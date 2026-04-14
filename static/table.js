@@ -37,12 +37,9 @@ async function loadTableData(force = false) {
       if (tr && tr.dataset.sym) {
         const pureSymbol = tr.dataset.sym;
         selectSymbol(pureSymbol); // 🎯 당첨!
-
-        // UI 피드백 (선택된 행 강조 등)
-        document
-          .querySelectorAll("#table-body tr")
-          .forEach((r) => r.classList.remove("bg-theme-selected"));
-        tr.classList.add("bg-theme-selected");
+        // ⭐️ 핵심: 전역 변수에 지금 선택한 놈을 박제함
+        window.currentSelectedSymbol = pureSymbol;
+        selectSymbol(pureSymbol);
       }
     });
 
@@ -384,6 +381,28 @@ function applyRealtimeSort() {
   // 🚀 안전장치 장착 (스크롤 쪽이랑 똑같이!)
   if (typeof refreshSniperTarget === "function") {
     refreshSniperTarget();
+  }
+}
+
+function applySelectedHighlight() {
+  const selectedSymbol = window.currentSelectedSymbol; // 전역에 저장된 선택 심볼
+  if (!selectedSymbol) return;
+
+  // 1. 일단 모든 행의 하이라이트 제거
+  document.querySelectorAll("#table-body tr").forEach((tr) => {
+    tr.style.outline = "none";
+    tr.style.boxShadow = "none";
+  });
+
+  // 2. 선택된 심볼을 가진 행(tr)을 찾아서 외곽선 빡!
+  const targetTr = document.querySelector(
+    `#table-body tr[data-sym="${selectedSymbol}"]`,
+  );
+  if (targetTr) {
+    targetTr.style.outline = "2px solid var(--accent)"; // 68층 성주님의 골드 라인
+    targetTr.style.outlineOffset = "-2px";
+    targetTr.style.boxShadow = "inset 0 0 10px rgba(var(--accent-rgb), 0.3)";
+    targetTr.style.zIndex = "10"; // 다른 행보다 위로
   }
 }
 
