@@ -164,3 +164,36 @@ body.theme-binance {
 .flip-row {
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* 쫀득한 이동 속도 */
 }
+
+/* 📱 모바일 최적화: 768px 이하일 때 마법이 일어납니다 */
+@media (max-width: 768px) {
+  /* 1. 테이블 패딩 다이어트 (옆으로 안 터지게) */
+  #table-body td, thead th {
+    padding: 8px 4px !important; 
+    font-size: 11px !important;
+  }
+
+  /* 2. 가격 텍스트만 조금 더 크게 (가독성) */
+  .price-cell {
+    font-size: 12px !important;
+  }
+
+  /* 3. 코인 이름(영문)은 모바일에서 과감히 숨기기 */
+  /* (Ticker만 봐도 성주님은 다 아시니까요 ㅋㅋㅋ) */
+  #table-body span.text-\[10px\] { 
+    display: none !important; 
+  }
+
+  /* 4. 차트 높이 고정 (리스트에 안 밀리게) */
+  #chart-container {
+    height: 45vh !important; /* 화면 높이의 45% 차지 */
+    margin: 8px !important;
+    width: calc(100% - 16px) !important;
+  }
+
+  /* 5. 가로 스크롤 생기는 거 방지 */
+  body, html {
+    overflow-x: hidden !important;
+  }
+}
+
