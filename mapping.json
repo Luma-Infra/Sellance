@@ -21,9 +21,12 @@
     ],
     "MANUAL_SUPPLY_MAP": {},
     "SYMBOL_TO_ID_MAP": {
+        "BTC": "1",
+        "ETH": "1027",
         "FXS": "6953",
         "QUICK": "19966",
         "VELODROME": "20435",
+        "USDS": "33039",
         "ACT": "33566",
         "AVAAI": "34116",
         "BROCCOLI714": "35749",
@@ -616,6 +619,18 @@
         "ELF": "ELF",
         "CBK": "ETH",
         "TT": "TT",
-        "BASED": "ETH"
+        "BASED": "ETH",
+        "USDS": "ARB",
+        "NATGAS": "NATGAS",
+        "CL": "CL",
+        "PRL": "BNB",
+        "BZ": "BZ",
+        "QQQ": "QQQ",
+        "TSM": "TSM",
+        "AAPL": "HYPE",
+        "SPY": "HYPE",
+        "MU": "MU",
+        "SNDK": "SNDK",
+        "BTC": "BTC"
     }
 }
