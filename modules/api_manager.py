@@ -92,12 +92,19 @@ def format_dynamic_price(price):
         # 숫자가 너무 작아 로그 계산이 안 될 경우 기본값
         return f"{price:,.2f}"
 
+# ✅ [수정 후] 테마를 지원하는 클린 포맷터
 def format_change(percent):
     if percent is None or not isinstance(percent, (int, float)):
-        return '<span style="color:gray;">N/A</span>'
-    color = "#26a69a" if percent > 0 else "#ef5350" if percent < 0 else "gray"
-    weight = "bold" if abs(percent) >= 5.0 else "normal"
-    return f'<span style="color:{color}; font-weight:{weight};">{percent:+.2f} %</span>'
+        return '<span class="text-theme-text opacity-50">N/A</span>'
+    
+    # 🚀 하드코딩 색상 빼고 테마 클래스로 변경!
+    theme_class = "text-theme-up" if percent > 0 else "text-theme-down" if percent < 0 else "text-theme-text opacity-50"
+    
+    # 🚀 인라인 스타일(font-weight) 대신 Tailwind 클래스로 통일
+    weight_class = "font-bold" if abs(percent) >= 5.0 else "font-normal"
+    
+    # style="..." 은 완전히 삭제하고 class="..." 만 넘겨줍니다.
+    return f'<span class="{theme_class} {weight_class}">{percent:+.2f} %</span>'
 
 def create_image_tag(url):
     if not url: return ""
@@ -149,24 +156,15 @@ def get_korean_exchange_markets():
         res = requests.get("https://api.upbit.com/v1/market/all?isDetails=false").json()
         for m in res:
             if m['market'].startswith('KRW-'): upbit_krw_set.add(m['market'].replace('KRW-', ''))
-    except: pass
+    except Exception as e:
+        print(f"🚨 [디버그] 업비트 마켓 목록 에러: {e}") # 👈 pass 대신 추가!
     try:
         res = requests.get("https://api.bithumb.com/public/ticker/ALL_KRW").json().get('data', {})
         for sym in res.keys():
             if sym.upper() not in ['DATE', 'TIMESTAMP']: bithumb_krw_set.add(sym.upper())
-    except: pass
-    if 'MET2' in upbit_krw_set:
-        upbit_krw_set.add('MET')
-        upbit_krw_set.discard('MET2') 
+    except Exception as e:
+        print(f"🚨 [디버그] 빗썸 마켓 목록 에러: {e}") # 👈 pass 대신 추가!
     return upbit_krw_set, bithumb_krw_set
-
-def _fetch_binance_open(symbol):
-    try:
-        # 1d 간격의 캔들 1개를 부르면 [0][1] 값이 정확히 UTC 00:00 시가입니다.
-        res = requests.get(f"https://fapi.binance.com/fapi/v1/klines?symbol={symbol}USDT&interval=1d&limit=1", timeout=0.5).json()
-        if res and len(res) > 0: return symbol, float(res[0][1])
-    except: pass
-    return symbol, None
 
 def is_valid_ticker(ticker):
     """
@@ -184,9 +182,10 @@ def is_valid_ticker(ticker):
 def _fetch_binance_open(symbol):
     """(보조) 바이낸스 9시 시가 단일 수집기"""
     try:
-        res = requests.get(f"https://fapi.binance.com/fapi/v1/klines?symbol={symbol}USDT&interval=1d&limit=1", timeout=3).json()
+        res = requests.get(f"https://fapi.binance.com/fapi/v1/klines?symbol={symbol}USDT&interval=1d&limit=1", timeout=2).json()
         if res and len(res) > 0: return symbol, float(res[0][1])
-    except: pass
+    except Exception as e: 
+        print(f"🚨 [디버그] 바이낸스 API 에러: {e}") # 👈 pass 대신 이걸 넣으세요!
     return symbol, None
 
 # ==========================================
@@ -210,7 +209,7 @@ def fetch_exchange_market_data():
 
         # 바이낸스 9시 시가 병렬 수집
         utc0_open_dict = {}
-        with ThreadPoolExecutor(max_workers=50) as executor:
+        with ThreadPoolExecutor(max_workers=25) as executor:
             results = executor.map(_fetch_binance_open, binance_base_assets)
             for sym, open_p in results:
                 if open_p: utc0_open_dict[sym] = open_p
@@ -222,23 +221,30 @@ def fetch_exchange_market_data():
                 'change_24h': c_dict.get(ticker, 0.0),
                 'utc0_open': utc0_open_dict.get(sym)
             }
-    except: pass
+    except Exception as e: 
+        print(f"🚨 fetch_exchange_market_data 에러: {e}") # 👈 pass 대신 이걸 넣으세요!
 
     binance_pure = {get_pure_base_asset(a) for a in binance_base_assets}
     upbit_only_assets = {k for k in upbit_krw_set if k not in EXCLUSION_LIST and not is_scaled_symbol(k) and k not in binance_pure and k not in binance_base_assets}
 
     upbit_data = {}
     if upbit_only_assets:
-        try:
-            markets_str = ",".join([f"KRW-{k}" for k in upbit_only_assets])
-            res = requests.get(f"https://api.upbit.com/v1/ticker?markets={markets_str}").json()
-            for item in res:
-                sym = item['market'].replace('KRW-', '')
-                upbit_data[sym] = {
-                    'price': item['trade_price'],
-                    'utc0_open': item['opening_price']
-                }
-        except: pass
+        # 🚨 업비트 API 길이 제한 방어: 100개씩 쪼개서 요청 (0달러 오류 해결)
+        upbit_list = list(upbit_only_assets)
+        for i in range(0, len(upbit_list), 100):
+            try:
+                chunk = upbit_list[i:i+100]
+                markets_str = ",".join([f"KRW-{k}" for k in chunk])
+                res = requests.get(f"https://api.upbit.com/v1/ticker?markets={markets_str}", timeout=5).json()
+                for item in res:
+                    sym = item['market'].replace('KRW-', '')
+                    upbit_data[sym] = {
+                        'price': item['trade_price'],
+                        'utc0_open': item['opening_price'],
+                        'change_24h': item.get('signed_change_rate', 0.0) * 100 # 아까 고친 24h 변동률!
+                    }
+            except Exception as e: 
+                print(f" 업비트 데이터 수집 에러 (Chunk): {e}")
 
     return binance_data, upbit_data, upbit_krw_set, upbit_only_assets
 
@@ -301,20 +307,30 @@ def fetch_cmc_market_data(binance_data, upbit_only_assets):
 # ==========================================
 # 🧱 모듈 3: 데이터 조립 및 변동률 계산기
 # ==========================================
+# ==========================================
+# 🧱 모듈 3: 데이터 조립 및 변동률 계산기 (완전 교체본)
+# ==========================================
 def build_final_market_list(binance_data, upbit_data, market_data_map, asset_to_lookup_key, upbit_krw_set, upbit_only_assets):
     global MAPPING_DATA
     PRICE_DIFFERENCE_THRESHOLD = 0.20
-    MAJOR_COINS = {'BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'SUI'}
+    # MAJOR_COINS = {'BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'SUI'}
     SAVED_CHAIN_MAP = MAPPING_DATA.get("SAVED_CHAIN_MAP", {})
+
+    # 🚀 1. 실시간 테더 환율 가져오기 (두나무 에러 방지)
+    krw_usd_rate = 1400.0 
+    try:
+        tether_res = requests.get("https://api.upbit.com/v1/ticker?markets=KRW-USDT", timeout=3).json()
+        if tether_res and len(tether_res) > 0:
+            krw_usd_rate = float(tether_res[0]['trade_price'])
+    except Exception as e:
+        print(f"⚠️ 테더 환율 수집 실패, 기본값 {krw_usd_rate}원 사용")
 
     final_results = []
     is_mapping_updated = False
 
-    for ticker, b_info in binance_data.items():
-        if "BTC" in ticker:
-            print(f"[DEBUG] BTC 발견: {ticker}, 가격: {b_info['price']}")
-
+    # ---------------------------------------------------------
     # 1. 바이낸스 선물 조립
+    # ---------------------------------------------------------
     for ticker, b_info in binance_data.items():
         base = get_pure_base_asset(ticker).upper()
         price = b_info['price']
@@ -350,14 +366,14 @@ def build_final_market_list(binance_data, upbit_data, market_data_map, asset_to_
                 adj_p = price / mul if mul > 0 else price
                 diff = abs(adj_p - cmc_p) / adj_p if adj_p > 0 else 1
 
-                if base in MAJOR_COINS or diff <= PRICE_DIFFERENCE_THRESHOLD:
-                    mcap = info.get('market_cap', 0)
-                else:
-                    continue
+                # if base in MAJOR_COINS or diff <= PRICE_DIFFERENCE_THRESHOLD:
+                #     mcap = info.get('market_cap', 0)
+                # else:
+                #     continue
         else: continue
 
-        utc0_open = b_info.get('utc0_open')
-        change_today = ((price - utc0_open) / utc0_open * 100) if utc0_open and utc0_open > 0 else 0.0
+        utc0_open = round(b_info.get('utc0_open', 0), 8) if b_info.get('utc0_open') else 0.0
+        change_today = round(((price - utc0_open) / utc0_open * 100), 2) if utc0_open and utc0_open > 0 else 0.0
 
         final_results.append({
             "Symbol": base, "DisplayTicker": ticker.replace('USDT', ''), "Ticker": ticker, 
@@ -371,7 +387,9 @@ def build_final_market_list(binance_data, upbit_data, market_data_map, asset_to_
             "Note": NOTE_MAP.get(base, '')
         })
 
-    # 2. 업비트 전용 조립
+    # ---------------------------------------------------------
+    # 2. 업비트 전용 조립 (🚨 철벽 방어 적용 완료)
+    # ---------------------------------------------------------
     for base in upbit_only_assets:
         base = base.upper()
         if not is_valid_ticker(base) and base not in SYMBOL_TO_ID_MAP: continue
@@ -388,27 +406,43 @@ def build_final_market_list(binance_data, upbit_data, market_data_map, asset_to_
             SAVED_CHAIN_MAP[base] = ch_sym
             is_mapping_updated = True
 
-        mcap = info['market_cap']
-        vol = info.get('volume_24h', 0) 
-        
-        up_info = upbit_data.get(base, {})
-        current_p = up_info.get('price') or info.get('cmc_price', 0)
-        utc0_open = up_info.get('utc0_open')
-        change_today = ((current_p - utc0_open) / utc0_open * 100) if utc0_open and utc0_open > 0 else 0.0
+        # 🚀 [철벽 방어] 모든 변수를 안전한 실수형(float) 0.0으로 선언하고 시작
+        up_price_krw = 0.0
+        up_open_krw = 0.0
+        up_change_24h = 0.0
+        current_p = float(info.get('cmc_price') or 0.0)
+        utc0_open = 0.0
+
+        up_info = upbit_data.get(base)
+        if up_info:
+            # 데이터가 None일 경우를 대비해 'or 0.0' 처리
+            up_price_krw = float(up_info.get('price') or 0.0)
+            up_open_krw = float(up_info.get('utc0_open') or 0.0)
+            up_change_24h = float(up_info.get('change_24h') or 0.0)
+            
+            if up_price_krw > 0:
+                current_p = up_price_krw / krw_usd_rate
+            if up_open_krw > 0:
+                utc0_open = up_open_krw / krw_usd_rate
+
+        change_today = round(((current_p - utc0_open) / utc0_open * 100), 2) if utc0_open > 0 else 0.0
         
         final_results.append({
             "Symbol": base, "DisplayTicker": base, "Ticker": f"{base}KRW", 
             "Logo": logo, "Name": info.get('name', base),
             "Chain": chain, "Upbit": 'O',
-            "Price": format_dynamic_price(current_p), "Change_24h": format_change(0.0),
+            "Price": format_dynamic_price(current_p), 
+            "Price_KRW": up_price_krw if up_price_krw > 0 else None, # JS에서 원화 표기용
+            "Change_24h": format_change(up_change_24h),
             "Change_Today": format_change(change_today), "utc0_open": utc0_open,
-            "Volume": vol, "Volume_Formatted": format_volume_string(vol), 
-            "MarketCap": mcap, "MarketCap_Formatted": format_market_cap_string(mcap),
+            "Volume": info.get('volume_24h', 0) if info else 0, 
+            "Volume_Formatted": format_volume_string(info.get('volume_24h', 0)) if info else "0", 
+            "MarketCap": info.get('market_cap', 0), 
+            "MarketCap_Formatted": format_market_cap_string(info.get('market_cap', 0)),
             "Note": NOTE_MAP.get(base, 'Upbit Only')
         })
 
     return final_results, is_mapping_updated, SAVED_CHAIN_MAP
-
 # ==========================================
 # 👑 최종 함수 BOSS
 # ==========================================
@@ -434,7 +468,7 @@ def _fetch_and_process_data():
                 json.dump(MAPPING_DATA, f, indent=4, ensure_ascii=False)
             print("💾 [System] 새로운 체인 정보가 mapping.json에 영구 저장되었습니다.")
         except Exception as e:
-            print(f"🚨 [System] mapping.json 자동 저장 실패: {e}")
+            print(f"[System] mapping.json 자동 저장 실패: {e}")
 
     # 5. 시총 정렬 후 반환
     final_results.sort(key=lambda x: x.get('MarketCap', 0), reverse=True)
@@ -447,8 +481,8 @@ def get_cached_data(force_reload=False):
         if force_reload or (datetime.now() - GLOBAL_CACHE['timestamp']).total_seconds() > CACHE_TIMEOUT_SECONDS:
             print("💡 API 데이터를 수집합니다... (약 5~10초 소요)")
             try:
-                with suppress_output():
-                    raw_data = _fetch_and_process_data() 
+                # with suppress_output():
+                raw_data = _fetch_and_process_data() 
 
                 if raw_data:
                     GLOBAL_CACHE.update({
@@ -458,6 +492,6 @@ def get_cached_data(force_reload=False):
                     })
                     print(f"✅ 데이터 캐싱 완료! (총 {len(raw_data)}개)")
             except Exception as e:
-                print(f"🚨 데이터 수집 에러: {e}")
+                print(f"데이터 수집 에러: {e}")
             
     return GLOBAL_CACHE['data'], GLOBAL_CACHE['last_updated_str']

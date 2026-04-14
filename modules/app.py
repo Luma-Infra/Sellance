@@ -1,4 +1,4 @@
-# main.py
+# app.py
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -87,9 +87,11 @@ def open_browser():
 
 @app.on_event("startup")
 def on_startup():
-    # ⭐️ 서버 켜지자마자 데이터 한 번 긁어오기 (백그라운드 실행)
+    # ⭐️ 데이터 긁어오기 (이건 배포든 로컬이든 필수!)
     threading.Thread(target=get_cached_data, args=(True,)).start()
     
-    if not os.environ.get("BROWSER_OPENED"):
+    # 🚀 로컬(127.0.0.1) 환경이고, 아직 브라우저 안 열었을 때만 실행
+    # Railway 같은 곳에서는 이 환경변수가 없으므로 브라우저를 열지 않습니다.
+    if not os.environ.get("RAILWAY_STATIC_URL") and not os.environ.get("BROWSER_OPENED"):
         threading.Timer(1.5, open_browser).start()
         os.environ["BROWSER_OPENED"] = "1"
