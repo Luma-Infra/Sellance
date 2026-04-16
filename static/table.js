@@ -1,14 +1,4 @@
 // table.js
-let originalTableData = []; // ⭐️ 원본 백업용 변수 추가
-let currentTableData = [];
-let currentSortCol = "";
-let sortState = ""; // 'desc'(내림) -> 'asc'(오름) -> ''(제자리)
-let currentRenderLimit = 50; // 초기 로딩은 가장 가볍게 50개로 시작
-const RENDER_CHUNK = 50; // 스크롤 바닥 칠 때마다 50개씩 추가
-
-// ⭐️ 파일 위쪽 전역 변수 모여있는 곳에 2줄 추가
-let tableObserver = null;
-let visibleSymbols = new Set(); // 현재 화면에 보이는 코인들만 담을 바구니
 
 // 1. 데이터 로드 함수
 async function loadTableData(force = false) {
@@ -31,20 +21,21 @@ async function loadTableData(force = false) {
 
     const tbody = document.getElementById("table-body");
 
+    // loadTableData 내부의 클릭 이벤트 리스너 수정
     tbody.addEventListener("click", (e) => {
-      // 🚀 핵심: 클릭된 요소에서 가장 가까운 'tr'을 찾습니다.
       const tr = e.target.closest("tr");
       if (tr && tr.dataset.sym) {
         const pureSymbol = tr.dataset.sym;
-        selectSymbol(pureSymbol); // 🎯 당첨!
-        // ⭐️ 핵심: 전역 변수에 지금 선택한 놈을 박제함
         window.currentSelectedSymbol = pureSymbol;
         selectSymbol(pureSymbol);
+        applySelectedHighlight();
 
-        applySelectedHighlight(); // 🚀 [추가] 클릭하자마자 테두리 빡!
+        // ⭐️ [추가] 모바일일 때만 차트 패널 '스윽' 올리기
+        if (window.innerWidth <= 768) {
+          showMobileChart();
+        }
       }
     });
-
     // 처음엔 화살표 없이 원본(시총순) 그대로 그림
     renderTable();
   } catch (error) {
@@ -444,10 +435,18 @@ function updateRowInnerHTML(tr, row) {
   const krwDisplay = row.Price_KRW
     ? `<span class="text-[12px] text-theme-text opacity-70 ml-1"> ( ${Number(row.Price_KRW).toLocaleString()} 원 )</span>`
     : "";
+  // ⭐️ [추가] 로컬스토리지에서 즐겨찾기 상태 가져오기
+  const favorites = JSON.parse(localStorage.getItem("sellnance_favs") || "[]");
+  const isFav = favorites.includes(pureSymbol);
 
   tr.innerHTML = `
   <td class="p-4">
     <div class="flex items-center gap-2">
+    <span class="star-btn ${isFav ? "active" : ""}" 
+            onclick="toggleFavorite('${pureSymbol}', event)"
+            style="cursor:pointer; font-size:16px; color: ${isFav ? "var(--accent)" : "gray"};">
+        ${isFav ? "⭐" : "☆"}
+      </span>
       ${row.Logo || ""}
       <div class="flex flex-col">
         <b class="text-sm text-theme-text">${row.Ticker}</b>
@@ -556,6 +555,28 @@ function initInfiniteScroll() {
     },
     { passive: true },
   );
+}
+
+function toggleFavorite(symbol, event) {
+  event.stopPropagation(); // 🚨 중요: 별 눌렀을 때 차트 열리는 거 방지!
+  const btn = event.currentTarget;
+  let favorites = JSON.parse(localStorage.getItem("sellnance_favs") || "[]");
+
+  if (favorites.includes(symbol)) {
+    favorites = favorites.filter((f) => f !== symbol);
+    btn.innerText = "☆";
+    btn.style.color = "gray";
+    btn.classList.remove("active");
+  } else {
+    favorites.push(symbol);
+    btn.innerText = "⭐";
+    btn.style.color = "var(--accent)";
+    btn.classList.add("active");
+    // ⭐️ 쫀득한 애니메이션 효과
+    btn.style.transform = "scale(1.5)";
+    setTimeout(() => (btn.style.transform = "scale(1)"), 200);
+  }
+  localStorage.setItem("sellnance_favs", JSON.stringify(favorites));
 }
 
 // ⭐️ 이 코드가 있어야 웹페이지가 켜지자마자 데이터를 가져옵니다!

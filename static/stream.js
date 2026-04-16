@@ -42,7 +42,7 @@ function startRealtimeCandle(symbol, interval, isFutures, isSpot) {
       const displayPrice = formatSmartPrice(lastPrice);
 
       // 탭 제목 0.1초 컷 업데이트 🚀
-      document.title = `[$${displayPrice}] ${symbol} | sellance 🚀`;
+      document.title = `${displayPrice} ${symbol} | sellance 🚀`;
     }
   };
 

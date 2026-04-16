@@ -521,12 +521,36 @@
         </div>
       </div>
     </div>
-
-    <script src="/static/_main.js"></script>
+    <div
+      id="mobile-chart-overlay"
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden opacity-0 transition-opacity duration-300"
+      onclick="closeMobileChart()"
+    >
+      <div
+        id="mobile-chart-panel"
+        class="absolute bottom-0 left-0 w-full h-[80%] bg-theme-panel rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)] translate-y-full transition-transform duration-300 ease-out flex flex-col"
+        onclick="event.stopPropagation()"
+      >
+        <div
+          class="w-full flex justify-center py-3"
+          onclick="closeMobileChart()"
+        >
+          <div class="w-12 h-1.5 bg-theme-border/50 rounded-full"></div>
+        </div>
+        <div
+          id="mobile-chart-content"
+          class="flex-1 flex flex-col overflow-hidden"
+        ></div>
+      </div>
+    </div>
+    <script src="/static/_config.js"></script>
+    <script src="/static/chart_utils.js"></script>
+    <script src="/static/ui_control.js"></script>
     <script src="/static/api.js"></script>
     <script src="/static/table.js"></script>
     <script src="/static/stream.js"></script>
     <script src="/static/streamEach.js"></script>
     <script src="/static/sim_engine.js"></script>
+    <script src="/static/_main.js"></script>
   </body>
 </html>

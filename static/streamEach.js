@@ -1,11 +1,6 @@
 // streamEach.js
 
-let sniperWs = null;
-let activeSubs = new Set(); // 현재 바이낸스에 구독 신청한 코인들
-
-/**
- * 🎯 스나이퍼 소켓 초기화
- */
+// 🎯 스나이퍼 소켓 초기화
 function initSniperSocket() {
   if (sniperWs && sniperWs.readyState === WebSocket.OPEN) return;
 
@@ -30,9 +25,7 @@ function initSniperSocket() {
   };
 }
 
-/**
- * 🔄 [핵심] visibleSymbols와 연동하여 구독 리스트 동기화
- */
+// 🔄 [핵심] visibleSymbols와 연동하여 구독 리스트 동기화
 function syncSniperSubscriptions() {
   if (!sniperWs || sniperWs.readyState !== WebSocket.OPEN) return;
   if (typeof visibleSymbols === "undefined") return;
@@ -70,11 +63,8 @@ function syncSniperSubscriptions() {
   }
 }
 
-/**
- * ⚡ 0.1초 정밀 렌더링 (깜빡이 속도 극대화)
- */
+// ⚡ 0.1초 정밀 렌더링 (깜빡이 속도 극대화)
 // streamEach.js
-
 function renderSniperPrice(data) {
   const symbol = data.s.replace("USDT", "");
   const priceCell = document.getElementById(`price-${symbol}`);
