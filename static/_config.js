@@ -15,7 +15,7 @@ let marketDataMap = {};
 let globalWs = null,
   tickerBuffer = {},
   radarIntervalId = null;
-let SCREEN_WIDTH = 500;
+const SCREEN_WIDTH = 768;
 const UI_UPDATE_INTERVAL = 3000;
 const tfSec = {
   "1m": 60,

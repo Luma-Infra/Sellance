@@ -2,6 +2,7 @@
 <html lang="ko">
 
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta charset="UTF-8" />
   <title>sellance</title>
   <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
@@ -40,12 +41,13 @@
       Fetching Market Data...
     </h2>
     <p class="text-[#d4d4d4] opacity-80 text-center text-sm leading-relaxed">
-      바이낸스 및 업비트 실시간 데이터를 수집 중입니다.<br />(최대 30초 ~ 1분
+      바이낸스 및 업비트 실시간 데이터를 수집 중입니다.<br />(최대 10초 ~ 1분
       소요)
     </p>
   </div>
 
-  <div class="flex flex-col md:flex-row h-full w-full max-w-[1600px] bg-theme-bg relative shadow-2xl overflow-hidden">
+  <div
+    class="flex flex-col md:flex-row h-[100dvh] md:h-[98dvh] max-h-[100dvh] md:max-h-[98dvh] w-full max-w-[1600px] bg-theme-bg relative shadow-2xl overflow-hidden shrink-0 mx-auto md:mb-[2dvh]">
     <div class="md:hidden flex w-full bg-theme-panel border-b border-theme-border shrink-0 z-50">
       <button onclick="switchMobileView('list')" id="mob-btn-list"
         class="flex-1 py-3 text-sm font-bold border-b-2 border-theme-accent text-theme-accent transition-colors">
@@ -58,13 +60,14 @@
     </div>
 
     <div
-      class="flex flex-col w-full md:w-[500px] lg:w-[600px] border-r border-theme-border bg-theme-bg transition-all duration-300 shrink-0"
+      class="flex flex-col w-full h-[calc(100vh-64px)] md:h-full md:w-[768px] lg:w-[600px] border-r border-theme-border bg-theme-bg transition-all duration-300 shrink-0 overflow-hidden"
       id="left-panel">
       <div class="flex justify-between items-center p-4 border-b border-theme-border bg-theme-panel/30">
         <div class="flex items-center gap-3">
+          <!-- 다크 라이트 토글 -->
           <button id="theme-toggle-btn" onclick="toggleTheme()"
             class="bg-transparent border border-theme-border text-theme-text px-3 py-1.5 rounded cursor-pointer text-sm hover:bg-theme-border/50 transition-colors shadow-sm">
-            🌙 다크
+            🌙
           </button>
           <h2 class="m-0 text-lg font-extrabold tracking-wider text-theme-accent uppercase">
             sellance
@@ -161,7 +164,7 @@
       </div>
     </div>
 
-    <div class="hidden md:flex flex-1 flex-col min-w-0 overflow-hidden bg-theme-bg relative transition-all duration-300"
+    <div class="hidden lg:flex flex-1 flex-col min-w-0 overflow-hidden bg-theme-bg relative transition-all duration-300"
       id="right-panel">
       <button id="sidebar-open-btn" onclick="toggleSidebar()"
         class="absolute top-4 left-4 z-50 hidden px-3 py-1.5 bg-theme-panel border border-theme-border rounded shadow-lg text-theme-text text-xs font-bold opacity-70 hover:opacity-100 hover:text-theme-accent transition-all">
@@ -203,18 +206,22 @@
               <span class="opacity-50 text-xs">Hover on chart to see OHLC...</span>
             </div>
             <div class="w-[1px] h-[30px] bg-theme-border opacity-50"></div>
-            <div class="flex flex-col text-xs text-left">
+            <div class="flex flex-col text-xs text-left ">
               <span class="opacity-50 text-[10px] uppercase font-bold tracking-wider">Market Cap</span>
-              <b id="head-mcap" class="text-[15px] font-mono mt-0.5">-</b>
+              <b id="head-mcap" class="text-[15px] font-mono mt-0.5"></b>
             </div>
             <div class="flex flex-col text-xs text-left">
               <span class="opacity-50 text-[10px] uppercase font-bold tracking-wider">Price</span>
-              <b id="head-price" class="text-[15px] font-mono mt-0.5">-</b>
+              <b id="head-price" text-[15px] font-mono mt-0.5"></b>
             </div>
             <div class="flex flex-col text-xs text-left">
+              <span class="opacity-50 text-[10px] uppercase font-bold tracking-wider">Volume</span>
+              <b id="head-volume" class="text-[15px] font-mono mt-0.5"></b>
+            </div>
+            <!-- <div class="flex flex-col text-xs text-left">
               <span class="opacity-50 text-[10px] uppercase font-bold tracking-wider">Target (Sim)</span>
               <b id="head-target" class="text-[15px] font-mono mt-0.5">-</b>
-            </div>
+            </div> -->
           </div>
         </div>
 
@@ -365,7 +372,7 @@
     class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden opacity-0 transition-opacity duration-300"
     onclick="closeMobileChart()">
     <div id="mobile-chart-panel"
-      class="absolute bottom-0 left-0 w-full h-[80%] bg-theme-panel rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)] translate-y-full transition-transform duration-300 ease-out flex flex-col"
+      class="absolute bottom-0 right-0 w-[88%] h-[92%] bg-theme-panel rounded-t-3xl shadow-[0_-10px_10px_rgba(0,0,0,0.1)] translate-y-full transition-transform duration-300 ease-out flex flex-col"
       onclick="event.stopPropagation()">
       <div class="w-full flex justify-center py-3" onclick="closeMobileChart()">
         <div class="w-12 h-1.5 bg-theme-border/50 rounded-full"></div>
@@ -375,13 +382,13 @@
   </div>
 
   <script src="/static/_config.js"></script>
+  <script src="/static/ui_control.js"></script>
+  <script src="/static/chart_utils.js"></script>
   <script src="/static/api.js"></script>
   <script src="/static/stream.js"></script>
   <script src="/static/streamEach.js"></script>
   <script src="/static/sim_engine.js"></script>
   <script src="/static/table.js"></script>
-  <script src="/static/ui_control.js"></script>
-  <script src="/static/chart_utils.js"></script>
   <script src="/static/_main.js"></script>
 </body>
 

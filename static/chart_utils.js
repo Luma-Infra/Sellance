@@ -58,16 +58,37 @@ function updateLegend(d) {
     `;
 }
 
-function updateStatus() {
-  if (!mainData.length) return;
-  document.getElementById("head-price").innerText =
-    mainData[mainData.length - 1].close.toLocaleString();
-  if (typeof getNext === "function") {
-    document.getElementById("head-target").innerText =
-      getNext().close.toLocaleString();
-    document.getElementById("head-target").style.color =
-      curDir === "bull" ? "var(--up)" : "var(--down)";
+function updateStatus(d) {
+  // 🚀 1. 핵심: d(실시간 데이터)가 들어오면 그걸 최우선으로 쓴다!
+  // d가 없으면(마우스 이벤트 등) 그때만 mainData에서 꺼내온다.
+  const last = d || (mainData.length ? mainData[mainData.length - 1] : null);
+
+  if (!last) return;
+
+  // console.log(d);
+  // // 확인용
+
+  // 2. 가격 업데이트 (toLocaleString 대신 formatSmartPrice 추천!)
+  const priceEl = document.getElementById("head-price");
+  if (priceEl) {
+    priceEl.innerText = formatSmartPrice(last.close);
   }
+
+  // 3. 거래량 업데이트
+  const volEl = document.getElementById("head-volume");
+  if (volEl) {
+    volEl.innerText = last.volume ? last.volume.toLocaleString() : "-";
+  }
+
+  // 4. 시뮬레이터 타겟 & 레전드 동시 갱신
+  const targetEl = document.getElementById("head-target");
+  if (targetEl && typeof getNext === "function") {
+    targetEl.innerText = formatSmartPrice(getNext().close);
+    targetEl.style.color = curDir === "bull" ? "var(--up)" : "var(--down)";
+  }
+
+  // 🚀 5. 대망의 레전드 업데이트
+  updateLegend(last);
 }
 
 function autoFit() {

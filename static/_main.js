@@ -154,10 +154,16 @@ function initChart() {
   });
 
   chart.subscribeCrosshairMove((p) => {
-    if (p.time) {
+    // 1. 마우스가 차트 위에 있고 데이터가 존재할 때 (탐색 모드)
+    if (p && p.time) {
       const d = p.seriesData.get(candleSeries);
-      if (d) updateLegend(d);
-    } else if (mainData.length) {
+      if (d) {
+        updateLegend(d);
+      }
+    }
+    // 2. 마우스가 차트를 벗어났을 때 (실시간 추적 모드)
+    else if (mainData && mainData.length > 0) {
+      // 가장 최근 봉(현재가) 데이터를 전광판에 고정!
       updateLegend(mainData[mainData.length - 1]);
     }
   });
@@ -188,8 +194,6 @@ function initChart() {
     autoFit();
   }
 
-  updateStatus();
-
   // 측정 도구 세팅
   setTimeout(setupMeasureTool, 10);
 
@@ -214,10 +218,10 @@ function initChart() {
         chart.resize(width, height);
         // 🚀 리사이즈 직후 차트 범위를 다시 맞춰야 안 찌그러짐
         chart.timeScale().fitContent();
-        console.log(`📏 리사이즈 완료: ${width}x${height}`);
+        // console.log(`📏 리사이즈 완료: ${width}x${height}`);
       }
 
-      // 🚀 모바일 오버레이 방어 (아까 그 500px 기준 적용!)
+      // 🚀 모바일 오버레이 방어 (아까 그 기준 적용!)
       if (width >= SCREEN_WIDTH) {
         const overlay = document.getElementById("mobile-chart-overlay");
         if (overlay && !overlay.classList.contains('hidden')) {
@@ -510,3 +514,26 @@ function setupCountdownDOM() {
 
   priceScaleTd.appendChild(countdownOverlay);
 }
+
+// // 🚀 [실시간 브라우저 감시관] - initChart 밖에 두세요!
+// window.addEventListener('resize', () => {
+//   const width = window.innerWidth; // 창 전체 너비 측정
+//   const overlay = document.getElementById("mobile-chart-overlay");
+//   const isOverlayOpen = overlay && !overlay.classList.contains("hidden");
+
+//   // 1. 📱 PC -> 모바일 자동 전환
+//   if (width < SCREEN_WIDTH && !isOverlayOpen) {
+//     // 현재 차트를 보고 있는 상태일 때만 자동으로 오버레이 띄우기
+//     const btnChart = document.getElementById("mob-btn-chart");
+//     if (btnChart && btnChart.classList.contains("text-theme-accent")) {
+//       console.log("📱 창 크기 감지: 모바일 모드 자동 전환");
+//       showMobileChart();
+//     }
+//   }
+
+//   // 2. 🖥️ 모바일 -> PC 자동 복구
+//   if (width >= SCREEN_WIDTH && isOverlayOpen) {
+//     console.log("🖥️ 창 크기 감지: PC 레이아웃 자동 복구");
+//     closeMobileChart();
+//   }
+// });

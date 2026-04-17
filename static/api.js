@@ -49,8 +49,10 @@ async function selectSymbol(s) {
 
   const headAssetName = document.getElementById("head-asset-name");
   if (headAssetName) headAssetName.innerText = s;
-  const headMcap = document.getElementById("head-mcap");
-  if (headMcap) headMcap.innerText = "조회 중...";
+  ["head-mcap", "head-price", "head-volume", "head-target"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerText = "조회 중...";
+  });
 
   let badges = "";
   if (marketDataMap.upbit && marketDataMap.upbit.includes(s))
@@ -66,10 +68,10 @@ async function selectSymbol(s) {
   try {
     const infoRes = await fetch(`/api/coin-info/${s}`);
     const infoData = await infoRes.json();
-    if (headMcap) headMcap.innerText = infoData.market_cap;
+    // if (headMcap) headMcap.innerText = infoData.market_cap;
     if (headAssetName) headAssetName.innerText = infoData.name + ` (${s})`;
   } catch (e) {
-    if (headMcap) headMcap.innerText = "조회 실패";
+    // if (headMcap) headMcap.innerText = "조회 실패";
   }
 
   fetchHistory(s);
@@ -77,15 +79,20 @@ async function selectSymbol(s) {
 
 async function fetchHistory(symbol, rawTicker) {
   if (!symbol) symbol = currentAsset;
-  currentAsset = symbol;
 
-  const binanceTicker = rawTicker || `${symbol}USDT`;
-  const upbitTicker = rawTicker || `KRW-${symbol}`;
+  const pureSymbol = symbol.replace(/USDT$/i, "").toUpperCase();
+  currentAsset = pureSymbol;
+
+  const isUpbitOnly = (marketDataMap.upbit || []).includes(pureSymbol);
+
+  const binanceTicker = rawTicker || `${pureSymbol}USDT`;
+  const upbitTicker = rawTicker || `KRW-${pureSymbol}`;
+
   const loadingModal = document.getElementById("chart-loading-modal");
   if (loadingModal) loadingModal.classList.remove("hidden"); // Tailwind 대응
 
-  const isFutures = (marketDataMap.futures || []).includes(symbol);
-  const isSpot = (marketDataMap.spot || []).includes(symbol);
+  const isFutures = !isUpbitOnly && (marketDataMap.futures || []).includes(pureSymbol);
+  const isSpot = !isUpbitOnly && (marketDataMap.spot || []).includes(pureSymbol);
 
   try {
     mainData = [];
@@ -151,7 +158,7 @@ async function fetchHistory(symbol, rawTicker) {
       updateStatus();
       if (mainData.length) updateLegend(mainData[mainData.length - 1]);
       if (typeof startRealtimeCandle === "function")
-        startRealtimeCandle(symbol, currentTF, isFutures, isSpot);
+        startRealtimeCandle(pureSymbol, currentTF, isFutures, isSpot);
     }
   } catch (e) {
     console.error("차트 로드 중 예외 발생:", e);

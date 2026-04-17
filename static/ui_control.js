@@ -6,14 +6,15 @@ function toggleTheme() {
   const btn = document.getElementById("theme-toggle-btn");
   const isCurrentlyDark = body.classList.contains("theme-binance");
 
+  // 다크 라이트 모드
   if (isCurrentlyDark) {
     body.classList.remove("theme-binance");
     currentTheme = "upbit-light";
-    if (btn) btn.innerHTML = "🌙 다크";
+    if (btn) btn.innerHTML = "🌙";
   } else {
     body.classList.add("theme-binance");
     currentTheme = "binance";
-    if (btn) btn.innerHTML = "☀️ 라이트";
+    if (btn) btn.innerHTML = "☀️";
   }
   setTimeout(() => {
     initChart();
@@ -65,6 +66,10 @@ function switchMobileView(view) {
     btnList.classList.replace("opacity-50", "text-theme-accent");
     btnChart.classList.replace("border-theme-accent", "border-transparent");
     btnChart.classList.replace("text-theme-accent", "opacity-50");
+
+    // 🚀 [추가] 모바일 리스트 모드일 때 높이 제한과 스크롤 주입
+    leftPanel.classList.add("overflow-y-auto", "h-[calc(100vh-64px)]", "pb-20");
+    leftPanel.style.height = 'calc(100vh - 64px)';
   } else {
     leftPanel.classList.remove("flex");
     leftPanel.classList.add("hidden");
@@ -87,7 +92,6 @@ function switchMobileView(view) {
 }
 
 function showMobileChart() {
-  // 1. PC/태블릿 모드 검문 (SCREEN_WIDTH 기준)
   if (window.innerWidth >= SCREEN_WIDTH) return;
 
   const overlay = document.getElementById("mobile-chart-overlay");
@@ -95,58 +99,62 @@ function showMobileChart() {
   const content = document.getElementById("mobile-chart-content");
   const rightPanel = document.getElementById("right-panel");
 
-  // 2. 중복 이사 방지
-  if (content.contains(rightPanel)) {
-    // 이미 이사 와 있다면 오버레이만 다시 보여주기
-    overlay.classList.remove("hidden");
-    overlay.style.pointerEvents = "auto";
-    return;
+  if (!overlay || !panel || !content || !rightPanel) return;
+
+  // 1. 이사 로직 (중복 방지)
+  if (!content.contains(rightPanel)) {
+    content.appendChild(rightPanel);
   }
 
-  // 3. 이사 시작 (물리적 이동)
-  content.appendChild(rightPanel);
+  rightPanel.style.display = "flex";
+  rightPanel.style.height = "100%";
+  rightPanel.style.width = "100%";
 
-  // 4. 레이아웃 초기화
+  // 2. 레이아웃 및 '방벽 제거' (핵심!)
   overlay.classList.remove("hidden");
-  overlay.style.pointerEvents = "auto";
-  rightPanel.classList.remove("hidden", "md:flex"); // PC용 클래스 잠시 제거
+  // 🚀 active 클래스 하나로 pointer-events와 opacity를 동시에 제어하는 게 가장 깔끔합니다.
+  overlay.classList.add("active");
+
+  rightPanel.classList.remove("hidden", "md:flex");
   rightPanel.classList.add("flex");
 
-  // 5. 애니메이션 및 리사이즈
+  // 3. 애니메이션 및 차트 리사이즈
   setTimeout(() => {
-    overlay.style.opacity = "1";
     panel.style.transform = "translateY(0)";
 
-    // 🚀 [핵심] 차트가 새 집의 크기를 강제로 인식하게 만들어야 함!
     if (window.chart) {
       const newWidth = content.clientWidth;
-      const newHeight = content.clientHeight - 60; // 헤더 공간 제외
-
+      const newHeight = content.clientHeight - 60;
       window.chart.resize(newWidth, newHeight);
       window.chart.timeScale().fitContent();
+
+      // 🚀 [추가] 차트가 뜨자마자 포커스를 잡게 해서 원터치 프리패스 완성!
+      const container = document.getElementById("chart-container");
+      if (container) container.focus();
     }
-  }, 200);
+  }, 100);
 }
+
 function closeMobileChart() {
   const overlay = document.getElementById("mobile-chart-overlay");
   const panel = document.getElementById("mobile-chart-panel");
   const rightPanel = document.getElementById("right-panel");
-  const mainContainer = document.querySelector(".max-w-\\[1600px\\]"); // 메인 부모
+  const mainContainer = document.querySelector(".max-w-\\[1600px\\]");
 
+  if (!overlay || !panel) return;
+
+  // 1. 유령 장벽 즉시 제거
   panel.style.transform = "translateY(100%)";
-  overlay.style.opacity = "0";
-  overlay.style.pointerEvents = "none"; // 👈 터치 즉시 비활성화 (유리벽 제거)
+  overlay.classList.remove("active"); // pointer-events: none 효과 발생
 
   setTimeout(() => {
     overlay.classList.add("hidden");
-    // 🚀 [복구] PC 버전 유지를 위해 우측 패널을 원래 자리로 돌려놓기!
+    // 2. 원래 자리로 복구
     if (rightPanel && mainContainer) {
       mainContainer.appendChild(rightPanel);
-      // 만약 PC에서 리스트를 보고 있었다면 다시 hidden 처리할지 로직 체크 필요
     }
-  }, 200);
+  }, 100);
 }
-
 // ⭐️ 1. 탭 전환 기능 (차트 ↔ 시뮬레이터) ⭐️
 function switchChartTab(mode) {
   const btnSim = document.getElementById("tab-btn-sim");
@@ -196,7 +204,7 @@ function executeTabSwitch(mode) {
       const container = document.getElementById("chart-container");
       if (container.clientWidth > 0 && container.clientHeight > 0)
         window.chart.resize(container.clientWidth, container.clientHeight);
-    }, 200);
+    }, 100);
   }
 }
 

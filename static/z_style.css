@@ -9,6 +9,11 @@
   --accent: #093687;
 }
 
+html,
+body {
+  height: 100% !important;
+}
+
 /* 변수들을 실제 사용할 클래스로 연결 */
 .text-theme-up {
   color: var(--up) !important;
@@ -170,61 +175,6 @@ body.theme-binance {
   /* 쫀득한 이동 속도 */
 }
 
-/* 📱 모바일 최적화: 768px 이하일 때 마법이 일어납니다 */
-@media (max-width: 768px) {
-
-  /* 1. 테이블 패딩 다이어트 (옆으로 안 터지게) */
-  #table-body td,
-  thead th {
-    padding: 8px 4px !important;
-    font-size: 11px !important;
-  }
-
-  /* 2. 가격 텍스트만 조금 더 크게 (가독성) */
-  .price-cell {
-    font-size: 12px !important;
-  }
-
-  /* 3. 코인 이름(영문)은 모바일에서 과감히 숨기기 */
-  /* (Ticker만 봐도 성주님은 다 아시니까요 ㅋㅋㅋ) */
-  #table-body span.text-\[10px\] {
-    display: none !important;
-  }
-
-  /* 4. 차트 높이 고정 (리스트에 안 밀리게) */
-  #chart-container {
-    height: 45vh !important;
-    /* 화면 높이의 45% 차지 */
-    margin: 8px !important;
-    width: calc(100% - 16px) !important;
-  }
-
-  /* 5. 가로 스크롤 생기는 거 방지 */
-  body,
-  html {
-    overflow-x: hidden !important;
-  }
-}
-
-/* 모바일에서 테이블 텍스트 크기 최적화 */
-@media (max-width: 768px) {
-  #left-panel {
-    width: 100% !important;
-    max-width: none !important;
-  }
-
-  #market-table {
-    font-size: 14px;
-    /* 시원하게 보이게 */
-  }
-
-  .ticker-cell {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-}
-
 /* 즐겨찾기 별 토글 애니메이션 */
 .star-btn {
   cursor: pointer;
@@ -250,9 +200,17 @@ body.theme-binance {
   height: 100% !important;
 }
 
+#mobile-chart-overlay.active {
+  display: block !important;
+  pointer-events: auto !important;
+  /* 🚀 활성화될 때만 클릭을 받음 */
+  opacity: 1 !important;
+}
+
 /* 모바일 오버레이 전체 높이 확보 */
 #mobile-chart-overlay {
-  display: flex;
+  display: none;
+  pointer-events: none;
   align-items: flex-end;
   /* 아래서 위로 올라오니까! */
 }
@@ -262,4 +220,47 @@ body.theme-binance {
   display: flex !important;
   flex-direction: column !important;
   height: 100% !important;
+}
+
+/* ✅ 모바일 통합 최적화 */
+@media (max-width: 768px) {
+
+  /* 1. 리스트 패널 강제 감옥 로직 (이게 핵심!) */
+  #left-panel.flex {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    /* 주소창 제외 실제 높이(dvh)에서 네비바(64px) 뺌 */
+    height: calc(100dvh - 10x) !important;
+    max-height: calc(100dvh - 10px) !important;
+    overflow-y: auto !important;
+    /* 드디어 스크롤 허용! */
+    z-index: 50;
+    background-color: var(--bg);
+    padding-bottom: 10px;
+    /* 맨 밑 코인 가려짐 방지 */
+  }
+
+  /* 2. 테이블 다이어트 */
+  #table-body td,
+  thead th {
+    padding: 8px 4px !important;
+    font-size: 11px !important;
+  }
+
+  /* 3. 차트 컨테이너 (오버레이 안에서 꽉 차게) */
+  #chart-container {
+    height: 100% !important;
+    /* 오버레이 안에서는 부모 높이 따라가기 */
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  /* 4. 가로 스크롤 완전 차단 */
+  body,
+  html {
+    overflow-x: hidden !important;
+    position: relative;
+  }
 }

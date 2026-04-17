@@ -21,21 +21,6 @@ async function loadTableData(force = false) {
 
     const tbody = document.getElementById("table-body");
 
-    // loadTableData 내부의 클릭 이벤트 리스너 수정
-    tbody.addEventListener("click", (e) => {
-      const tr = e.target.closest("tr");
-      if (tr && tr.dataset.sym) {
-        const pureSymbol = tr.dataset.sym;
-        currentSelectedSymbol = pureSymbol;
-        selectSymbol(pureSymbol);
-        applySelectedHighlight();
-
-        // ⭐️ [추가] 모바일일 때만 차트 패널 '스윽' 올리기
-        if (window.innerWidth <= 500) {
-          showMobileChart();
-        }
-      }
-    });
     // 처음엔 화살표 없이 원본(시총순) 그대로 그림
     renderTable();
   } catch (error) {
@@ -46,6 +31,28 @@ async function loadTableData(force = false) {
     modal.classList.add("hidden");
   }
 }
+
+// [table.js 맨 아래에 독립적으로 배치]
+document.addEventListener("DOMContentLoaded", () => {
+  const tbody = document.getElementById("table-body");
+
+  tbody.addEventListener("click", (e) => {
+    // 1. 별표(즐겨찾기) 버튼 눌렀을 때는 차트 안 뜨게 방어 (이미 toggleFavorite에 stopPropagation 있지만 한 번 더!)
+    if (e.target.closest(".star-btn")) return;
+
+    const tr = e.target.closest("tr");
+    if (tr && tr.dataset.sym) {
+      const pureSymbol = tr.dataset.sym;
+      currentSelectedSymbol = pureSymbol;
+      selectSymbol(pureSymbol, true);
+      applySelectedHighlight();
+
+      if (window.innerWidth <= SCREEN_WIDTH) {
+        showMobileChart();
+      }
+    }
+  });
+});
 
 // 2. ⭐️ 3단계 정렬 핵심 로직 ⭐️ (리셋 & 상단 이동 추가)
 function sortTable(colKey) {
@@ -331,7 +338,8 @@ function applySelectedHighlight() {
 
 // 💡 헬퍼 함수: 재활용한 껍데기에 알맹이만 채우는 함수 (기존 로직 분리)
 function updateRowInnerHTML(tr, row) {
-  const pureSymbol = row.Symbol;
+  const pureSymbol = (row.Ticker || "").replace("KRW", "").replace("USDT", "").toUpperCase();
+  tr.dataset.sym = pureSymbol;
   const getCleanNum = (val) => {
     if (val === undefined || val === null) return 0;
     const clean =

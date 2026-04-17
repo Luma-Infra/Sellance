@@ -86,6 +86,7 @@ function startRealtimeCandle(symbol, interval, isFutures, isSpot) {
         updateRealtimeCountdown(serverMs);
       }
       // 🚨 기존 candleSeries.update(liveData); 삭제하고 아래 함수로 교체!
+      updateStatus(liveData);
       renderWithGhosts();
     };
 
@@ -156,6 +157,7 @@ function startRealtimeCandle(symbol, interval, isFutures, isSpot) {
         }
 
         // 🚨 기존 candleSeries.update(liveData); 삭제하고 아래 함수로 교체!
+        updateStatus(liveData);
         renderWithGhosts();
       }
     };
