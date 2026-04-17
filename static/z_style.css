@@ -225,7 +225,7 @@ body.theme-binance {
 /* ✅ 모바일 통합 최적화 */
 @media (max-width: 768px) {
 
-  /* 4. 가로 스크롤 완전 차단 */
+  /* 가로 스크롤 완전 차단 */
   body,
   html {
     overflow-x: hidden !important;
@@ -249,14 +249,14 @@ body.theme-binance {
     /* 맨 밑 코인 가려짐 방지 */
   }
 
-  /* 2. 테이블 다이어트 */
+  /* 테이블 다이어트 */
   #table-body td,
   thead th {
     padding: 8px 4px !important;
     font-size: 11px !important;
   }
 
-  /* 3. 차트 컨테이너 (오버레이 안에서 꽉 차게) */
+  /* 차트 컨테이너 (오버레이 안에서 꽉 차게) */
   #chart-container {
     height: 100% !important;
     /* 오버레이 안에서는 부모 높이 따라가기 */
@@ -264,21 +264,32 @@ body.theme-binance {
     margin: 0 !important;
   }
 
-  /* 🚀 1. 메인 화면에서는 없는 놈 취급 (유령 박멸) */
+  /* 1. 패널 자체를 안드로메다로 보냄 */
   #right-panel {
     display: none !important;
-    /* HTML의 style="display:flex"를 씹어버림 */
     position: fixed !important;
-    /* 레이아웃 공간 차지 방지 */
+    left: -9999px !important; /* 화면 밖으로 완전히 퇴출 */
     visibility: hidden !important;
+    opacity: 0 !important;
   }
 
-  /* 🚀 2. 모바일 팝업(오버레이) 안에서만 다시 소환 */
-  #mobile-chart-overlay.active #right-panel {
+  /* 2. [핵심] 캔버스/차트 엔진 강제 숨기기 */
+  /* 차트 라이브러리가 생성하는 모든 내부 요소를 강제로 숨깁니다 */
+  #right-panel *, 
+  #chart-container canvas,
+  .tv-lightweight-charts {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+
+  /* 3. 모바일 팝업 활성화 시에만 정중하게 재소환 */
+  #mobile-chart-overlay.active #right-panel,
+  #mobile-chart-overlay.active #right-panel *,
+  #mobile-chart-overlay.active #chart-container canvas {
     display: flex !important;
     position: relative !important;
+    left: 0 !important;
     visibility: visible !important;
-    height: 100% !important;
-    width: 100% !important;
+    opacity: 1 !important;
   }
-}
