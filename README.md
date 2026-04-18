@@ -1,112 +1,95 @@
-# 🚀 Sellnance - 실시간 크립토 차트 & 모의 시뮬레이터
+ # 🚀 Sellnance - Edge-Optimized Crypto Terminal & Simulator
 
-**Sellnance**는 업비트(Upbit)와 바이낸스(Binance)의 실시간 웹소켓 데이터를 기반으로 작동하는 고성능 암호화폐 차트 분석 및 트레이딩 시뮬레이터입니다. 단순한 조회를 넘어, 사용자가 직접 다음 캔들을 예측하고 그려볼 수 있는 **커스텀 시뮬레이션 엔진**을 탑재하고 있습니다.
 
----
 
-[][] 사진 하나 잇으면 좋을듯 !pic
+ Sellnance는 업비트(Upbit)와 바이낸스(Binance)의 데이터를 통합하여 실시간으로 분석하는 고성능 암호화폐 차트 터미널 및 트레이딩 시뮬레이터입니다.
 
-## ✨ 핵심 기능 (Key Features)
+ 클라이언트의 브라우저 자원을 극대화하여 서버 리소스를 절감하는 Zero-Cost 아키텍처와, 거래소의 CORS 및 429(Rate Limit) 제재를 완벽히 우회하는 서버 사이드 프록시(Proxy) 엔진을 기반으로 설계되었습니다. 단순한 조회를 넘어 사용자가 직접 미래의 캔들을 예측하고 그려볼 수 있는 커스텀 시뮬레이션 엔진을 제공합니다.
 
-### 📈 1. 초고속 실시간 차트 (Zero-Lag WebSocket)
-* **멀티 거래소 통합:** 바이낸스 선물/현물 및 업비트 원화 마켓의 실시간 시세 완벽 동기화.
-* **렌더링 최적화:** - `ResizeObserver` 디바운싱(Debouncing) 적용으로 화면 크기 변경 시 차트 깜빡임 제거.
-    - 웹소켓 수신 시 불필요한 DOM Reflow를 차단하여 낮은 CPU 점유율과 60FPS의 부드러운 움직임 구현.
-* **스마트 가격 정밀도 (Dynamic Precision):** - 비트코인부터 밈코인까지 가격대에 맞춰 차트 눈금과 유효숫자(최대 10자리) 자동 동기화.
+ ## 🏛 System Architecture
 
-### 🎮 2. 트레이딩 시뮬레이터 (Trading Simulator)
-* **롱/숏 모드 전환:** 하이브리드 액체 트랜지션(Liquid Transition)이 적용된 UI를 통해 롱/숏 관점 즉시 전환.
-* **정밀 캔들 컨트롤:** 슬라이더를 통해 몸통(Body), 윗꼬리(Upper Wick), 아랫꼬리(Lower Wick) 비율을 1% 단위로 조절.
-* **시뮬레이션 관리:** `Add Next Candle`로 타임라인 확장 및 `Undo` 기능을 통한 히스토리 역추적 지원.
+ 본 프로젝트는 비용 효율성과 렌더링 성능을 극대화하기 위해 백엔드와 프론트엔드의 역할을 엄격하게 분리한 하이브리드 아키텍처를 채택했습니다.
 
-### 🎨 3. 사용자 중심 UI/UX
-* **플로팅 독(Floating Dock):** 화면 하단에 떠 있는 듯한 세련된 컨트롤러로 시각적 개방감 확보.
-* **테마 시스템:** 바이낸스 다크(Deep Navy) 및 업비트 라이트 테마 원클릭 스위칭.
-* **고급 알럿(Alert):** `SweetAlert2`를 이식하여 데이터 초기화 등 주요 작업 시 쫀득한 애니메이션 모달 제공.
+ * Backend (The Proxy Shield): FastAPI 기반의 백엔드는 브라우저의 CORS 에러를 원천 차단하는 API Gateway 역할을 수행합니다. ThreadPoolExecutor를 활용해 다중 거래소 데이터를 병렬로 수집하며, 메모리 Lock(data_lock) 기반의 스마트 캐싱 시스템을 통해 500명 이상의 동시 접속 환경에서도 API 호출 제한(429 Error)을 방어합니다.
+ * Frontend (The Heavy Lifter): 유저의 기기 자원을 적극 활용(Client-side Rendering)합니다. IntersectionObserver를 활용한 뷰포트 감지 렌더링과 스나이퍼 웹소켓(Sniper Socket) 통신을 통해 화면에 보이는 데이터만 선택적으로 구독(Subscribe)하여 CPU/RAM 점유율을 획기적으로 낮췄습니다.
+ * Edge Routing: Cloudflare Workers 인프라와 결합하여 정적 리소스 로드 속도를 최적화합니다.
 
----
+ ## ✨ 핵심 기능 및 기술적 문제 해결 (Key Features & Engineering)
 
-## 🛠 기술 스택 (Tech Stack)
+ ### 🛡️ 1. CORS 무력화 및 429 율속 방어 (Proxy & Throttle)
+ * 문제: 브라우저 직결(fetch) 방식에서 발생하는 거래소 CORS 에러 및 새로고침 남용에 의한 IP 차단(429 Too Many Requests).
+ * 해결: 파이썬(app.py)에 우회용 엔드포인트(/api/candles)를 구축하여 **서버 간 통신(Server-to-Server)**으로 CORS를 패스하고, 프론트엔드(api.js)에 1.5초 간격의 **광클 방지 스로틀링(Throttling)**을 적용하여 거래소 방화벽을 안전하게 통과합니다.
 
-| 구분 | 기술 스택 |
+ ### ⚡ 2. 초고속 실시간 렌더링 엔진 (Zero-Lag UI)
+ * DOM 재활용 (Recycling) & FLIP 애니메이션: 100위권 밖으로 밀려난 캔들 DOM을 파괴하지 않고 메모리 풀(Pool)에 보관(table.js)하여 가비지 컬렉션(GC) 부하를 제거했습니다.
+ * 스나이퍼 소켓 (Sniper WebSocket): 500개의 코인 데이터를 모두 수신하지 않고, 화면에 보이는 코인(visibleSymbols)만 추적하여 구독/해지(syncSniperSubscriptions)를 실시간으로 스위칭합니다.
+ * 디바운스 리사이징: ResizeObserver에 0.1초 디바운스를 적용하여 창 크기 조절 시 발생하는 무한 Reflow 및 캔버스 깜빡임 버그를 차단했습니다.
+
+ ### 📱 3. 모바일 레이아웃 격리 (Mobile UX Isolation)
+ * 문제: 반응형 축소 시 차트 캔버스(Lightweight Charts)가 남기는 잔상과 하위 요소 밀림 현상.
+ * 해결: 모바일 오버레이 활성화 시 기존 DOM 트리에서 차트를 분리하여 임시 컨테이너에 마운트(Mount)하고, 닫을 때 원상 복구(closeMobileChart)하는 CSS/DOM 격리 기법을 적용했습니다. 카운트다운 라벨 역시 가장 가까운 table 노드를 역추적하여 안전하게 절대 좌표(position: absolute)에 부착됩니다.
+
+ ### 🧮 4. 동적 가격 정밀도 엔진 (Dynamic Precision)
+ * 문제: $100,000 대의 비트코인과 $0.00000001 대의 밈 코인(Meme Coin)이 동일한 눈금 포맷을 사용하여 UI가 붕괴되는 현상.
+ * 해결: Math.log10() 기반의 수학적 알고리즘(formatSmartPrice)을 적용하여 코인의 절대 가격에 따라 유효숫자(최대 10자리)를 실시간으로 자동 계산하고 포맷팅합니다.
+
+ ### 🎮 5. 트레이딩 시뮬레이터 (Custom Simulation Engine)
+ * 하이브리드 액체 트랜지션: UI 슬라이더를 통해 롱(Bull)/숏(Bear) 모드 전환.
+ * 정밀 캔들 조형: 몸통(Body), 위/아래 꼬리(Wick) 비율을 1% 단위로 조작하여 미래의 가상 캔들을 배열 배열(ghostData)에 삽입 및 Undo 히스토리 관리.
+
+ ## 🛠 기술 스택 (Tech Stack)
+
+ | Category | Technology |
 | :--- | :--- |
-| **Backend** | Python 3.9+, FastAPI, Uvicorn |
-| **Frontend** | Vanilla JavaScript (ES6+), Tailwind CSS (CLI Optimized) |
-| **Chart** | TradingView Lightweight Charts v4.0+ |
-| **Data** | Binance API/WS, Upbit API/WS, CoinMarketCap API |
+| Backend | Python 3.9+, FastAPI, Uvicorn, Requests |
+| Frontend | Vanilla JavaScript (ES6+), Tailwind CSS |
+| Data Engine | Upbit API/WS, Binance FAPI/WS, CoinMarketCap API |
+| Visualization | TradingView Lightweight Charts v4.0+ |
+| Infrastructure | Cloudflare Workers, Railway (or Local) |
 
----
+ ## 📁 프로젝트 구조 (Project Structure)
 
-## 🚀 시작하기 (Quick Start)
-
-### 1. API 키 설정
-시총 데이터 로드를 위해 **CoinMarketCap API Key**가 필요합니다.
-* 발급: [CoinMarketCap Developer Portal](https://pro.coinmarketcap.com/account)
-* 프로젝트 루트의 `.env` 파일에 `CMC_API_KEY=your_key_here` 형태로 입력하세요.
-
-### 2. 실행 (Windows)
-프로젝트 폴더 내 `Sellnance.bat` 파일을 더블 클릭하면 자동으로 환경 검사 및 서버가 가동됩니다.
-
-```batch
-# Sellnance.bat 내부 로직
-python -m pip install fastapi uvicorn requests pandas openpyxl jinja2 python-dotenv
-python -m uvicorn modules.app:app --reload --port num
-```
-
-### 3. 접속 (Access)
-서버가 정상적으로 구동되면 브라우저를 실행하여 아래 주소로 접속합니다.
-* **URL:** `http://localhost:num`
-* **권장 브라우저:** Chrome, Edge, Safari (최신 버전)
-
----
-
-## 📁 프로젝트 구조 (Project Structure)
-
-본 프로젝트는 백엔드(Python/FastAPI)와 프론트엔드(Vanilla JS)의 명확한 역할 분담을 위해 다음과 같은 모듈형 구조를 채택하고 있습니다.
-
-```text
+ ```text
 Sellnance/
-├── modules/               # 백엔드 핵심 로직 (Python)
-│   ├── api_manager.py     # 외부 거래소 API 요청 및 데이터 가공 전용
-│   ├── app.py             # FastAPI 메인 서버 및 엔드포인트 제어
-│   └── get_market.py      # 전역 마켓 데이터 수집 및 매핑 로직
-├── static/                # 프론트엔드 정적 리소스
-│   ├── _main.js           # UI 초기화, 테마 관리 및 전역 상태 컨트롤 타워
-│   ├── api.js             # 데이터 통신 (History 로드 및 심볼 검색) 전용
-│   ├── stream.js          # WebSocket 실시간 데이터 처리 엔진
-│   ├── sim_engine.js      # 시뮬레이터 수학 알고리즘 (캔들 생성/Undo)
-│   ├── table.js           # 마켓 보드 리스트 실시간 렌더링 제어
-│   └── z_style.css        # Content-visibility 등 고성능 렌더링용 CSS
-├── templates/
-│   └── index.html         # 메인 프론트엔드 레이아웃 (반응형 독 구조)
-├── config.py              # 전역 환경 설정 및 API 키 관리
-├── mapping.json           # 거래소별 심볼 매핑 데이터 캐시
-├── .gitignore             # 가상 환경 및 캐시 파일 제외 설정
-├── LICENSE                # 프로젝트 라이선스
-└── README.md              # 프로젝트 가이드라인
+├── modules/               # 백엔드 코어 (Proxy & Aggregation)
+│   ├── api_manager.py     # 다중 거래소 병렬 수집, 캐시 매니저, 동적 가격 포맷터
+│   ├── app.py             # FastAPI 라우터, CORS 미들웨어, 프록시 엔드포인트
+│   └── get_market.py      # 거래소 티커 맵핑 유틸
+├── static/                # 프론트엔드 (Client-side Rendering Engine)
+│   ├── api.js             # 내부 API 통신 및 1.5초 Throttle 제어
+│   ├── chart_utils.js     # 차트 스케일링, 로그 수학 연산, 카운트다운 DOM 주입
+│   ├── stream.js          # 통합 웹소켓 관리 및 Ghost Candle 렌더러
+│   ├── streamEach.js      # 스나이퍼 웹소켓 (뷰포트 추적 기반 구독 동기화)
+│   ├── table.js           # Intersection Observer 기반 DOM 재활용 & 무한 스크롤
+│   ├── ui_control.js      # 모바일/PC 레이아웃 스위칭 및 CSS Isolation 제어
+│   └── _main.js           # 전역 상태 관리 및 ResizeObserver 디바운스
+├── config.py              # API Key(CMC) 및 전역 환경 변수 관리
+└── mapping.json           # 심볼-체인 매핑 캐시 스토리지
 ```
 
 ---
 
-## 🔧 주요 최적화 및 문제 해결 일지 (Development Log)
+ ## 🚀 시작하기 (Quick Start)
 
-프로젝트 개발 중 발생한 핵심 병목 현상과 버그들을 아래와 같이 최적화하여 해결했습니다.
+ ### 1. 환경 변수 설정
+ * [CoinMarketCap API](https://pro.coinmarketcap.com/account) 키 발급 후 프로젝트 루트에 `.env` 파일을 생성합니다.
+ ```env
+CMC_API_KEY=your_cmc_api_key_here
+ ### 2. 서버 실행 (Windows 환경)
+ * 폴더 내 제공된 start.bat을 실행하거나 아래 명령어를 터미널에 입력합니다.
+```
+```bash
+pip install -r requirements.txt
+uvicorn modules.app:app --reload --port 8000
+```
 
-### 🚀 성능 및 렌더링 최적화 (요약)
-* **차트 깜빡임 해결:** `ResizeObserver`에 0.1초 디바운스(Debounce)를 적용하여 무한 리사이즈 버그 차단.
-* **CPU 부하 절감:** 전 종목 시세 갱신에 3초 주기 버퍼링(Buffering) 전략을 도입하여 렌더링 횟수 최소화.
-* **메모리 효율화:** `content-visibility: auto`를 통해 화면 밖 리스트 요소의 브라우저 연산 제외.
-* **로딩 속도 개선:** Tailwind CSS CDN 의존성을 제거하고 CLI 빌드 방식으로 전환하여 초기 로딩 속도 10배 향상.
-
-### 📉 데이터 및 안정성 개선 (요약)
-* **캔들 중복 증식 차단:** 내 PC 시계 대신 업비트 서버 타임스탬프(`timestamp`)를 기준점으로 동기화하여 캔들 증식 버그 해결.
-* **가격 정밀도 동기화:** `$100,000`부터 `$0.00000001`까지 코인 가격에 맞춰 차트 눈금(`minMove`)과 자릿수 자동 전환.
-* **타임존 시차 보정:** 업비트 API 시각 데이터에 UTC 표준(`Z`)을 강제 파싱하여 차트 찌그러짐 및 시차 문제 해결.
-* **모듈형 아키텍처:** 800줄의 스파게티 코드를 기능별(API, Stream, Engine)로 분리하여 유지보수성 극대화.
+ ### 3. 접속
+ * 브라우저에서 `http://localhost:8000` 접속 (Chrome 최적화).
 
 ---
 
-## 📝 라이선스 및 기여 (License & Contribution)
-* **License:** 본 프로젝트는 MIT 라이선스 하에 배포되며, 개인 학습 및 연구 목적은 가능하나 상업적 이용은 지양 바랍니다.
-* 단순 참고 용도이며, 거래 시 발생하는 어떠한 손실에 대해서도 책임지지 않습니다.
-* 코인마캣캡(CMC) 및 거래소(Upbit, Binance)의 API 이용 약관을 준수해야만 합니다.
+ ## 📝 라이선스 및 면책 조항 (License & Disclaimer)
+ * **License:** MIT License. 개인 학습, 연구 및 포트폴리오 목적의 수정/배포를 환영합니다.
+ * **Disclaimer:** 본 프로젝트는 실시간 데이터 분석 및 시뮬레이션을 위한 도구입니다. 제공되는 시세 정보의 지연이나 오류가 발생할 수 있으며, 이를 바탕으로 한 실제 트레이딩 손실에 대해서는 어떠한 법적 책임도 지지 않습니다. (거래소 API 이용 약관 준수 필수)
+
+---
