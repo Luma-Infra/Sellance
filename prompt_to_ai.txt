@@ -1,0 +1,31 @@
+# 1. 초기화 (기존 파일 삭제)
+if (Test-Path context_for_ai.txt) { Remove-Item context_for_ai.txt }
+
+# 2. [섹션 1] 프로젝트 구조 (직계 파일만 리스트업)
+"=== [1] PROJECT STRUCTURE ===" | Out-File -FilePath context_for_ai.txt -Encoding UTF8
+# 루트 폴더 파일들
+Get-ChildItem -Path "." -Depth 0 | Where-Object { !$_.PSIsContainer } | Select-Object -ExpandProperty Name | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+# modules 폴더 내부 (깊이 들어가지 않고 직계 .py만)
+"`n+---modules" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+Get-ChildItem -Path "./modules" -Filter *.py -Depth 0 | ForEach-Object { "|   $($_.Name)" } | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+# static 폴더 내부
+"`n+---static" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+Get-ChildItem -Path "./static" -Filter *.js -Depth 0 | ForEach-Object { "|   $($_.Name)" } | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+
+# 3. [섹션 2] 파이썬 핵심 (루트 + modules 직계 .py만)
+"`n=== [2] PYTHON CORE LOGIC ===" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+Get-ChildItem -Path ".", "./modules" -Filter *.py -Depth 0 | ForEach-Object {
+    if ($_.Name -notmatch "env|venv") {
+        "`n--- File: $($_.Name) ---" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+        Get-Content $_.FullName -Encoding UTF8 | Select-String "def ","class ","# ","async def " | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+    }
+}
+
+# 4. [섹션 3] 자바스크립트 핵심 (static 폴더만)
+"`n=== [3] JAVASCRIPT CORE LOGIC ===" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+Get-ChildItem -Path "./static" -Filter *.js -Depth 0 | ForEach-Object {
+    "`n--- File: $($_.Name) ---" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+    Get-Content $_.FullName -Encoding UTF8 | Select-String "function ","const ","async ","// ","window\." | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+}
+
+Write-Host "🚀 청소 끝! 이제 진짜 '본인 코드'만 남았습니다." -ForegroundColor Green

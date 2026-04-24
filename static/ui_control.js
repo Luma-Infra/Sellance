@@ -9,16 +9,24 @@ function toggleTheme() {
   // 다크 라이트 모드
   if (isCurrentlyDark) {
     body.classList.remove("theme-binance");
-    currentTheme = "upbit-light";
+    body.classList.add("theme-upbit");
+
+    currentTheme = "upbit";
+
     if (btn) btn.innerHTML = "🌙";
   } else {
+    body.classList.remove("theme-upbit");
     body.classList.add("theme-binance");
+
     currentTheme = "binance";
     if (btn) btn.innerHTML = "☀️";
   }
   setTimeout(() => {
     initChart();
-  }, 10);
+    if (typeof updateRealtimeCountdown === 'function') {
+      updateRealtimeCountdown(Date.now());
+    }
+  }, 50);
 }
 
 // 데스크탑: 좌측 패널 접기/펴기
@@ -46,7 +54,7 @@ function toggleSidebar() {
       const container = document.getElementById("chart-container");
       chart.resize(container.clientWidth, container.clientHeight);
     }
-  }, 200);
+  }, 50);
 }
 
 // 모바일: 리스트/차트 화면 전환
@@ -87,7 +95,7 @@ function switchMobileView(view) {
       if (chart && container.clientWidth > 0) {
         chart.resize(container.clientWidth, container.clientHeight);
       }
-    }, 200);
+    }, 50);
   }
 }
 
@@ -106,33 +114,33 @@ function showMobileChart() {
     content.appendChild(rightPanel);
   }
 
-  rightPanel.style.display = "flex";
+  // 2. 스타일 강제 초기화
+  rightPanel.style.setProperty('display', 'flex', 'important');
   rightPanel.style.height = "100%";
   rightPanel.style.width = "100%";
-
-  // 2. 레이아웃 및 '방벽 제거' (핵심!)
-  overlay.classList.remove("hidden");
-  // 🚀 active 클래스 하나로 pointer-events와 opacity를 동시에 제어하는 게 가장 깔끔합니다.
-  overlay.classList.add("active");
-
   rightPanel.classList.remove("hidden", "md:flex");
-  rightPanel.classList.add("flex");
 
-  // 3. 애니메이션 및 차트 리사이즈
+  // 3. 배경 소환
+  overlay.classList.remove("hidden");
+  overlay.classList.add("active");
+  overlay.style.opacity = "1";
+  overlay.style.pointerEvents = "auto";
+
+  // 4. 애니메이션 (패널 등장)
   setTimeout(() => {
     panel.style.transform = "translateY(0)";
+    panel.style.opacity = "1"; // 🚀 이거 빠지면 안 보여요!
 
     if (window.chart) {
       const newWidth = content.clientWidth;
-      const newHeight = content.clientHeight - 60;
+      const newHeight = content.clientHeight - 60; // 헤더 빼고
       window.chart.resize(newWidth, newHeight);
       window.chart.timeScale().fitContent();
 
-      // 🚀 [추가] 차트가 뜨자마자 포커스를 잡게 해서 원터치 프리패스 완성!
       const container = document.getElementById("chart-container");
       if (container) container.focus();
     }
-  }, 100);
+  }, 50);
 }
 
 function closeMobileChart() {
@@ -153,8 +161,9 @@ function closeMobileChart() {
     if (rightPanel && mainContainer) {
       mainContainer.appendChild(rightPanel);
     }
-  }, 100);
+  }, 50);
 }
+
 // ⭐️ 1. 탭 전환 기능 (차트 ↔ 시뮬레이터) ⭐️
 function switchChartTab(mode) {
   const btnSim = document.getElementById("tab-btn-sim");
@@ -204,7 +213,7 @@ function executeTabSwitch(mode) {
       const container = document.getElementById("chart-container");
       if (container.clientWidth > 0 && container.clientHeight > 0)
         window.chart.resize(container.clientWidth, container.clientHeight);
-    }, 100);
+    }, 50);
   }
 }
 

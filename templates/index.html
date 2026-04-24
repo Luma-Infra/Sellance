@@ -7,15 +7,23 @@
   <title>sellance</title>
   <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <!-- <script src="https://cdn.tailwindcss.com"></script> -->
-  <!-- <link rel="stylesheet" href="/static/z_style.css" /> -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- <link rel="stylesheet" href="/static/z_style.css"> -->
+  <script src="/static/_config.js"></script>
+  <script src="/static/ui_control.js"></script>
+  <script src="/static/chart_utils.js"></script>
+  <script src="/static/api.js"></script>
+  <script src="/static/stream.js"></script>
+  <script src="/static/streamEach.js"></script>
+  <script src="/static/sim_engine.js"></script>
+  <script src="/static/table.js"></script>
+  <script src="/static/_main.js"></script>
   <link rel="stylesheet" href="/static/z_style.min.css">
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            // 🚨 핵심: Tailwind 클래스에 우리의 CSS 변수를 연결!
             theme: {
               bg: "var(--bg)",
               panel: "var(--panel)",
@@ -29,53 +37,119 @@
         },
       },
     };
-  </script>
+    const timeframes = [
+      { label: "1분", value: "1m" },
+      { label: "3분", value: "3m" },
+      { label: "5분", value: "5m" },
+      { label: "15분", value: "15m" },
+      { label: "30분", value: "30m" },
+      { label: "1시간", value: "1h" },
+      { label: "2시간", value: "2h" },
+      { label: "4시간", value: "4h" },
+      { label: "12시간", value: "12h" },
+      { label: "1D", value: "1d" },
+      { label: "3D", value: "3d" },
+      { label: "1W", value: "1w" },
+      { label: "1달", value: "1M" },
+    ];
+    function renderTimeframeButtons(currentTF = '1d') {
+      const container = document.getElementById('tf-container');
+      const existingButtons = container.querySelectorAll('.tf-btn');
+      existingButtons.forEach(btn => btn.remove());
+
+      timeframes.reverse().forEach(tf => {
+        const btn = document.createElement('button');
+        const activeClass = tf.value === currentTF ? 'active !opacity-100 border-theme-accent' : 'border-transparent';
+        btn.className = `tf-btn px-2.5 py-1 text-[11px] font-bold bg-transparent text-theme-text opacity-50 border rounded hover:bg-theme-border/50 hover:opacity-100 transition-all ${activeClass}`;
+        btn.innerText = tf.label;
+        btn.onclick = () => {
+          setTF(tf.value);
+          renderTimeframeButtons(tf.value); // 클릭 시 액티브 상태 갱신
+        };
+
+        container.prepend(btn);
+      });
+      timeframes.reverse(); // 배열 원복
+    }
+
+    // 🚀 초기 실행
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTimeframeButtons('1d');
+    });  </script>
 </head>
 
+<!-- 스타트뷰(cmc api 로그인), 모바일 하단 네비바, 멀티 차트 퀵 탐색(4~8개) 메모 -->
+
 <body
-  class="text-theme-text font-sans h-screen w-screen overflow-hidden flex justify-center transition-colors duration-10">
-  <!-- theme-binance  -->
+  class="theme-binance text-theme-text font-sans h-screen w-screen overflow-hidden flex justify-center transition-colors duration-10">
+
   <div id="loading-modal"
-    class="fixed inset-0 w-screen h-screen bg-[#131313]/85 backdrop-blur-[5px] z-[50] flex flex-col justify-center items-center text-white transition-opacity duration-10">
+    class="fixed z-[200] inset-0 w-screen h-screen bg-[#131313]/85 backdrop-blur-[5px] flex flex-col justify-center items-center text-white transition-opacity duration-10">
     <div class="spinner"></div>
     <h2 class="m-0 mb-3 text-theme-accent text-xl font-bold tracking-wide">
       Fetching Market Data...
     </h2>
     <p class="text-[#d4d4d4] opacity-80 text-center text-sm leading-relaxed">
-      바이낸스 및 업비트 실시간 데이터를 수집 중입니다.<br />(최대 10초 ~ 1분
-      소요)
+      바이낸스 및 업비트 실시간 데이터를 수집 중입니다.<br />(최대 10초 ~ 30초 소요)
     </p>
+  </div>
+
+  <!-- theme-binance  -->
+
+  <div class="md:hidden flex w-full bg-theme-panel border-b border-theme-border shrink-0 z-50">
+    <button onclick="switchMobileView('list')" id="mob-btn-list"
+      class="flex-1 py-3 text-sm font-bold border-b-2 border-theme-accent text-theme-accent transition-colors">
+      📋 마켓 리스트
+    </button>
+    <button onclick="switchMobileView('chart')" id="mob-btn-chart"
+      class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent opacity-50 transition-colors">
+      📈 차트 보기
+    </button>
+  </div>
+
+  <div id="mobile-chart-overlay"
+    class="fixed z-[110] inset-0 bg-black/60 backdrop-blur-sm  hidden opacity-0 transition-opacity duration-300"
+    onclick="closeMobileChart()">
+    <div id="mobile-chart-panel"
+      class="fixed z-[120] bottom-0 right-0 w-[88%] h-[92%] bg-theme-panel rounded-t-3xl shadow-[0_-10px_10px_rgba(0,0,0,0.1)] translate-y-full transition-transform duration-300 ease-out flex flex-col"
+      onclick="event.stopPropagation()">
+      <div class="w-full flex justify-center py-3" onclick="closeMobileChart()">
+        <div class="w-12 h-1.5 bg-theme-border/50 rounded-full"></div>
+      </div>
+      <div id="mobile-chart-content" class="flex-1 flex flex-col overflow-hidden"></div>
+    </div>
   </div>
 
   <div
     class="flex flex-col md:flex-row h-[100dvh] md:h-[98dvh] max-h-[100dvh] md:max-h-[98dvh] w-full max-w-[1600px] bg-theme-bg relative shadow-2xl overflow-hidden shrink-0 mx-auto md:mb-[2dvh]">
-    <div class="md:hidden flex w-full bg-theme-panel border-b border-theme-border shrink-0 z-50">
-      <button onclick="switchMobileView('list')" id="mob-btn-list"
-        class="flex-1 py-3 text-sm font-bold border-b-2 border-theme-accent text-theme-accent transition-colors">
-        📋 마켓 리스트
-      </button>
-      <button onclick="switchMobileView('chart')" id="mob-btn-chart"
-        class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent opacity-50 transition-colors">
-        📈 차트 보기
-      </button>
-    </div>
-
     <div
       class="flex flex-col w-full h-[calc(100vh-64px)] md:h-full md:w-[768px] lg:w-[600px] border-r border-theme-border bg-theme-bg transition-all duration-300 shrink-0 overflow-hidden"
       id="left-panel">
-      <div class="flex justify-between items-center p-4 border-b border-theme-border bg-theme-panel/30">
+      <div class="flex justify-between items-center h-16 p-4 border-b border-theme-border bg-theme-panel/20">
         <div class="flex items-center gap-3">
           <!-- 다크 라이트 토글 -->
           <button id="theme-toggle-btn" onclick="toggleTheme()"
             class="bg-transparent border border-theme-border text-theme-text px-3 py-1.5 rounded cursor-pointer text-sm hover:bg-theme-border/50 transition-colors shadow-sm">
-            🌙
+            ☀️
           </button>
           <h2 class="m-0 text-lg font-extrabold tracking-wider text-theme-accent uppercase">
             sellance
           </h2>
         </div>
 
-        <div id="connection-status" class="flex items-center gap-2 px-4 py-2 text-[11px] bg-black/5">
+        <!-- ==============================임시 경주마 토글 버튼============================== -->
+
+        <div class="flex items-center gap-2 p-2 bg-theme-panel border-b border-theme-border">
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="flip-toggle" class="sr-only peer" checked>
+            <div
+              class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-theme-accent">
+            </div>
+            <span class="ml-2 text-[10px] font-bold opacity-70 uppercase tracking-tighter">Flip Anim</span>
+          </label>
+        </div>
+
+        <div id="connection-status" class="flex items-center gap-2 px-4 py-2 text-[11px]">
           <span id="status-dot" class="w-2 h-2 rounded-full bg-gray-500 shadow-[0_0_5px_rgba(0,0,0,0.5)]"></span>
           <span id="status-text" class="font-bold opacity-70 tracking-wide">DISCONNECTED</span>
         </div>
@@ -110,47 +184,44 @@
               <th onclick="sortTable('Ticker')"
                 class="p-4 cursor-pointer select-none hover:bg-white/5 transition-colors group w-[25%]">
                 Ticker
-                <span id="sort-Ticker"
-                  class="sort-arrow text-theme-accent ml-1 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                <span id="sort-Ticker" class="sort-arrow text-theme-accent ml-1  transition-opacity"></span>
               </th>
 
-              <th class="p-4 select-none w-[35%]">
+              <th class="p-4 select-none w-[30%] hover:bg-white/5">
                 <div class="flex flex-col gap-1">
-                  <div onclick="sortTable('Price')"
+                  <div onclick="sortTable('Price_Raw')"
                     class="cursor-pointer hover:text-theme-accent transition-colors group font-bold">
                     Price
-                    <span id="sort-Price"
-                      class="sort-arrow text-[10px] text-theme-accent ml-1 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span id="sort-Price_Raw"
+                      class="sort-arrow text-[10px] text-theme-accent ml-1  transition-opacity"></span>
                   </div>
-                  <div class="flex gap-3 text-[10px] opacity-70">
-                    <span onclick="sortTable('Change_24h')"
+                  <div class="flex gap-3 text-[10px]">
+                    <span onclick="sortTable('Change_24h_Raw')"
                       class="cursor-pointer hover:text-theme-accent transition-colors group">
                       24h
-                      <span id="sort-Change_24h"
-                        class="sort-arrow text-theme-accent ml-0.5 opacity-0 group-hover:opacity-100"></span>
+                      <span id="sort-Change_24h_Raw" class="sort-arrow text-theme-accent ml-0.5 "></span>
                     </span>
-                    <span onclick="sortTable('Change_Today')"
+                    <span onclick="sortTable('Change_Today_Raw')"
                       class="cursor-pointer hover:text-theme-accent transition-colors group">
                       Day
-                      <span id="sort-Change_Today"
-                        class="sort-arrow text-theme-accent ml-0.5 opacity-0 group-hover:opacity-100"></span>
+                      <span id="sort-Change_Today_Raw" class="sort-arrow text-theme-accent ml-0.5 "></span>
                     </span>
                   </div>
                 </div>
               </th>
 
-              <th class="p-4 select-none w-[25%]">
+              <th class="p-4 select-none w-[30%] hover:bg-white/5">
                 <div class="flex flex-col gap-1">
                   <div onclick="sortTable('Volume')"
                     class="cursor-pointer hover:text-theme-accent transition-colors group font-bold">
                     Volume
                     <span id="sort-Volume"
-                      class="sort-arrow text-[10px] text-theme-accent ml-1 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                      class="sort-arrow text-[10px] text-theme-accent ml-1  transition-opacity"></span>
                   </div>
                   <div onclick="sortTable('MarketCap')"
                     class="cursor-pointer hover:text-theme-accent transition-colors group text-[10px] opacity-70">
                     M.Cap
-                    <span id="sort-MarketCap" class="sort-arrow text-theme-accent ml-1">▼</span>
+                    <span id="sort-MarketCap" class="sort-arrow text-theme-accent ml-1"></span>
                   </div>
                 </div>
               </th>
@@ -172,7 +243,7 @@
         ▶ 리스트 열기
       </button>
 
-      <div class="flex w-full shrink-0 bg-theme-panel border-b border-theme-border">
+      <div class="flex w-full shrink-0 h-16 bg-theme-panel border-b border-theme-border">
         <button id="tab-btn-chart"
           class="chart-tabs-btn active flex-1 p-3 bg-transparent border-none text-theme-text font-bold transition-all border-b-2 cursor-pointer hover:bg-white/5"
           onclick="switchChartTab('chart')">
@@ -193,116 +264,99 @@
             </h3>
             <div id="exchange-badges" class="flex gap-1.5 items-center"></div>
 
-            <div class="relative ml-2">
+            <!-- <div class="relative ml-2">
               <input type="text" id="symbol-input" placeholder="Search Ticker..." oninput="searchSymbols(this.value)"
                 class="bg-theme-panel text-theme-text border border-theme-border px-3 py-1.5 rounded-md w-[140px] text-xs font-bold focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-all placeholder-opacity-40 shadow-inner" />
               <div id="search-results"
                 class="absolute top-full left-0 mt-2 bg-theme-panel border border-theme-border w-[280px] z-[1000] max-h-[300px] overflow-y-auto hidden rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
               </div>
+            </div> -->
+
+            <div
+              class="relative flex items-center bg-theme-panel border border-theme-border rounded-md px-3 py-1.5 focus-within:border-theme-accent transition-all shadow-inner">
+              <input type="text" id="symbol-input" placeholder="Search Ticker..." oninput="searchSymbols(this.value)"
+                onclick="searchSymbols(this.value)" onfocus="searchSymbols(this.value)"
+                class="bg-transparent text-theme-text w-full text-xs font-bold focus:outline-none placeholder-opacity-40" />
+              <div id="search-results"
+                class="absolute top-full left-0 mt-2 bg-theme-panel border border-theme-border w-[280px] z-[1000] max-h-[300px] overflow-y-auto hidden rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+              </div>
+              <button onclick="clearSearch()"
+                class="ml-2 text-theme-text opacity-40 hover:opacity-100 transition-opacity">
+                ✕
+              </button>
             </div>
+
           </div>
 
-          <div class="flex items-center gap-5 text-right flex-wrap">
-            <div id="ohlc-legend" class="font-mono text-[13px] flex items-center gap-2 bg-black/5 px-3 py-1 rounded">
-              <span class="opacity-50 text-xs">Hover on chart to see OHLC...</span>
-            </div>
-            <div class="w-[1px] h-[30px] bg-theme-border opacity-50"></div>
-            <div class="flex flex-col text-xs text-left ">
-              <span class="opacity-50 text-[10px] uppercase font-bold tracking-wider">Market Cap</span>
-              <b id="head-mcap" class="text-[15px] font-mono mt-0.5"></b>
-            </div>
-            <div class="flex flex-col text-xs text-left">
-              <span class="opacity-50 text-[10px] uppercase font-bold tracking-wider">Price</span>
-              <b id="head-price" text-[15px] font-mono mt-0.5"></b>
-            </div>
-            <div class="flex flex-col text-xs text-left">
-              <span class="opacity-50 text-[10px] uppercase font-bold tracking-wider">Volume</span>
-              <b id="head-volume" class="text-[15px] font-mono mt-0.5"></b>
-            </div>
-            <!-- <div class="flex flex-col text-xs text-left">
+          <div class="flex items-center gap-5 text-right flex-wrap w-full">
+
+            <div class="flex-1"></div>
+            <!-- <div class="w-[1px] h-[30px] bg-theme-border opacity-50"></div> -->
+            <div class="flex items-center gap-5">
+              <div class="flex flex-col text-xs text-left ">
+                <span class="opacity-50 text-[10px] uppercase font-bold tracking-wider">Market Cap</span>
+                <b id="head-mcap" class="text-[15px] font-mono mt-0.5"></b>
+              </div>
+              <div class="flex flex-col text-xs text-left">
+                <span class="opacity-50 text-[10px] uppercase font-bold tracking-wider">Volume</span>
+                <b id="head-volume" class="text-[15px] font-mono mt-0.5"></b>
+              </div>
+              <!-- <div class="flex flex-col text-xs text-left">
+                <span class="opacity-50 text-[10px] uppercase font-bold tracking-wider">Price</span>
+                <b id="head-price" text-[15px] font-mono mt-0.5"></b>
+              </div> -->
+              <!-- <div class="flex flex-col text-xs text-left">
               <span class="opacity-50 text-[10px] uppercase font-bold tracking-wider">Target (Sim)</span>
               <b id="head-target" class="text-[15px] font-mono mt-0.5">-</b>
             </div> -->
+            </div>
           </div>
         </div>
 
         <div
           class="flex items-center gap-1.5 bg-black/5 px-5 py-2 border-t border-theme-border overflow-x-auto whitespace-nowrap scrollbar-hide">
-          <button
-            class="tf-btn px-2.5 py-1 text-[11px] font-bold bg-transparent text-theme-text opacity-50 border border-transparent rounded hover:bg-theme-border/50 hover:opacity-100 transition-all"
-            onclick="setTF('1m')">
-            1분
-          </button>
-          <button
-            class="tf-btn px-2.5 py-1 text-[11px] font-bold bg-transparent text-theme-text opacity-50 border border-transparent rounded hover:bg-theme-border/50 hover:opacity-100 transition-all"
-            onclick="setTF('5m')">
-            5분
-          </button>
-          <button
-            class="tf-btn px-2.5 py-1 text-[11px] font-bold bg-transparent text-theme-text opacity-50 border border-transparent rounded hover:bg-theme-border/50 hover:opacity-100 transition-all"
-            onclick="setTF('15m')">
-            15분
-          </button>
-          <button
-            class="tf-btn px-2.5 py-1 text-[11px] font-bold bg-transparent text-theme-text opacity-50 border border-transparent rounded hover:bg-theme-border/50 hover:opacity-100 transition-all"
-            onclick="setTF('1h')">
-            1시간
-          </button>
-          <button
-            class="tf-btn px-2.5 py-1 text-[11px] font-bold bg-transparent text-theme-text opacity-50 border border-transparent rounded hover:bg-theme-border/50 hover:opacity-100 transition-all"
-            onclick="setTF('4h')">
-            4시간
-          </button>
-          <button
-            class="tf-btn active px-2.5 py-1 text-[11px] font-bold bg-transparent text-theme-text opacity-50 border border-transparent rounded hover:bg-theme-border/50 hover:opacity-100 transition-all"
-            onclick="setTF('1d')">
-            1D
-          </button>
-          <button
-            class="tf-btn px-2.5 py-1 text-[11px] font-bold bg-transparent text-theme-text opacity-50 border border-transparent rounded hover:bg-theme-border/50 hover:opacity-100 transition-all"
-            onclick="setTF('1w')">
-            1W
-          </button>
-          <button
-            class="tf-btn px-2.5 py-1 text-[11px] font-bold bg-transparent text-theme-text opacity-50 border border-transparent rounded hover:bg-theme-border/50 hover:opacity-100 transition-all"
-            onclick="setTF('1M')">
-            1달
-          </button>
+          <div id="tf-container" class="flex items-center gap-1.5"></div>
 
-          <label class="flex items-center gap-1.5 ml-auto mr-2 cursor-pointer group">
-            <input type="checkbox" id="toggle-countdown" class="hidden" checked
-              onchange="toggleCountdown(this.checked)" />
-            <div
-              class="w-6 h-3.5 bg-theme-border rounded-full relative transition-colors duration-300 peer-checked:bg-theme-accent group-hover:brightness-110">
-              <div id="countdown-knob"
-                class="absolute left-[2px] top-[2px] w-2.5 h-2.5 bg-white rounded-full transition-transform duration-300 transform translate-x-[10px]">
+          <div class="flex items-center gap-1.5 ml-auto">
+            <label class="flex items-center gap-1.5 mr-2 cursor-pointer group">
+              <input type="checkbox" id="toggle-countdown" class="hidden" checked
+                onchange="toggleCountdown(this.checked)" />
+              <div
+                class="w-6 h-3.5 bg-theme-border rounded-full relative transition-colors duration-300 peer-checked:bg-theme-accent group-hover:brightness-110">
+                <div id="countdown-knob"
+                  class="absolute left-[2px] top-[2px] w-2.5 h-2.5 bg-white rounded-full transition-transform duration-300 transform translate-x-[10px]">
+                </div>
               </div>
-            </div>
-            <span
-              class="text-[10px] font-bold opacity-50 group-hover:opacity-100 transition-opacity text-theme-text uppercase tracking-wider">Countdown</span>
-          </label>
+              <span
+                class="text-[10px] font-bold opacity-50  transition-opacity text-theme-text uppercase tracking-wider">Countdown</span>
+            </label>
 
-          <button
-            class="reset-btn px-3 py-1 text-[11px] font-bold text-theme-down border border-theme-down/30 rounded ml-auto hover:bg-theme-down/10 transition-colors shadow-sm"
-            onclick="resetChartScale()">
-            🔄 스케일 리셋
-          </button>
+            <button
+              class="reset-btn px-3 py-1 text-[11px] font-bold text-theme-down border border-theme-down rounded hover:bg-theme-down/10 transition-colors shadow-sm"
+              onclick="resetChartScale()">
+              차트 스케일 리셋
+            </button>
+          </div>
         </div>
       </header>
 
       <div id="chart-container"
         class="flex-1 relative overflow-hidden m-[15px] w-[calc(100%-30px)] border border-theme-border rounded-lg bg-theme-panel shadow-[inset_0_0_15px_rgba(0,0,0,0.15)]">
         <div id="chart-loading-modal"
-          class="absolute inset-0 z-[1000] hidden flex flex-col justify-center items-center bg-theme-bg/80 backdrop-blur-[4px] text-theme-text transition-opacity duration-200">
+          class="absolute z-[200] inset-0 hidden flex flex-col justify-center items-center bg-transparent backdrop-blur-[2px] text-theme-text transition-opacity duration-100">
           <div class="chart-spinner"></div>
           <div class="text-[10px] opacity-60 mt-3 font-black tracking-[0.2em] uppercase">
             Loading Chart
           </div>
         </div>
+        <div id="ohlc-legend"
+          class="absolute top-2 left-2 z-[50] font-mono text-[13px] flex items-center px-2 gap-2 bg-black/5 rounded pointer-events-none">
+          <span class="opacity-50 text-xs">Hover on chart to see OHLC...</span>
+        </div>
       </div>
 
       <div
-        class="hidden flex-col gap-6 p-7 bg-theme-panel border border-theme-border rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.2)] w-[55%] min-w-[600px] mx-auto mb-6 mt-2"
+        class="hidden flex-col gap-4 p-4 bg-theme-panel border border-theme-border rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.2)] w-[55%] min-w-[600px] mx-auto mb-6 mt-2"
         id="sim-controls">
         <div
           class="relative flex p-1.5 bg-theme-bg/80 border border-theme-border rounded-xl overflow-hidden shadow-inner">
@@ -368,29 +422,6 @@
       </div>
     </div>
   </div>
-
-  <div id="mobile-chart-overlay"
-    class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden opacity-0 transition-opacity duration-300"
-    onclick="closeMobileChart()">
-    <div id="mobile-chart-panel"
-      class="absolute bottom-0 right-0 w-[88%] h-[92%] bg-theme-panel rounded-t-3xl shadow-[0_-10px_10px_rgba(0,0,0,0.1)] translate-y-full transition-transform duration-300 ease-out flex flex-col"
-      onclick="event.stopPropagation()">
-      <div class="w-full flex justify-center py-3" onclick="closeMobileChart()">
-        <div class="w-12 h-1.5 bg-theme-border/50 rounded-full"></div>
-      </div>
-      <div id="mobile-chart-content" class="flex-1 flex flex-col overflow-hidden"></div>
-    </div>
-  </div>
-
-  <script src="/static/_config.js"></script>
-  <script src="/static/ui_control.js"></script>
-  <script src="/static/chart_utils.js"></script>
-  <script src="/static/api.js"></script>
-  <script src="/static/stream.js"></script>
-  <script src="/static/streamEach.js"></script>
-  <script src="/static/sim_engine.js"></script>
-  <script src="/static/table.js"></script>
-  <script src="/static/_main.js"></script>
 </body>
 
 </html>

@@ -1,5 +1,5 @@
-// --- 🎮 시뮬레이터 수학 & 로직 ---
 // sim_engine.js
+// --- 🎮 시뮬레이터 수학 & 로직 ---
 function changeDir(d) {
     const bodyInput = document.getElementById('input-body');
     if (curDir === 'bull') bullBody = bodyInput.value;

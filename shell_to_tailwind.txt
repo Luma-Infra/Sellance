@@ -1,0 +1,2 @@
+# 결과물을 min.css로 만들고 이걸 index.html에 연결하면 됩니다.
+npx tailwindcss -i ./static/z_style.css -o ./static/z_style.min.css --minify

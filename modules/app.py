@@ -1,17 +1,19 @@
 # app.py
-from fastapi import FastAPI, Request
+from modules.api_manager import get_cached_data
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request
+from datetime import datetime
 from pathlib import Path
-from modules.api_manager import get_cached_data
-import os
-import threading
 import webbrowser
-import requests  # ⭐️ 추가됨!
-import config    # ⭐️ 추가됨!
+import threading
+import requests
+import pytz
+import time
 import sys
 import io
+import os
 
 # 윈도우 터미널 인코딩 문제를 해결하기 위해 표준 출력을 utf-8로 강제 설정
 sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
@@ -77,7 +79,7 @@ def get_coin_info(asset: str):
         # api_manager.py의 캐시 데이터를 가져옵니다 (force=False 이므로 API 새로 안 찌름)
         cached_data, _ = get_cached_data(force_reload=False)
         
-        # 캐시된 400개 리스트 중에서 내가 클릭한 코인을 찾습니다
+        # 캐시된 600개 리스트 중에서 내가 클릭한 코인을 찾습니다
         for coin in cached_data:
             if coin["Symbol"] == asset or coin["DisplayTicker"] == asset:
                 return {
@@ -125,14 +127,30 @@ def get_proxy_candles(exchange: str, symbol: str, interval: str, limit: int = 20
 
 def open_browser():
     webbrowser.open("http://127.0.0.1:8000")
+    
+def auto_reset_scheduler():
+    while True:
+        kst = pytz.timezone('Asia/Seoul')
+        now_kst = datetime.now(kst)
+        
+        # 9시 0분 0초 ~ 30초 사이에만 한 번 트리거
+        if now_kst.hour == 9 and now_kst.minute == 0 and now_kst.second < 30:
+            print("⏰ 스케줄러: 9시 정각입니다. 캐시를 갱신합니다.")
+            get_cached_data(force_reload=True)
+            time.sleep(40) # 중복 실행 방지용 40초 휴식
+        
+        time.sleep(10) # 10초마다 시계 확인    
 
 @app.on_event("startup")
 def on_startup():
+    # ⭐️ 9시 정각 감시 스레드 시작
+    threading.Thread(target=auto_reset_scheduler, daemon=True).start()
+    
     # ⭐️ 데이터 긁어오기 (이건 배포든 로컬이든 필수!)
     threading.Thread(target=get_cached_data, args=(True,)).start()
     
     # 🚀 로컬(127.0.0.1) 환경이고, 아직 브라우저 안 열었을 때만 실행
-    # Railway 같은 곳에서는 이 환경변수가 없으므로 브라우저를 열지 않습니다.
+    # Railway 같은 곳에서는 이 환경변수가 없으므로 브라우저를 열지 않는다는 소문이 있네요
     if not os.environ.get("RAILWAY_STATIC_URL") and not os.environ.get("BROWSER_OPENED"):
         threading.Timer(1.5, open_browser).start()
         os.environ["BROWSER_OPENED"] = "1"

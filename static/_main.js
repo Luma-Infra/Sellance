@@ -1,17 +1,51 @@
 // _main.js
+// 🚀 엔진 시동 파트
+document.addEventListener("DOMContentLoaded", async () => {
+  console.log("🏁 대시보드 엔진 가동 시작...");
 
-// --- 🚀 초기화 (Init) ---
-window.onload = () => {
-  initChart();
-  initMeasureEvents();
-  initInfiniteScroll(); // 🚀 무한 스크롤 센서 가동!
-  initSniperSocket(); // 🚀 스나이퍼 센서 가동
+  try {
+    // 1️⃣ [데이터 로드] 마켓 구성 정보 + 실제 테이블 장부를 '순서대로' 가져온다
+    if (typeof loadSymbols === "function") {
+      await loadSymbols(); // 코인 맵핑 정보 로드
+      console.log("✅ 1-A. 마켓 맵 로드 완료");
+    }
 
-  if (typeof startGlobalMarketRadar === "function") startGlobalMarketRadar();
-  if (typeof loadSymbols === "function") loadSymbols();
-  // if (typeof selectSymbol === "function") selectSymbol("BTC");
+    if (typeof loadTableData === "function") {
+      // 🚨 핵심: 실시간 시세가 기록될 '진짜 장부'가 채워질 때까지 기다립니다.
+      await loadTableData();
+      console.log("✅ 1-B. 실시간 시세 장부(currentTableData) 입고 완료");
+    }
 
-  // 슬라이더 이벤트 바인딩
+    // 2️⃣ [엔진 준비] 이제 장부가 확실히 있으니 차트를 그린다
+    if (window.currentTableData && window.currentTableData.length > 0) {
+      initChart();
+      initMeasureEvents();
+      initInfiniteScroll();
+      console.log("✅ 2. 차트 및 인터페이스 준비 완료");
+
+      // 3️⃣ [소켓 점화] 모든 준비가 끝났을 때 비로소 소켓을 연결!
+      // (장부가 꽉 차 있어서 켜지자마자 바로 구독 성공함)
+      initSniperSocket();
+      if (typeof startBinanceMarketRadar === "function") startBinanceMarketRadar();
+      if (typeof startUpbitMarketRadar === "function") startUpbitMarketRadar();
+      console.log("✅ 3. 실시간 소켓 연결 성공!");
+    } else {
+      throw new Error("장부 데이터가 비어있습니다.");
+    }
+
+    // 4️⃣ [UI 이벤트] 슬라이더 및 버튼 반응 설정
+    setupSliderEvents();
+    setupButtonEvents();
+
+  } catch (err) {
+    console.error("🚨 시동 실패:", err);
+    // 보험: 2초 뒤 자동 새로고침 시도
+    // setTimeout(() => location.reload(), 2000);
+  }
+});
+
+// 💡 슬라이더 로직 (가독성을 위해 분리)
+function setupSliderEvents() {
   ["body", "top", "bottom"].forEach((id) => {
     const inputEl = document.getElementById("input-" + id);
     if (inputEl) {
@@ -27,7 +61,10 @@ window.onload = () => {
       };
     }
   });
+}
 
+// 💡 버튼 호버 로직
+function setupButtonEvents() {
   const genBtn = document.getElementById("btn-generate");
   if (genBtn) {
     genBtn.onmouseenter = () => {
@@ -39,7 +76,7 @@ window.onload = () => {
       previewSeries.setData([]);
     };
   }
-};
+}
 
 // ⚙️ 2. 시간 변환 통합 헬퍼 (전역으로 이동!)
 // 이제 initChart와 startRealtimeCandle 양쪽에서 모두 사용 가능합니다.
@@ -49,9 +86,16 @@ const getUnixSeconds = (t) => {
   if (typeof t === "string") return new Date(t).getTime() / 1000;
   return t;
 };
+
 function initChart() {
   const container = document.getElementById("chart-container");
-  if (chart) chart.remove();
+  // 🚀 과거와의 작별 (이게 메모리 아끼는 핵심!)
+  if (chart) {
+    chart.remove(); // 엔진 내부 메모리 해제
+    chart = null;
+    candleSeries = null;
+    countdownPriceLine = null; // 👈 유령 방지
+  }
 
   const isDark = currentTheme === "binance" || currentTheme === "upbit-dark";
   const upColor = currentTheme === "binance" ? "#26a69a" : "#c84a31";
@@ -69,11 +113,11 @@ function initChart() {
         .trim(),
     },
     grid: {
-      vertLines: { color: isDark ? "#2a2e39" : "#f1f1f4" },
-      horzLines: { color: isDark ? "#2a2e39" : "#f1f1f4" },
+      vertLines: { color: isDark ? "#2a2a22" : "#f1f1f11f" },
+      horzLines: { color: isDark ? "#2a2a22" : "#f1f1f11f" },
     },
     timeScale: {
-      borderColor: isDark ? "#2a2e39" : "#d5d6dc",
+      borderColor: isDark ? "#2a2a22" : "#f1f1f11f",
       timeVisible: true,
       secondsVisible: false,
       fixRightEdge: false,
@@ -119,8 +163,10 @@ function initChart() {
       },
     },
     rightPriceScale: {
+      autoScale: true,
       visible: true,
-      borderColor: isDark ? "#2a2e39" : "#d5d6dc",
+      entireTextOnly: false,
+      borderColor: isDark ? "#2a2a22" : "#f1f1f11f",
       mode: isLogMode ? 1 : 0,
     },
     crosshair: {
@@ -129,10 +175,17 @@ function initChart() {
   });
 
   // 🚀 1. 공통 커스텀 가격 포맷 설정 (함수 추가 없이 기존 formatSmartPrice 재활용!)
+  const p = currentTableData.find(c => c.Symbol === currentAsset)?.precision ?? 2;
+  const safeMinMove = Number((1 / Math.pow(10, p)).toFixed(p));
   const customPriceFormat = {
     type: "custom",
-    minMove: 0.00000001, // 동전주(최대 소수점 8자리)까지 눈금을 허용하도록 족쇄 해제
-    formatter: (price) => formatSmartPrice(price), // Y축 숫자를 그릴 때마다 기존 함수 통과
+    precision: p,
+    minMove: safeMinMove,
+    formatter: (price) => {
+      if (typeof price !== 'number') return "";
+      // 🚨 여기서 한 번 더 p값으로 강제 컷트!
+      return formatSmartPrice(price, p);
+    },
   };
 
   candleSeries = chart.addCandlestickSeries({
@@ -143,6 +196,7 @@ function initChart() {
     wickUpColor: upColor,
     wickDownColor: downColor,
     priceFormat: customPriceFormat, // 👈 여기 추가
+    lastValueVisible: false,
   });
 
   previewSeries = chart.addCandlestickSeries({
@@ -195,10 +249,7 @@ function initChart() {
   }
 
   // 측정 도구 세팅
-  setTimeout(setupMeasureTool, 10);
-
-  // 🚀 [여기에 추가!!!] 차트 그려진 직후에 카운트다운 DOM 세팅!
-  setTimeout(setupCountdownDOM, 10);
+  setTimeout(setupMeasureTool, 50);
 
   // 리사이즈 옵저버 디바운스
   if (window.chartResizeObserver) window.chartResizeObserver.disconnect();
@@ -211,13 +262,13 @@ function initChart() {
     // 2. 0달러 방지 (크기가 0일 땐 패스)
     if (!width || !height) return;
 
-    // 3. 디바운스 (너무 자주 그리면 렉 걸리니까 0.05초 대기)
+    // 3. 디바운스 (너무 자주 그리면 렉 걸리니까 잠시 대기)
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
       if (chart) {
         chart.resize(width, height);
         // 🚀 리사이즈 직후 차트 범위를 다시 맞춰야 안 찌그러짐
-        chart.timeScale().fitContent();
+        // chart.timeScale().fitContent();
         // console.log(`📏 리사이즈 완료: ${width}x${height}`);
       }
 
@@ -228,7 +279,7 @@ function initChart() {
           closeMobileChart();
         }
       }
-    }, 100);
+    }, 50);
   });
   // 🎯 차트 컨테이너 감시 시작!
   const chartContainer = document.getElementById("chart-container");
@@ -238,9 +289,7 @@ function initChart() {
 }
 
 function setTF(tf) {
-  const isSimMode = document
-    .getElementById("tab-btn-sim")
-    .classList.contains("active");
+  const isSimMode = document.getElementById("tab-btn-sim").classList.contains("active");
   if (isSimMode) {
     Swal.fire({
       title: "초기화 경고!",
@@ -265,19 +314,19 @@ function executeSetTF(tf) {
   currentTF = tf;
   document.querySelectorAll(".tf-btn").forEach((b) => {
     const onClickAttr = b.getAttribute("onclick") || "";
-    // 1. 현재 버튼이 클릭된 타임프레임(tf)과 일치하는지 확인
+    // 현재 버튼이 클릭된 타임프레임(tf)과 일치하는지 확인
     const isMatch = onClickAttr.includes(`'${tf}'`);
 
-    // 2. active 클래스 토글
+    // active 클래스 토글
     b.classList.toggle("active", isMatch);
 
-    // 3. 투명도 조절 (Tailwind 기준) - 반드시 루프 안에서 실행!
+    // 투명도 조절 (Tailwind 기준) - 반드시 루프 안에서 실행!
     b.classList.toggle("opacity-100", isMatch);
     b.classList.toggle("opacity-50", !isMatch);
   });
 
   // 4. 차트 데이터 갱신 함수 호출
-  if (typeof fetchHistory === "function") fetchHistory();
+  if (typeof fetchHistory === "function") fetchHistory(currentAsset);
 }
 
 function toggleLogScale() {
@@ -432,115 +481,124 @@ function toggleCountdown(isChecked) {
   }
 }
 
-// _main.js 빈 곳에 추가 (기존 updateCountdownPosition이 있다면 덮어쓰기)
 function updateRealtimeCountdown(serverMs) {
-  if (
-    !showCountdown ||
-    !countdownOverlay ||
-    !candleSeries ||
-    mainData.length === 0
-  ) {
-    if (countdownOverlay) countdownOverlay.style.opacity = "0";
+  // 1. 기본 방어 (차트 시리즈 없으면 삭제)
+  if (!candleSeries || mainData.length === 0) {
+    if (countdownPriceLine) {
+      candleSeries.removePriceLine(countdownPriceLine);
+      countdownPriceLine = null;
+    }
     return;
   }
 
-  // 1. 서버 시간 기반으로 남은 시간 텍스트 계산
-  const timeText = calculateTimeRemaining(currentTF, serverMs);
-  if (!timeText) {
-    countdownOverlay.style.opacity = "0";
-    return;
+  // 2. 보간 엔진 가동 조건 (serverMs가 유효할 때만)
+  if (serverMs && serverMs > 0) {
+    if (serverMs !== lastServerMs) {
+      lastServerMs = serverMs;
+      localTimeAtUpdate = performance.now();
+    }
+
+    // 🚀 보간 계산
+    const interpolatedMs = lastServerMs + (performance.now() - localTimeAtUpdate);
+
+    // 🎯 마감 시간 체크 로직 추가
+    const secondsPerBar = tfSec[currentTF] || 60;
+    const lastCandleTime = mainData[mainData.length - 1].time; // Unix Sec
+    const nextBarTimeMs = (lastCandleTime + secondsPerBar) * 1000; // MS 변환
+
+    if (interpolatedMs >= nextBarTimeMs) {
+      // 🚨 시간이 이미 지났다? 서버 신호 올 때까지 "Wait..."으로 강제 고정!
+      displayTime = "00:00";
+    } else {
+      // 아직 시간 남았으면 정상 카운트다운
+      displayTime = calculateTimeRemaining(currentTF, interpolatedMs);
+    }
   }
 
-  // 2. 현재 봉 상태 가져오기
+  // 3. 봉 색상 및 상태 파악
   const lastCandle = mainData[mainData.length - 1];
-  const { open, close } = lastCandle;
+  const isDown = lastCandle.close < lastCandle.open;
+  const style = getComputedStyle(document.body);
+  const varName = isDown ? '--down' : '--up';
+  const rawColor = style.getPropertyValue(varName).trim() || (isDown ? '#ef5350' : '#26a69a');
 
-  // 3. 색상 및 위치 계산
-  const bgCol = close < open ? "var(--down)" : "var(--up)";
-  const yCoordinate = candleSeries.priceToCoordinate(close);
+  // 4. 차트 레이블 옵션 (보간된 displayTime 적용)
+  const lineOptions = {
+    price: lastCandle.close,
+    color: 'transparent',
+    lineWidth: 0,
+    axisLabelVisible: true,
+    title: showCountdown ? `${displayTime} ` : "", // 🚀 Wait... 또는 05:20
+    axisLabelColor: rawColor,
+    axisLabelTextColor: '#ffffff',
+  };
 
-  // 4. DOM 업데이트 (단 한 번의 Reflow만 발생)
-  if (yCoordinate !== null) {
-    countdownOverlay.innerText = timeText;
-    countdownOverlay.style.backgroundColor = bgCol;
-    countdownOverlay.style.color = "white";
-    countdownOverlay.style.borderRadius = "2px";
-    countdownOverlay.style.transform = `translateY(${yCoordinate + 15}px)`;
-    countdownOverlay.style.opacity = "1";
+  // 5. 생성 및 갱신
+  if (!countdownPriceLine) {
+    countdownPriceLine = candleSeries.createPriceLine(lineOptions);
   } else {
-    countdownOverlay.style.opacity = "0";
+    countdownPriceLine.applyOptions(lineOptions);
   }
 }
 
-function setupCountdownDOM() {
-  const container = document.getElementById("chart-container");
-  if (!container) return;
-
-  // 🚀 [개선 포인트] container 내부뿐만 아니라, 이사 간 부모(table) 전체에서 가격축(td:nth-child(3))을 찾습니다.
-  const priceScaleTd = container.closest('table')?.querySelector("tr:nth-child(1) td:nth-child(3)") 
-                     || container.querySelector("div.tv-lightweight-charts table tr:nth-child(1) td:nth-child(3)");
-
-  if (!priceScaleTd) {
-    // 차트가 아직 안 그려졌거나 렌더링 전이면 재시도
-    setTimeout(setupCountdownDOM, 100);
-    return;
+// 실시간 카운트다운 보간 
+setInterval(() => {
+  if (typeof updateRealtimeCountdown === "function" && lastServerMs > 0) {
+    updateRealtimeCountdown(lastServerMs);
   }
+}, 50);
 
-  // 🚀 [중요] 기존에 그려진 잔상이 있다면 제거하고 새로 붙입니다 (중복 방지)
-  if (countdownOverlay && countdownOverlay.parentElement && countdownOverlay.parentElement !== priceScaleTd) {
-      countdownOverlay.parentElement.removeChild(countdownOverlay);
+// 🚀 [특수수사대] 정렬 순서 박제형 방향키 엔진
+document.addEventListener("keydown", (e) => {
+  if (document.activeElement.tagName === "INPUT") return;
+
+  const up = e.key === "ArrowUp";
+  const down = e.key === "ArrowDown";
+
+  if (up || down) {
+    e.preventDefault();
+
+    // 1. [수정] 원본 데이터 말고, 현재 화면에 정렬되어 있는 "진짜 순서"를 가져옵니다.
+    // renderTable() 할 때 사용하는 그 최종 배열이어야 합니다.
+    const sortedList = currentTableData; // 이미 sortTable()에서 정렬된 상태의 배열
+    if (!sortedList || sortedList.length === 0) return;
+
+    // 2. 현재 정렬된 순서에서 나의 위치(인덱스) 찾기
+    let currentIndex = sortedList.findIndex(item => item.Symbol === currentSelectedSymbol);
+
+    // 3. [수정] 무한 루프 금지! 위아래 "제한" 걸기
+    let nextIndex;
+    if (up) {
+      // 맨 위면 더 이상 안 올라감 (제한)
+      nextIndex = currentIndex <= 0 ? 0 : currentIndex - 1;
+    } else {
+      // 맨 아래면 더 이상 안 내려감 (제한)
+      nextIndex = currentIndex >= sortedList.length - 1 ? sortedList.length - 1 : currentIndex + 1;
+    }
+
+    // 4. 인덱스가 변했을 때만 실행 (똑같은 자리면 리소스 아끼기)
+    if (nextIndex === currentIndex) return;
+
+    const nextCoin = sortedList[nextIndex];
+    if (nextCoin) {
+      // 5. 렌더링 리미트 보정 (정렬된 순서대로 보여주기 위해 필요)
+      if (nextIndex >= currentRenderLimit) {
+        currentRenderLimit = nextIndex + 1;
+        renderTable();
+      }
+
+      // 6. 실행 및 하이라이트
+      currentSelectedSymbol = nextCoin.Symbol;
+      selectSymbol(nextCoin.Symbol); // 👈 여기서 이미 마켓 판별 로직 타니까 안전!
+
+      // 7. 스크롤 추적 (즉시 반응을 위해 behavior: instant 추천)
+      setTimeout(() => {
+        const targetRow = document.querySelector(`#table-body tr[data-sym="${nextCoin.Symbol}"]`);
+        if (targetRow) {
+          targetRow.scrollIntoView({ block: "nearest", behavior: "instant" });
+          applySelectedHighlight();
+        }
+      }, 0);
+    }
   }
-
-  priceScaleTd.style.position = "relative";
-
-  if (!countdownOverlay) {
-    countdownOverlay = document.createElement("div");
-  }
-
-  // 🚀 [핵심] 스타일 재설정 (누님의 기존 스타일 유지)
-  countdownOverlay.style.cssText = `
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    text-align: center;
-    color: white;
-    background-color: var(--up);
-    padding: 2px 0;
-    font-size: 11px; /* 🚀 모바일 가독성을 위해 살짝 조절 가능 */
-    font-family: monospace;
-    font-weight: bold;
-    z-index: 10000;
-    pointer-events: none;
-    opacity: 0;
-    transition: transform 0.1s ease-out;
-    font-variant-numeric: tabular-nums;
-    border-radius: 4px;
-  `;
-
-  // 🚀 최종적으로 현재 활성화된 가격 축에 찰싹 붙이기!
-  priceScaleTd.appendChild(countdownOverlay);
-}
-
-// // 🚀 [실시간 브라우저 감시관] - initChart 밖에 두세요!
-// window.addEventListener('resize', () => {
-//   const width = window.innerWidth; // 창 전체 너비 측정
-//   const overlay = document.getElementById("mobile-chart-overlay");
-//   const isOverlayOpen = overlay && !overlay.classList.contains("hidden");
-
-//   // 1. 📱 PC -> 모바일 자동 전환
-//   if (width < SCREEN_WIDTH && !isOverlayOpen) {
-//     // 현재 차트를 보고 있는 상태일 때만 자동으로 오버레이 띄우기
-//     const btnChart = document.getElementById("mob-btn-chart");
-//     if (btnChart && btnChart.classList.contains("text-theme-accent")) {
-//       console.log("📱 창 크기 감지: 모바일 모드 자동 전환");
-//       showMobileChart();
-//     }
-//   }
-
-//   // 2. 🖥️ 모바일 -> PC 자동 복구
-//   if (width >= SCREEN_WIDTH && isOverlayOpen) {
-//     console.log("🖥️ 창 크기 감지: PC 레이아웃 자동 복구");
-//     closeMobileChart();
-//   }
-// });
+});

@@ -8,11 +8,8 @@ C:.
 |   context_for_ai.txt
 |   LICENSE
 |   mapping.json
-|   package-lock.json
-|   package.json
-|   prompt_to_ai.txt
+|   promptAI.txt
 |   README.md
-|   readme_by_ai.txt
 |   requirements.txt
 |   start.bat
 |   wrangler.jsonc
@@ -28,610 +25,6 @@ C:.
 |           api_manager.cpython-313.pyc
 |           app.cpython-313.pyc
 |           
-|   |   .package-lock.json
-|   |   
-|   +---.bin
-|   |       jiti
-|   |       jiti.cmd
-|   |       jiti.ps1
-|   |       tailwindcss
-|   |       tailwindcss.cmd
-|   |       tailwindcss.ps1
-|   |       
-|   +---@jridgewell
-|   |   +---gen-mapping
-|   |   |   |   LICENSE
-|   |   |   |   package.json
-|   |   |   |   README.md
-|   |   |   |   
-|   |   |   +---dist
-|   |   |   |   |   gen-mapping.mjs
-|   |   |   |   |   gen-mapping.mjs.map
-|   |   |   |   |   gen-mapping.umd.js
-|   |   |   |   |   gen-mapping.umd.js.map
-|   |   |   |   |   
-|   |   |   |   \---types
-|   |   |   |           gen-mapping.d.ts
-|   |   |   |           set-array.d.ts
-|   |   |   |           sourcemap-segment.d.ts
-|   |   |   |           types.d.ts
-|   |   |   |           
-|   |   |   +---src
-|   |   |   |       gen-mapping.ts
-|   |   |   |       set-array.ts
-|   |   |   |       sourcemap-segment.ts
-|   |   |   |       types.ts
-|   |   |   |       
-|   |   |   \---types
-|   |   |           gen-mapping.d.cts
-|   |   |           gen-mapping.d.cts.map
-|   |   |           gen-mapping.d.mts
-|   |   |           gen-mapping.d.mts.map
-|   |   |           set-array.d.cts
-|   |   |           set-array.d.cts.map
-|   |   |           set-array.d.mts
-|   |   |           set-array.d.mts.map
-|   |   |           sourcemap-segment.d.cts
-|   |   |           sourcemap-segment.d.cts.map
-|   |   |           sourcemap-segment.d.mts
-|   |   |           sourcemap-segment.d.mts.map
-|   |   |           types.d.cts
-|   |   |           types.d.cts.map
-|   |   |           types.d.mts
-|   |   |           types.d.mts.map
-|   |   |           
-|   |   +---remapping
-|   |   |   |   LICENSE
-|   |   |   |   package.json
-|   |   |   |   README.md
-|   |   |   |   
-|   |   |   +---dist
-|   |   |   |       remapping.mjs
-|   |   |   |       remapping.mjs.map
-|   |   |   |       remapping.umd.js
-|   |   |   |       remapping.umd.js.map
-|   |   |   |       
-|   |   |   +---src
-|   |   |   |       build-source-map-tree.ts
-|   |   |   |       remapping.ts
-|   |   |   |       source-map-tree.ts
-|   |   |   |       source-map.ts
-|   |   |   |       types.ts
-|   |   |   |       
-|   |   |   \---types
-|   |   |           build-source-map-tree.d.cts
-|   |   |           build-source-map-tree.d.cts.map
-|   |   |           build-source-map-tree.d.mts
-|   |   |           build-source-map-tree.d.mts.map
-|   |   |           remapping.d.cts
-|   |   |           remapping.d.cts.map
-|   |   |           remapping.d.mts
-|   |   |           remapping.d.mts.map
-|   |   |           source-map-tree.d.cts
-|   |   |           source-map-tree.d.cts.map
-|   |   |           source-map-tree.d.mts
-|   |   |           source-map-tree.d.mts.map
-|   |   |           source-map.d.cts
-|   |   |           source-map.d.cts.map
-|   |   |           source-map.d.mts
-|   |   |           source-map.d.mts.map
-|   |   |           types.d.cts
-|   |   |           types.d.cts.map
-|   |   |           types.d.mts
-|   |   |           types.d.mts.map
-|   |   |           
-|   |   +---resolve-uri
-|   |   |   |   LICENSE
-|   |   |   |   package.json
-|   |   |   |   README.md
-|   |   |   |   
-|   |   |   \---dist
-|   |   |       |   resolve-uri.mjs
-|   |   |       |   resolve-uri.mjs.map
-|   |   |       |   resolve-uri.umd.js
-|   |   |       |   resolve-uri.umd.js.map
-|   |   |       |   
-|   |   |       \---types
-|   |   |               resolve-uri.d.ts
-|   |   |               
-|   |   +---sourcemap-codec
-|   |   |   |   LICENSE
-|   |   |   |   package.json
-|   |   |   |   README.md
-|   |   |   |   
-|   |   |   +---dist
-|   |   |   |       sourcemap-codec.mjs
-|   |   |   |       sourcemap-codec.mjs.map
-|   |   |   |       sourcemap-codec.umd.js
-|   |   |   |       sourcemap-codec.umd.js.map
-|   |   |   |       
-|   |   |   +---src
-|   |   |   |       scopes.ts
-|   |   |   |       sourcemap-codec.ts
-|   |   |   |       strings.ts
-|   |   |   |       vlq.ts
-|   |   |   |       
-|   |   |   \---types
-|   |   |           scopes.d.cts
-|   |   |           scopes.d.cts.map
-|   |   |           scopes.d.mts
-|   |   |           scopes.d.mts.map
-|   |   |           sourcemap-codec.d.cts
-|   |   |           sourcemap-codec.d.cts.map
-|   |   |           sourcemap-codec.d.mts
-|   |   |           sourcemap-codec.d.mts.map
-|   |   |           strings.d.cts
-|   |   |           strings.d.cts.map
-|   |   |           strings.d.mts
-|   |   |           strings.d.mts.map
-|   |   |           vlq.d.cts
-|   |   |           vlq.d.cts.map
-|   |   |           vlq.d.mts
-|   |   |           vlq.d.mts.map
-|   |   |           
-|   |   \---trace-mapping
-|   |       |   LICENSE
-|   |       |   package.json
-|   |       |   README.md
-|   |       |   
-|   |       +---dist
-|   |       |       trace-mapping.mjs
-|   |       |       trace-mapping.mjs.map
-|   |       |       trace-mapping.umd.js
-|   |       |       trace-mapping.umd.js.map
-|   |       |       
-|   |       +---src
-|   |       |       binary-search.ts
-|   |       |       by-source.ts
-|   |       |       flatten-map.ts
-|   |       |       resolve.ts
-|   |       |       sort.ts
-|   |       |       sourcemap-segment.ts
-|   |       |       strip-filename.ts
-|   |       |       trace-mapping.ts
-|   |       |       types.ts
-|   |       |       
-|   |       \---types
-|   |               binary-search.d.cts
-|   |               binary-search.d.cts.map
-|   |               binary-search.d.mts
-|   |               binary-search.d.mts.map
-|   |               by-source.d.cts
-|   |               by-source.d.cts.map
-|   |               by-source.d.mts
-|   |               by-source.d.mts.map
-|   |               flatten-map.d.cts
-|   |               flatten-map.d.cts.map
-|   |               flatten-map.d.mts
-|   |               flatten-map.d.mts.map
-|   |               resolve.d.cts
-|   |               resolve.d.cts.map
-|   |               resolve.d.mts
-|   |               resolve.d.mts.map
-|   |               sort.d.cts
-|   |               sort.d.cts.map
-|   |               sort.d.mts
-|   |               sort.d.mts.map
-|   |               sourcemap-segment.d.cts
-|   |               sourcemap-segment.d.cts.map
-|   |               sourcemap-segment.d.mts
-|   |               sourcemap-segment.d.mts.map
-|   |               strip-filename.d.cts
-|   |               strip-filename.d.cts.map
-|   |               strip-filename.d.mts
-|   |               strip-filename.d.mts.map
-|   |               trace-mapping.d.cts
-|   |               trace-mapping.d.cts.map
-|   |               trace-mapping.d.mts
-|   |               trace-mapping.d.mts.map
-|   |               types.d.cts
-|   |               types.d.cts.map
-|   |               types.d.mts
-|   |               types.d.mts.map
-|   |               
-|   +---@parcel
-|   |   +---watcher
-|   |   |   |   binding.gyp
-|   |   |   |   index.d.ts
-|   |   |   |   index.js
-|   |   |   |   index.js.flow
-|   |   |   |   LICENSE
-|   |   |   |   package.json
-|   |   |   |   README.md
-|   |   |   |   wrapper.js
-|   |   |   |   
-|   |   |   +---scripts
-|   |   |   |       build-from-source.js
-|   |   |   |       
-|   |   |   \---src
-|   |   |       |   Backend.cc
-|   |   |       |   Backend.hh
-|   |   |       |   binding.cc
-|   |   |       |   Debounce.cc
-|   |   |       |   Debounce.hh
-|   |   |       |   DirTree.cc
-|   |   |       |   DirTree.hh
-|   |   |       |   Event.hh
-|   |   |       |   Glob.cc
-|   |   |       |   Glob.hh
-|   |   |       |   PromiseRunner.hh
-|   |   |       |   Signal.hh
-|   |   |       |   Watcher.cc
-|   |   |       |   Watcher.hh
-|   |   |       |   
-|   |   |       +---kqueue
-|   |   |       |       KqueueBackend.cc
-|   |   |       |       KqueueBackend.hh
-|   |   |       |       
-|   |   |       +---linux
-|   |   |       |       InotifyBackend.cc
-|   |   |       |       InotifyBackend.hh
-|   |   |       |       
-|   |   |       +---macos
-|   |   |       |       FSEventsBackend.cc
-|   |   |       |       FSEventsBackend.hh
-|   |   |       |       
-|   |   |       +---shared
-|   |   |       |       BruteForceBackend.cc
-|   |   |       |       BruteForceBackend.hh
-|   |   |       |       
-|   |   |       +---unix
-|   |   |       |       fts.cc
-|   |   |       |       legacy.cc
-|   |   |       |       
-|   |   |       +---wasm
-|   |   |       |       include.h
-|   |   |       |       WasmBackend.cc
-|   |   |       |       WasmBackend.hh
-|   |   |       |       
-|   |   |       +---watchman
-|   |   |       |       BSER.cc
-|   |   |       |       BSER.hh
-|   |   |       |       IPC.hh
-|   |   |       |       WatchmanBackend.cc
-|   |   |       |       WatchmanBackend.hh
-|   |   |       |       
-|   |   |       \---windows
-|   |   |               WindowsBackend.cc
-|   |   |               WindowsBackend.hh
-|   |   |               win_utils.cc
-|   |   |               win_utils.hh
-|   |   |               
-|   |   \---watcher-win32-x64
-|   |           LICENSE
-|   |           package.json
-|   |           README.md
-|   |           watcher.node
-|   |           
-|   +---@tailwindcss
-|   |   +---cli
-|   |   |   |   LICENSE
-|   |   |   |   package.json
-|   |   |   |   README.md
-|   |   |   |   
-|   |   |   \---dist
-|   |   |           index.mjs
-|   |   |           
-|   |   +---node
-|   |   |   |   LICENSE
-|   |   |   |   package.json
-|   |   |   |   README.md
-|   |   |   |   
-|   |   |   \---dist
-|   |   |           esm-cache.loader.d.mts
-|   |   |           esm-cache.loader.mjs
-|   |   |           index.d.mts
-|   |   |           index.d.ts
-|   |   |           index.js
-|   |   |           index.mjs
-|   |   |           require-cache.d.ts
-|   |   |           require-cache.js
-|   |   |           
-|   |   +---oxide
-|   |   |       index.d.ts
-|   |   |       index.js
-|   |   |       LICENSE
-|   |   |       package.json
-|   |   |       
-|   |   \---oxide-win32-x64-msvc
-|   |           LICENSE
-|   |           package.json
-|   |           README.md
-|   |           tailwindcss-oxide.win32-x64-msvc.node
-|   |           
-|   +---detect-libc
-|   |   |   index.d.ts
-|   |   |   LICENSE
-|   |   |   package.json
-|   |   |   README.md
-|   |   |   
-|   |   \---lib
-|   |           detect-libc.js
-|   |           elf.js
-|   |           filesystem.js
-|   |           process.js
-|   |           
-|   +---enhanced-resolve
-|   |   |   LICENSE
-|   |   |   package.json
-|   |   |   README.md
-|   |   |   types.d.ts
-|   |   |   
-|   |   \---lib
-|   |       |   AliasFieldPlugin.js
-|   |       |   AliasPlugin.js
-|   |       |   AliasUtils.js
-|   |       |   AppendPlugin.js
-|   |       |   CachedInputFileSystem.js
-|   |       |   CloneBasenamePlugin.js
-|   |       |   ConditionalPlugin.js
-|   |       |   createInnerContext.js
-|   |       |   DescriptionFilePlugin.js
-|   |       |   DescriptionFileUtils.js
-|   |       |   DirectoryExistsPlugin.js
-|   |       |   ExportsFieldPlugin.js
-|   |       |   ExtensionAliasPlugin.js
-|   |       |   FileExistsPlugin.js
-|   |       |   forEachBail.js
-|   |       |   getInnerRequest.js
-|   |       |   getPaths.js
-|   |       |   ImportsFieldPlugin.js
-|   |       |   index.js
-|   |       |   JoinRequestPartPlugin.js
-|   |       |   JoinRequestPlugin.js
-|   |       |   LogInfoPlugin.js
-|   |       |   MainFieldPlugin.js
-|   |       |   ModulesInHierachicDirectoriesPlugin.js
-|   |       |   ModulesInHierarchicalDirectoriesPlugin.js
-|   |       |   ModulesInRootPlugin.js
-|   |       |   ModulesUtils.js
-|   |       |   NextPlugin.js
-|   |       |   ParsePlugin.js
-|   |       |   PnpPlugin.js
-|   |       |   Resolver.js
-|   |       |   ResolverFactory.js
-|   |       |   RestrictionsPlugin.js
-|   |       |   ResultPlugin.js
-|   |       |   RootsPlugin.js
-|   |       |   SelfReferencePlugin.js
-|   |       |   SymlinkPlugin.js
-|   |       |   SyncAsyncFileSystemDecorator.js
-|   |       |   TryNextPlugin.js
-|   |       |   TsconfigPathsPlugin.js
-|   |       |   UnsafeCachePlugin.js
-|   |       |   UseFilePlugin.js
-|   |       |   
-|   |       \---util
-|   |               entrypoints.js
-|   |               fs.js
-|   |               identifier.js
-|   |               memoize.js
-|   |               module-browser.js
-|   |               path.js
-|   |               process-browser.js
-|   |               strip-json-comments.js
-|   |               
-|   +---graceful-fs
-|   |       clone.js
-|   |       graceful-fs.js
-|   |       legacy-streams.js
-|   |       LICENSE
-|   |       package.json
-|   |       polyfills.js
-|   |       README.md
-|   |       
-|   +---is-extglob
-|   |       index.js
-|   |       LICENSE
-|   |       package.json
-|   |       README.md
-|   |       
-|   +---is-glob
-|   |       index.js
-|   |       LICENSE
-|   |       package.json
-|   |       README.md
-|   |       
-|   +---jiti
-|   |   |   LICENSE
-|   |   |   package.json
-|   |   |   README.md
-|   |   |   
-|   |   +---dist
-|   |   |       babel.cjs
-|   |   |       jiti.cjs
-|   |   |       
-|   |   \---lib
-|   |           jiti-cli.mjs
-|   |           jiti-hooks.mjs
-|   |           jiti-native.mjs
-|   |           jiti-register.d.mts
-|   |           jiti-register.mjs
-|   |           jiti.cjs
-|   |           jiti.d.cts
-|   |           jiti.d.mts
-|   |           jiti.mjs
-|   |           types.d.ts
-|   |           
-|   +---lightningcss
-|   |   |   LICENSE
-|   |   |   package.json
-|   |   |   README.md
-|   |   |   
-|   |   \---node
-|   |           ast.d.ts
-|   |           ast.js.flow
-|   |           browserslistToTargets.js
-|   |           composeVisitors.js
-|   |           flags.js
-|   |           index.d.ts
-|   |           index.js
-|   |           index.js.flow
-|   |           index.mjs
-|   |           targets.d.ts
-|   |           targets.js.flow
-|   |           
-|   +---lightningcss-win32-x64-msvc
-|   |       LICENSE
-|   |       lightningcss.win32-x64-msvc.node
-|   |       package.json
-|   |       README.md
-|   |       
-|   +---magic-string
-|   |   |   LICENSE
-|   |   |   package.json
-|   |   |   README.md
-|   |   |   
-|   |   \---dist
-|   |           magic-string.cjs.d.ts
-|   |           magic-string.cjs.js
-|   |           magic-string.cjs.js.map
-|   |           magic-string.es.d.mts
-|   |           magic-string.es.mjs
-|   |           magic-string.es.mjs.map
-|   |           magic-string.umd.js
-|   |           magic-string.umd.js.map
-|   |           
-|   +---mri
-|   |   |   index.d.ts
-|   |   |   license.md
-|   |   |   package.json
-|   |   |   readme.md
-|   |   |   
-|   |   \---lib
-|   |           index.js
-|   |           index.mjs
-|   |           
-|   +---node-addon-api
-|   |   |   common.gypi
-|   |   |   except.gypi
-|   |   |   index.js
-|   |   |   LICENSE.md
-|   |   |   napi-inl.deprecated.h
-|   |   |   napi-inl.h
-|   |   |   napi.h
-|   |   |   node_addon_api.gyp
-|   |   |   node_api.gyp
-|   |   |   noexcept.gypi
-|   |   |   nothing.c
-|   |   |   package-support.json
-|   |   |   package.json
-|   |   |   README.md
-|   |   |   
-|   |   \---tools
-|   |           check-napi.js
-|   |           clang-format.js
-|   |           conversion.js
-|   |           eslint-format.js
-|   |           README.md
-|   |           
-|   +---picocolors
-|   |       LICENSE
-|   |       package.json
-|   |       picocolors.browser.js
-|   |       picocolors.d.ts
-|   |       picocolors.js
-|   |       README.md
-|   |       types.d.ts
-|   |       
-|   +---picomatch
-|   |   |   index.js
-|   |   |   LICENSE
-|   |   |   package.json
-|   |   |   posix.js
-|   |   |   README.md
-|   |   |   
-|   |   \---lib
-|   |           constants.js
-|   |           parse.js
-|   |           picomatch.js
-|   |           scan.js
-|   |           utils.js
-|   |           
-|   +---source-map-js
-|   |   |   LICENSE
-|   |   |   package.json
-|   |   |   README.md
-|   |   |   source-map.d.ts
-|   |   |   source-map.js
-|   |   |   
-|   |   \---lib
-|   |           array-set.js
-|   |           base64-vlq.js
-|   |           base64.js
-|   |           binary-search.js
-|   |           mapping-list.js
-|   |           quick-sort.js
-|   |           source-map-consumer.d.ts
-|   |           source-map-consumer.js
-|   |           source-map-generator.d.ts
-|   |           source-map-generator.js
-|   |           source-node.d.ts
-|   |           source-node.js
-|   |           util.js
-|   |           
-|   +---tailwindcss
-|   |   |   index.css
-|   |   |   LICENSE
-|   |   |   package.json
-|   |   |   preflight.css
-|   |   |   README.md
-|   |   |   theme.css
-|   |   |   utilities.css
-|   |   |   
-|   |   \---dist
-|   |           chunk-F4544Y4M.mjs
-|   |           chunk-TDNFF6A4.mjs
-|   |           chunk-X4GG3EDV.mjs
-|   |           colors-C__qRT83.d.ts
-|   |           colors.d.mts
-|   |           colors.d.ts
-|   |           colors.js
-|   |           colors.mjs
-|   |           default-theme.d.mts
-|   |           default-theme.d.ts
-|   |           default-theme.js
-|   |           default-theme.mjs
-|   |           flatten-color-palette.d.mts
-|   |           flatten-color-palette.d.ts
-|   |           flatten-color-palette.js
-|   |           flatten-color-palette.mjs
-|   |           lib.d.mts
-|   |           lib.d.ts
-|   |           lib.js
-|   |           lib.mjs
-|   |           plugin.d.mts
-|   |           plugin.d.ts
-|   |           plugin.js
-|   |           plugin.mjs
-|   |           resolve-config-B4yBzhca.d.ts
-|   |           resolve-config-QUZ9b-Gn.d.mts
-|   |           types-CJYAW1ql.d.mts
-|   |           
-|   \---tapable
-|       |   LICENSE
-|       |   package.json
-|       |   README.md
-|       |   tapable.d.ts
-|       |   
-|       \---lib
-|               AsyncParallelBailHook.js
-|               AsyncParallelHook.js
-|               AsyncSeriesBailHook.js
-|               AsyncSeriesHook.js
-|               AsyncSeriesLoopHook.js
-|               AsyncSeriesWaterfallHook.js
-|               Hook.js
-|               HookCodeFactory.js
-|               HookMap.js
-|               index.js
-|               MultiHook.js
-|               SyncBailHook.js
-|               SyncHook.js
-|               SyncLoopHook.js
-|               SyncWaterfallHook.js
-|               util-browser.js
-|               
 +---static
 |       api.js
 |       chart_utils.js
@@ -641,7 +34,6 @@ C:.
 |       table.js
 |       ui_control.js
 |       z_style.css
-|       z_style.min.css
 |       _config.js
 |       _main.js
 |       
@@ -671,7 +63,7 @@ def get_cmc_api_key():
 
 --- File: api_manager.py ---
 
-# api_manager.py
+import json # ⭐️ 상단에 json 임포트 추가
 # --- ⭐️ GLOBAL CACHE SETTINGS ⭐️ ---
 CACHE_TIMEOUT_SECONDS = 3600 # 1시간
 # --- ⭐️ LOAD MAPPING CONFIG ⭐️ ---
@@ -698,8 +90,7 @@ def format_dynamic_price(price):
 # ✅ [수정 후] 테마를 지원하는 클린 포맷터
 def format_change(percent):
     # 🚀 하드코딩 색상 빼고 테마 클래스로 변경!
-    theme_class = "text-theme-up" if percent > 0 else "text-theme-down" if percent < 0 else "text-theme-text opaci
-ty-50"
+    theme_class = "text-theme-up" if percent > 0 else "text-theme-down" if percent < 0 else "text-theme-text opacity-50"
     # 🚀 인라인 스타일(font-weight) 대신 Tailwind 클래스로 통일
     weight_class = "font-bold" if abs(percent) >= 5.0 else "font-normal"
     # style="..." 은 완전히 삭제하고 class="..." 만 넘겨줍니다.
@@ -708,7 +99,7 @@ def get_pure_base_asset(ticker):
     # 1. Quote(결제자산)를 뒤에서부터 안전하게 제거
     # USDT, KRW 외에 다른 마켓이 추가되어도 대응 가능하도록 리스트화
     # 2. 정규식으로 배율과 순수 심볼 분리
-    # ^(10+|1[MB])? : 시작부분의 10, 100, 1M, 1B 등을 그룹 캡처
+    # ^(10+|1[MB])? : 시작부분의 10, 100, 1M, 1B 등을 그룹1로 캡처
     # (?P<symbol>.+) : 나머지를 전부 'symbol' 그룹으로 캡처
 def is_scaled_symbol(symbol):
 def suppress_output():
@@ -733,59 +124,44 @@ def fetch_exchange_market_data():
 # 🧱 모듈 2: 코인마켓캡(CMC) 정보 수집기
 # ==========================================
 def fetch_cmc_market_data(binance_data, upbit_only_assets):
-    # 🚀 [추가] 역방향 족보 생성: "진짜티커_거래소" -> "별명(임의이름)"
-        # 바이낸스 소속인지 업비트 소속인지 확인
-        # 🚀 [수정] 족보에서 별명 찾기
-        # ⭐️ 격리 출신이면 무조건 [0]번값(UID)을 꽂아버리기~
 # ==========================================
 # 🧱 모듈 3: 데이터 조립 및 변동률 계산기
 # ==========================================
-def build_final_market_list(
+# ==========================================
+# 🧱 모듈 3: 데이터 조립 및 변동률 계산기 (완전 교체본)
+# ==========================================
+def build_final_market_list(binance_data, upbit_data, market_data_map, asset_to_lookup_key, upbit_krw_set, upbit_only_assets):
     # MAJOR_COINS = {'BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'SUI'}
     # 🚀 1. 실시간 테더 환율 가져오기 (두나무 api 에러 방지)
-     # 🚀 [추가] 역방향 족보 여기서도 동일하게 생성
-    # 🚀 [추가] 중복 출입 통제소 (같은 UID는 두 번 못 들어옴!)
     # ---------------------------------------------------------
     # 1. 바이낸스 선물 조립
     # ---------------------------------------------------------
     # --- 1. 바이낸스 선물 조립 루프 내부 ---
-        # 1. 이름표 발급 (딱 한 번만 선언)
-        # 2. 프론트용 예쁜 별명 찾기
-        # 3. 맵핑 조회를 위한 룩업 키 결정 (원본 우선, 없으면 깎은 이름)
-        # 4. 쓰레기 필터링
-        # 5. CMC 정보 가져오기 (에러 확률 원천 차단)
-        if not info: continue # 정보 없으면 스킵
-        # 🚀 [철벽 방어] 이미 명부에 있는 UID면 즉시 폐기 (중복 방지)
-            # 🚀 [철벽 방어 2] 격리 병동 놈들은 체인 덮어씌우고 TICKER_DATA에 저장 안 함!
-                ch_sym = DUPLICATED_LIST[display_name][1] # [1]번 값으로 체인 덮어씌움
-                # 깨끗한 놈들만 TICKER_DATA에 저장 허락
+        # [수정 1] 정규식 돌리기 전에 "원본 티커(숫자포함)"를 먼저 보관!
+        # [수정 2] 이름은 정규식으로 예쁘게 깎기 (화면 표시용)
+        # [수정 3] 맵핑 조회는 "원본 티커"가 있으면 그걸 우선, 없으면 깎인 이름으로!
+        # [수정 4] 이제 조회할 때 lookup_key를 사용!
+        # [수정 5] CMC 데이터 맵에서 가져올 때도 lookup_key 사용!
+        info = market_data_map.get(asset_to_lookup_key.get(lookup_key))# --- 바이낸스 루프 긴급 수정본 ---
+        # 1. 원본 티커 (예: 1000000BOB)
+        # 2. 예쁘게 깎은 이름 (예: BOB)
+        # 3. ⭐️ 맵핑 데이터 확인 (철벽 방어)
+            lookup_key = base_display # 맵핑 없으면 그냥 깎은 이름으로!
+        # 4. ⭐️ 여기서 에러 났을 확률 높음! 안전하게 조회
+            # 맵핑에 없으면 그냥 통과하거나 예전 방식(base_display)으로 한 번 더 시도
+        # [이하 로직은 기존과 동일... 하지만 info가 없을 때를 대비해야 함]
+        if not info: continue # 👈 데이터 없으면 그냥 다음 코인으로! (목록 증발 방지)
+        # mcap = 0
                 # if base in MAJOR_COINS or diff <= PRICE_DIFFERENCE_THRESHOLD:
                 #     mcap = info.get('market_cap', 0)
                 # else:
                 #     continue
-        # else: continue
-        # 🚀 [사전 변수 통일] append 안에 들어갈 놈들을 미리 깔끔하게 정리
-        # 🚀 [깔끔한 Append] 바이낸스/업비트 완벽하게 동일한 구조
-            # --- 1. 기본 식별 정보 ---
-            # --- 2. 화면 표시용 데이터 (HTML 포함) ---
-            "Price_KRW": None, # 바이낸스는 원화 없음
-            # --- 3. 프론트엔드 정렬용 순수 숫자 데이터 (Raw) ---
     # ---------------------------------------------------------
     # 2. 업비트 전용 조립 (🚨 철벽 방어 적용 완료)
     # ---------------------------------------------------------
-        # 지도에서 UID 찾아오기 (중복 제거 완료)
-        # 🚀 별명 먼저 확정 (VIP 여부 판단용)
-        # ✅ 원칙 적용: UID가 이미 명부에 있다면?
-            # ⭐️ 단, "이미 지어준 별명(EDGE 등)"이 있는 귀빈들은 예외로 통과!
-        # --- 여기서부터는 데이터 조립 ---
-        # 🚀 [철벽 방어] 격리 놈들은 체인 덮어씌우고 TICKER_DATA 저장 안 함!
         # 🚀 [철벽 방어] 모든 변수를 안전한 실수형(float) 0.0으로 선언하고 시작
             # 데이터가 None일 경우를 대비해 'or 0.0' 처리
-        # 🚀 [사전 변수 통일] 바이낸스와 똑같은 변수명으로 맞춤
-        # 🚀 [깔끔한 Append] 바이낸스와 복붙 수준으로 통일
-            # --- 1. 기본 식별 정보 ---
-            # --- 2. 화면 표시용 데이터 (HTML 포함) ---
-            # --- 3. 프론트엔드 정렬용 순수 숫자 데이터 (Raw) ---
+            "Price_KRW": up_price_krw if up_price_krw > 0 else None, # JS에서 원화 표기용
 # ==========================================
 # 👑 최종 함수 BOSS
 # ==========================================
@@ -793,8 +169,7 @@ def _fetch_and_process_data():
     # 1. 시세 수집
     # 2. 정보 수집 (CMC)
     # 3. 조립 및 계산
-    # 4. JSON 덮어쓰기 (체인 변경 시)
-            # 🚀 [추가] TICKER_DATA를 A-Z 알파벳 순으로 깔끔하게 정렬!
+    # 4. JSON 덮어쓰기 (새 체인 발견 시)
     # 5. 시총 정렬 후 반환
 def get_cached_data(force_reload=False):
     with data_lock: # 👈 여기서 딱 한 명만 진입 가능! 나머지는 줄 서서 기다림
@@ -805,6 +180,8 @@ def get_cached_data(force_reload=False):
 --- File: app.py ---
 
 # app.py
+import requests  # ⭐️ 추가됨!
+import config    # ⭐️ 추가됨!
 # 윈도우 터미널 인코딩 문제를 해결하기 위해 표준 출력을 utf-8로 강제 설정
     allow_origins=["*"],      # 🚀 모든 도메인(폰 포함) 허용!
     allow_methods=["*"],      # 🚀 GET, POST 등 모든 방식 허용!
@@ -818,7 +195,7 @@ def get_market_map():
 # ⭐️ async 삭제됨!
 def get_coin_info(asset: str):
         # api_manager.py의 캐시 데이터를 가져옵니다 (force=False 이므로 API 새로 안 찌름)
-        # 캐시된 600개 리스트 중에서 내가 클릭한 코인을 찾습니다
+        # 캐시된 400개 리스트 중에서 내가 클릭한 코인을 찾습니다
         # 캐시에 없으면 (신규 상장 등)
 def get_proxy_candles(exchange: str, symbol: str, interval: str, limit: int = 200):
             # 업비트 요청
@@ -828,13 +205,13 @@ def open_browser():
 def on_startup():
     # ⭐️ 데이터 긁어오기 (이건 배포든 로컬이든 필수!)
     # 🚀 로컬(127.0.0.1) 환경이고, 아직 브라우저 안 열었을 때만 실행
-    # Railway 같은 곳에서는 이 환경변수가 없으므로 브라우저를 열지 않는다는 소문이 있네요
+    # Railway 같은 곳에서는 이 환경변수가 없으므로 브라우저를 열지 않습니다.
 
 
 
 --- File: get_market.py ---
 
-# get_market.py
+# modules/data_engine.py
 def get_market_status():
 
 
@@ -843,15 +220,13 @@ def get_market_status():
 
 --- File: api.js ---
 
-// app.js
 // --- 📡 API Fetch 로직 ---
+// app.js
 async function loadSymbols() {
     const res = await fetch("/api/market-map");
 function searchSymbols(v) {
   const resDiv = document.getElementById("search-results");
   const filtered = allSymbols
-      // const logoImg = marketDataMap.all_assets[s][0] || "";
-      // ${logoImg}  
 async function selectSymbol(s) {
   const symInput = document.getElementById("symbol-input");
   const searchRes = document.getElementById("search-results");
@@ -862,46 +237,26 @@ async function selectSymbol(s) {
     const infoData = await infoRes.json();
     // if (headMcap) headMcap.innerText = infoData.market_cap;
     // if (headMcap) headMcap.innerText = "조회 실패";
-async function fetchHistory(symbol) {
-  // 1. 광클 철벽 방어
+async function fetchHistory(symbol, rawTicker) {
+  // 🚨 1. 광클 철벽 방어 (1.5초 이내 재요청 무시하여 429 에러 방지)
   const now = Date.now();
-  // 🚀 [정리] 변수 정의를 명확하게!
-  const displayName = symbol || currentAsset; // "BOB(BNB)"
-  // 괄호 찢기 대신, 백엔드가 준 데이터가 있으면 거기서 원본을 유추하거나 찢기를 최소화
-  const rawSymbol = displayName.split('(')[0].trim().toUpperCase(); // "BOB"
-  currentAsset = displayName; // 상태 관리는 별명으로
-  // 2. 거래소 판별
-  const isUpbitOnly = (marketDataMap.upbit || []).includes(rawSymbol);
-  const isFutures = !isUpbitOnly && (marketDataMap.futures || []).includes(rawSymbol);
-  const isSpot = !isUpbitOnly && (marketDataMap.spot || []).includes(rawSymbol);
-  // 티커 규격 맞추기
-  const binanceTicker = `${rawSymbol}USDT`;
-  const upbitTicker = `KRW-${rawSymbol}`;
+  const pureSymbol = symbol.replace(/USDT$/i, "").toUpperCase();
+  const isUpbitOnly = (marketDataMap.upbit || []).includes(pureSymbol);
+  const binanceTicker = rawTicker || `${pureSymbol}USDT`;
+  const upbitTicker = rawTicker || `KRW-${pureSymbol}`;
   const loadingModal = document.getElementById("chart-loading-modal");
-    // 🚀 [구조화] 바이낸스 vs 업비트 분기
+  const isFutures = !isUpbitOnly && (marketDataMap.futures || []).includes(pureSymbol);
+  const isSpot = !isUpbitOnly && (marketDataMap.spot || []).includes(pureSymbol);
+    // 🚀 2. 직접 외부로 안 나가고 내 파이썬 서버(/api/candles)로 요청!
       const exchange = isFutures ? "binance_futures" : "binance_spot";
-      const res = await fetch(`/api/candles?exchange=${exchange}&symbol=${binanceTicker}&interval=${currentTF}&lim
-it=500`);
-      // [개선] 재료 고르기 (업비트 지원 목록)
-      const supportedMin = [1, 3, 5, 10, 15, 30, 60, 240];
-      const v = parseInt(currentTF);
-      const u = currentTF.replace(/[0-9]/g, '');
-      const totalSec = tfSec[currentTF] || 60;
-        // 일/주/월 단위: 3d면 'days' 가져와서 3개 합치기
-        // 분/시간 단위: 120분(2h)이면 60분봉 가져와서 2개 합치기
-        const targetMin = totalSec / 60;
-        // 나눌 수 있는 가장 큰 지원 분봉 찾기
-        const baseMin = supportedMin.reverse().find(m => targetMin % m === 0) || 1;
-      // 2. 데이터 가져오기 (압축을 위해 limit 넉넉히)
-      const fetchLimit = Math.min(200 * step, 600);
-      const res = await fetch(`/api/candles?exchange=upbit&symbol=${upbitTicker}&interval=${fetchInterval}&limit=$
-{fetchLimit}`);
-        // 🚀 3. 무지성 합치기 (step이 1이면 그냥 통과, 아니면 압축)
-          const chunk = baseData.slice(i, i + step);
-    // 3. 차트 렌더링
-        // 🚀 [보정] 데이터가 셋팅되고 '실제로 화면에 그려질 시간' 약간 주기
-          // setupCountdownDOM();
-      // 실시간 캔들 시작
+      // 내부 API 호출
+      const res = await fetch(`/api/candles?exchange=${exchange}&symbol=${binanceTicker}&interval=${currentTF}&limit=500`);
+      const tfMap = { "1m": 1, "15m": 15, "1h": 60, "4h": 240, "1d": "days", "1w": "weeks", "1M": "months" };
+      const tfValue = tfMap[currentTF] || 60;
+      // 내부 API 호출
+      const res = await fetch(`/api/candles?exchange=upbit&symbol=${upbitTicker}&interval=${upbitInterval}&limit=200`);
+          const ts = Math.floor(Date.parse(d.candle_date_time_utc + "Z") / 1000);
+    // 3. 차트 그리기
 
 
 
@@ -912,7 +267,7 @@ function resetChartScale() {
 function formatSmartPrice(price) {
     const absPrice = Math.abs(price);
     // 1. 큰 금액 (100 이상) 처리
-    // 2. 소수점 자릿수 계산
+    // 2. 소수점 자릿수 계산 (범인 검거 구역)
     const logValue = Math.log10(absPrice);
     // logValue가 -Infinity(값이 너무 작을 때)인 경우 방어
     const firstSigDigit = isFinite(logValue) ? Math.floor(logValue) : -20;
@@ -946,36 +301,19 @@ function autoFit() {
       to: len + 20, // 👈 이 숫자를 키우면 캔들이 더 왼쪽(가운데)으로 밀려납니다.
 // _main.js 에서 기존 함수를 이걸로 교체
 function calculateTimeRemaining(tf, serverMs) {
+  // 🚨 내 PC 시간이 아니라, 파라미터로 받은 '웹소켓 서버 시간'을 기준으로 삼음
   const now = new Date(serverMs);
-  // 1. 단순 밀리초 계산이 가능한 봉들
-  const msMap = {
-    // 🚨 0.1초 오차 방지를 위해 1ms 더해서 올림 처리
-  // 2. 날짜 단위 계산이 필요한 봉들 (하루 ~ 1년)
-    const year = now.getUTCFullYear();
-    const month = now.getUTCMonth();
-    const date = now.getUTCDate();
-        // 상장일 기준이 아니라 UTC 0시 기준 3일씩 끊기 (바이낸스 방식)
-        const dayDiff = Math.ceil((serverMs + 1) / (86400000 * 3)) * (86400000 * 3);
-        // 다음주 월요일 00:00 UTC (일요일 23:59:59 마감)
-        const dayOfWeek = now.getUTCDay(); // 0(일)~6(토)
-        const diffToMon = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
-  // 3. 남은 시간 계산 및 포맷팅
+      const hours = now.getUTCHours();
+      const next4h = Math.ceil((hours + 0.1) / 4) * 4;
   const diff = Math.max(0, nextClose - serverMs);
-  const d = Math.floor(diff / 86400000);
-  const h = Math.floor((diff % 86400000) / 3600000);
+  const h = Math.floor(diff / 3600000);
   const m = Math.floor((diff % 3600000) / 60000);
   const s = Math.floor((diff % 60000) / 1000);
-  // 포맷팅은 그냥 일:시:분:초 스타일로 보여주기
-  const dd = d > 0 ? `${d}d ` : "";
-  const hh = String(h).padStart(2, "0");
-  const mm = String(m).padStart(2, "0");
-  const ss = String(s).padStart(2, "0");
 
 
 
 --- File: sim_engine.js ---
 
-// sim_engine.js
 // --- 🎮 시뮬레이터 수학 & 로직 ---
 // sim_engine.js
 function changeDir(d) {
@@ -1002,8 +340,8 @@ function getNext() {
 
 --- File: stream.js ---
 
-// stream.js
 // --- 🌊 실시간 웹소켓 엔진 ---
+// stream.js
 function startRealtimeCandle(symbol, interval, isFutures, isSpot) {
     // 🚀 연결 막기
     // 연결 종료
@@ -1049,14 +387,35 @@ function startBinanceMarketRadar() {
     const data = JSON.parse(event.data);
       const pureSymbol = ticker.s.replace("USDT", "");
       tickerBuffer[pureSymbol] = ticker; // 정렬용 버퍼는 그대로 유지
+      // // 🚀 [차등화 전략 핵심] 0초 실시간 깜빡이 센서 가동
+      // // 쌀먹 원칙: CCTV(visibleSymbols)에 잡힌 놈만 즉시 렌더링한다.
+      // if (
+      //   typeof visibleSymbols !== "undefined" &&
+      //   visibleSymbols.has(pureSymbol)
+      // ) {
+      //   const priceCell = document.getElementById(`price-${pureSymbol}`);
+      //   if (priceCell) {
+      //     const newPrice = parseFloat(ticker.c);
+      //     const oldPrice = parseFloat(
+      //       priceCell.innerText.replace(/[^0-9.-]+/g, ""),
+      //     );
+      //     // 가격이 변했을 때만 즉시 DOM 조작 (웹소켓 단위)
+      //     if (oldPrice !== newPrice) {
+      //       priceCell.innerText = `$ ${formatSmartPrice(newPrice)}`;
+      //       const flashClass = newPrice > oldPrice ? "flash-up" : "flash-down";
+      //       priceCell.classList.add(flashClass);
+      //       // 0.2초 뒤 클래스 제거 (다음 깜빡임을 위해)
+      //       setTimeout(() => priceCell.classList.remove(flashClass), 200);
+      //     }
+      //   }
+      // }
     let dataUpdated = false; // 데이터가 갱신되었는지 확인하는 플래그
       const ticker = tickerBuffer[pureSymbol];
       const newPrice = parseFloat(ticker.c);
-      const newChange24h = parseFloat(ticker.P);
-      // 🚨 정렬을 위해 원본 배열(currentTableData) 무조건 갱신, 화면에 안 보여도 데이터는 사전 최신화해서 대응
+      // 🚨 1. 정렬을 위해 원본 배열(currentTableData) 무조건 갱신!
+      // (화면에 안 보여도 데이터는 최신화해둬야 갑자기 떡상할 때 1등으로 치고 올라옵니다)
         const targetRow = currentTableData.find(
             const openPrice = parseFloat(targetRow.utc0_open);
-            const todayChange = ((newPrice - openPrice) / openPrice) * 100;
       // 🚨 2. 화면에 안 보이는 코인이면 CPU 절약을 위해 DOM 업데이트(깜빡임 등)는 패스!
       // --- 👇 여기서부터는 기존 화면 업데이트 로직 동일 👇 ---
       const priceCell = document.getElementById(`price-${pureSymbol}`);
@@ -1081,8 +440,8 @@ function startBinanceMarketRadar() {
       //     newChange > 0 ? "#26a69a" : newChange < 0 ? "#ef5350" : "gray";
       //   const weight = Math.abs(newChange) >= 5.0 ? "bold" : "normal";
       //   // formattedChange를 출력에 사용
-      //   changeCell.innerHTML = `<span style="color:${color}; font-weight:${weight};">${newChange > 0 ? "+" : ""
-}${formattedChange} %</span>`;
+      //   changeCell.innerHTML = `<span style="color:${color}; font-weight:${weight};">${newChange > 0 ? "+" : ""}${formattedCha
+nge} %</span>`;
       // }
       // if (todayCell && typeof originalTableData !== "undefined") {
       //   const targetCoin = originalTableData.find(
@@ -1104,8 +463,8 @@ function startBinanceMarketRadar() {
       //             : "gray";
       //       const tWeight = Math.abs(todayChange) >= 5.0 ? "bold" : "normal";
       //       // 🚀 3. DOM 업데이트
-      //       todayCell.innerHTML = `<span style="color:${tColor}; font-weight:${tWeight};">${todayChange > 0 ? "
-+" : ""}${finalStr} %</span>`;
+      //       todayCell.innerHTML = `<span style="color:${tColor}; font-weight:${tWeight};">${todayChange > 0 ? "+" : ""}${final
+Str} %</span>`;
       //       // 🚀 4. [중요] 정렬용 데이터(currentTableData)도 숫자로 업데이트
       //       const row = currentTableData.find(
       //         (r) => (r.Symbol || r.symbol) === pureSymbol,
@@ -1124,7 +483,7 @@ function startBinanceMarketRadar() {
 --- File: streamEach.js ---
 
 // streamEach.js
-// 🎯 개별 스트림 스나이퍼 소켓 초기화
+// 🎯 스나이퍼 소켓 초기화
 function initSniperSocket() {
   // 바이낸스 선물 복합 스트림 (개별 티커 전용)
     syncSniperSubscriptions(); // 연결되자마자 현재 보이는 놈들 구독
@@ -1173,13 +532,19 @@ async function loadTableData(force = false) {
     const res = await fetch(`/api/market-data?force=${force}`);
     console.log("2. 파이썬 서버가 응답 완료!"); // ⭐️ 추가
     const result = await res.json();
-    originalTableData = JSON.parse(JSON.stringify(result.data)); // 🛡️ 철벽 방어 원본
-    currentTableData = JSON.parse(JSON.stringify(result.data));  // 🏃 실시간 작업용
-      // 1. 순위 재계산 (경주마 로직 실행)
-      // 2. 정렬 상태가 아니면 그냥 평소대로 그리기
+    // ⭐️ 데이터를 받아오자마자 원본을 깊은 복사로 백업해둡니다.
+    const tbody = document.getElementById("table-body");
+    // 처음엔 화살표 없이 원본(시총순) 그대로 그림
+// [table.js 맨 아래에 독립적으로 배치]
+  const tbody = document.getElementById("table-body");
+    // 1. 별표(즐겨찾기) 버튼 눌렀을 때는 차트 안 뜨게 방어 (이미 toggleFavorite에 stopPropagation 있지만 한 번 더!)
+    const tr = e.target.closest("tr");
+      const pureSymbol = tr.dataset.sym;
+      if (window.innerWidth <= SCREEN_WIDTH) {
 // 2. ⭐️ 3단계 정렬 핵심 로직 ⭐️ (리셋 & 상단 이동 추가)
 function sortTable(colKey) {
   // 1. 클릭할 때마다 3단계 사이클 돌리기
+  // 🚀 [추가] 정렬을 누르면 무조건 50개 리밋으로 리셋!
   // 🚀 [추가] 스크롤을 최상단으로 강제 소환!
   const scrollContainer = document.querySelector(
   // 2. 화살표 UI 업데이트
@@ -1188,7 +553,8 @@ function sortTable(colKey) {
     // [3타 - 제자리 복구]
     renderTable(); // renderTable 내부에서도 currentRenderLimit(50)을 쓰니까 완벽!
     // [1타, 2타 - 실시간 정렬]
-    // 정렬은 순식간에 해버리기
+    // 💡 applyRealtimeSort가 돌면서 100등 밖으로 밀려난 애들을
+    // 알아서 recycleBin(재활용 바구니)에 넣고 DOM에서 치워버립니다.
 // 표 그리기 함수 수정
 // 🚀 [추가] 행(TR) 생성 헬퍼 (초기 렌더링 & 신규 진입 시 사용)
 function createRowElement(row) {
@@ -1206,30 +572,30 @@ function renderTable() {
         const sym = entry.target.dataset.sym; // 코인 이름 가져오기
           visibleSymbols.add(sym); // 화면에 들어오면 추가
         else visibleSymbols.delete(sym); // 화면 밖으로 나가면 삭제
-  // 🚨 핵심: 전체가 아니라 상위 RENDER_LIMIT만 자릅니다!
+  // 🚨 핵심: 500개 전체가 아니라 상위 RENDER_LIMIT만 자릅니다!
   const topData = currentTableData.slice(0, currentRenderLimit); // 🚀 이걸로 변경
     // 만들어둔 헬퍼 함수로 깔끔하게 렌더링
   applySelectedHighlight(); // 🚀 [추가] 정렬 끝나고 내 코인 다시 찾아!
-// 💡 애니메이션 없이 정렬만 하는 깔끔한 함수
-function simpleSortData() {
-  // 🚀 [핵심] 백엔드(api_manager.py)에서 보내주는 필드명과 1:1로 맞춥니다!
-  const sortKeyMap = {
-    "Ticker": "_s_DisplayTicker" // 이름은 프론트 가공본(_s_) 유지
-  const key = sortKeyMap[currentSortCol] || currentSortCol;
-  const isAsc = sortState === "asc";
-    // 1. 둘 다 숫자인 경우 (MarketCap, Price, Change 등)
-    // 2. 문자열인 경우 (Ticker 등)
-    const strA = (valA || "").toString();
-    const strB = (valB || "").toString();
-// ⭐️ 실시간 재정렬 & 경주마 애니메이션 함수
+// <td class="p-4 text-right">
+//     <div class="flex flex-col items-end justify-center h-full gap-1">
+//         <span class="text-[13px]">${row.Upbit === "O" ? "🔵" : "⚫"}</span>
+//         <span style="font-size:10px; opacity:0.6;">${row.Note || ""}</span>
+//     </div>
+// </td>
+// ⭐️ 2. 좌우 넓이 드래그 조절 기능 ⭐️
+const leftPanel = document.getElementById("left-panel");
+  // 🚨 핵심: 이전 프레임이 대기 중이면 취소하고 최신 것만 실행
+    const containerWidth = document.body.clientWidth;
+    // 1. 패널 크기 변경
+    // 2. 차트 리사이즈 (가장 무거운 작업)
+    if (window.chart) {
+      const container = document.getElementById("chart-container");
+      window.chart.resize(container.clientWidth, container.clientHeight);
+  document.body.classList.remove("resizing-active"); // 🚨 효과 해제
+// ⭐️ [신규 추가] 실시간 재정렬 & 경주마 애니메이션 함수
 function applyRealtimeSort() {
-  // 🚀 정렬용 맵핑 (클릭한 컬럼 -> 미리 계산된 숫자 필드)
-  const sortKeyMap = {
-  // 🚀 2. 메모리 정렬 실행 (정규식 완전 삭제!!!!)
-    const key = sortKeyMap[currentSortCol] || currentSortCol;
+  // 1. 값 기반 메모리 정렬 (500개 연산 - 초고속)
     const isAsc = sortState === "asc";
-    // 숫자 데이터면 단순 연산
-    // 문자열 데이터면 localeCompare
   const tbody = document.getElementById("table-body");
   const topData = currentTableData.slice(0, currentRenderLimit);
   const topSymbols = new Set(topData.map((d) => d.Symbol || d.symbol));
@@ -1237,7 +603,7 @@ function applyRealtimeSort() {
   const firstRects = new Map();
   // 🚀 [최적화 2] FLIP First: "화면에 보이는 놈들만" 위치 기억
     const sym = row.dataset.sym;
-  // 🚀 [최적화] DOM 재활용 풀(Pool) 생성
+  // 🚀 [최적화 1] DOM 재활용 풀(Pool) 생성
   // 100등 밖으로 밀려난 패배자들의 DOM을 버리지 않고 모아둡니다.
   const recycleBin = [];
     const sym = row.dataset.sym;
@@ -1251,7 +617,7 @@ function applyRealtimeSort() {
       tr.style.animation = "flash-up 1s ease-out"; // 떡상 이펙트
     // 위치가 다르면 DOM 이동
   // 혹시 남은 잉여 DOM이 있다면 그때서야 파괴 (보통 발생 안 함)
-  // 🚀 [최적화] FLIP Last & Play: "화면에 보였던 놈들만" 부드럽게 이동
+  // 🚀 [최적화 2] FLIP Last & Play: "화면에 보였던 놈들만" 부드럽게 이동
   const finalRows = Array.from(tbody.children);
     const sym = row.dataset.sym;
     const firstY = firstRects.get(sym);
@@ -1259,28 +625,28 @@ function applyRealtimeSort() {
       const lastY = row.getBoundingClientRect().top; // 여기서 Reflow 발생 (최소화됨)
       const deltaY = firstY - lastY;
   // 🚀 안전장치 장착 (스크롤 쪽이랑 똑같이!)
-  applySelectedHighlight(); // 🚀 [추가] 순위 바뀌어도 내 코인은 빛나리라
+  applySelectedHighlight(); // 🚀 [추가] 순위 바뀌어도 내 코인은 빛나야지!
 function applySelectedHighlight() {
   const selectedSymbol = currentSelectedSymbol; // 전역에 저장된 선택 심볼
   // 1. 일단 모든 행의 하이라이트 제거
   // 2. 선택된 심볼을 가진 행(tr)을 찾아서 외곽선 빡!
   const targetTr = document.querySelector(
+    targetTr.style.outline = "2px solid var(--accent)"; // 68층 성주님의 골드 라인
     targetTr.style.zIndex = "10"; // 다른 행보다 위로
 // 💡 헬퍼 함수: 재활용한 껍데기에 알맹이만 채우는 함수 (기존 로직 분리)
 function updateRowInnerHTML(tr, row) {
-  const pureSymbol = row.Symbol;
+  const pureSymbol = (row.Ticker || "").replace("KRW", "").replace("USDT", "").toUpperCase();
+  const getCleanNum = (val) => {
+    const clean =
   // console.log(`[유기적 체크] 티커: ${row.Ticker} | 최종 이름표: ${pureSymbol}`);
-  // 백엔드에서 준 Raw 숫자 데이터
-  const n24h = row.Change_24h_Raw ?? 0;
-  const nDay = row.Change_Today_Raw ?? 0;
-  const rawPrice = row.Price_Raw ?? 0;
-  // 테마 색상 결정
+  const n24h = getCleanNum(row.Change_24h);
+  const nDay = getCleanNum(row.Change_Today);
   const color24h =
   const colorDay =
-  // 가격 포맷팅
-  const formattedPrice = formatSmartPrice(rawPrice);
+  const formattedPrice = formatSmartPrice(Number(row.Price));
+  // 🚀 핵심: 원화 가격이 데이터에 존재하면 " (911원)" 포맷으로 만들기
   const krwDisplay = row.Price_KRW
-  // 즐겨찾기 상태
+  // ⭐️ [추가] 로컬스토리지에서 즐겨찾기 상태 가져오기
   const favorites = JSON.parse(localStorage.getItem("sellnance_favs") || "[]");
   const isFav = favorites.includes(pureSymbol);
 // 🚀 [table.js 또는 main.js] 무한 스크롤 & 스나이퍼 통합 엔진
@@ -1303,34 +669,13 @@ function initInfiniteScroll() {
       // --- [파트 B] 스나이퍼 조준경 (디바운싱 동기화) ---
       // 슥슥 올릴 땐 가만히 있다가, 멈추면 해당 구역 0.1초 틱 따기 시작!
         // ✅ [통합 훅] refreshSniperTarget 하나면 '보이는 놈 계산 + 구독'까지 한방입니다.
-      }, 50); // 초 단위 멈춤 감지 (IP 밴 방어선)
+      }, 200); // 0.3초 멈춤 감지 (IP 밴 방어선)
 function toggleFavorite(symbol, event) {
   event.stopPropagation(); // 🚨 중요: 별 눌렀을 때 차트 열리는 거 방지!
   const btn = event.currentTarget;
     // ⭐️ 쫀득한 애니메이션 효과
-// <td class="p-4 text-right">
-//     <div class="flex flex-col items-end justify-center h-full gap-1">
-//         <span class="text-[13px]">${row.Upbit === "O" ? "🔵" : "⚫"}</span>
-//         <span style="font-size:10px; opacity:0.6;">${row.Note || ""}</span>
-//     </div>
-// </td>
-// ⭐️ 2. 좌우 넓이 드래그 조절 기능 ⭐️
-const leftPanel = document.getElementById("left-panel");
-  // 🚨 핵심: 이전 프레임이 대기 중이면 취소하고 최신 것만 실행
-    const containerWidth = document.body.clientWidth;
-    // 1. 패널 크기 변경
-    // 2. 차트 리사이즈 (가장 무거운 작업)
-    if (window.chart) {
-      const container = document.getElementById("chart-container");
-      window.chart.resize(container.clientWidth, container.clientHeight);
-  document.body.classList.remove("resizing-active"); // 🚨 효과 해제
-// [table.js 맨 아래에 독립적으로 배치]
 // ⭐️ 이 코드가 있어야 웹페이지가 켜지자마자 데이터를 가져옵니다!
-  const tbody = document.getElementById("table-body");
-    // 1. 별표(즐겨찾기) 버튼 눌렀을 때는 차트 안 뜨게 방어 (이미 toggleFavorite에 stopPropagation 있지만 한 번 더!)
-    const tr = e.target.closest("tr");
-      const pureSymbol = tr.dataset.sym;
-      if (window.innerWidth <= SCREEN_WIDTH) {
+window.addEventListener("DOMContentLoaded", () => {
 
 
 
@@ -1368,15 +713,15 @@ function showMobileChart() {
   const content = document.getElementById("mobile-chart-content");
   const rightPanel = document.getElementById("right-panel");
   // 1. 이사 로직 (중복 방지)
-  // 2. 스타일 강제 초기화
-  // 3. 배경 소환
-  // 4. 애니메이션 (패널 등장)
-    panel.style.opacity = "1"; // 🚀 이거 빠지면 안 보여요!
+  // 2. 레이아웃 및 '방벽 제거' (핵심!)
+  // 🚀 active 클래스 하나로 pointer-events와 opacity를 동시에 제어하는 게 가장 깔끔합니다.
+  // 3. 애니메이션 및 차트 리사이즈
     if (window.chart) {
       const newWidth = content.clientWidth;
-      const newHeight = content.clientHeight - 60; // 헤더 빼고
+      const newHeight = content.clientHeight - 60;
       window.chart.resize(newWidth, newHeight);
       window.chart.timeScale().fitContent();
+      // 🚀 [추가] 차트가 뜨자마자 포커스를 잡게 해서 원터치 프리패스 완성!
       const container = document.getElementById("chart-container");
 function closeMobileChart() {
   const overlay = document.getElementById("mobile-chart-overlay");
@@ -1401,21 +746,30 @@ function executeTabSwitch(mode) {
 --- File: _config.js ---
 
 // _config.js
-// 🌐 1. 차트 & 데이터 엔진
-// ⏱️ 2. 보간 카운트다운 엔진 (여기가 핵심!)
-let localTimeAtUpdate = 0; // 🚀 보간 기준점
-let lastServerMs = 0;      // 🚀 서버 진짜 시간
-// 🐎 3. 테이블 및 인피니트 스크롤
-const RENDER_CHUNK = 50;
-// 📡 4. 통신 및 사이드바
-// 📏 5. 측정 도구 및 DOM 캐싱
-// 시스템 상수
+// 🌐 전역 변수 (Global State)
+// 🚀 [광클 방지용] 마지막 요청 시간 기록
 const SCREEN_WIDTH = 768;
 const UI_UPDATE_INTERVAL = 3000;
-const CHART_CONFIG = { GHOST_COUNT: 500, VISIBLE_COUNT: 200, RIGHT_PADDING: 10 };
-const tfSec = { "1m": 60, "3m": 180, "5m": 300, "15m": 900, "30m": 1800, "1h": 3600, "2h": 7200, "4h": 14400, "6h"
-: 21600, "12h": 43200, "1d": 86400, "3d": 259200, "1w": 604800, "1M": 2592000 };
-// 측정용 DOM (누님 스타일 그대로)
+const tfSec = {
+  "1M": 2592000,   // 30일 기준
+  "1Y": 31536000,  // 365일 기준
+// BTC
+let countdownOverlay = null; // 차트 위에 떠다닐 DOM
+// --- 🎨 차트 렌더링 및 UI ---
+// ⚙️ 차트 설정 전역 변수 (여기만 수정하면 전체 적용됨)
+const CHART_CONFIG = {
+  GHOST_COUNT: 500, // 미래 유령 캔들 개수
+  VISIBLE_COUNT: 100, // 화면에 보여줄 과거 캔들 개수
+  RIGHT_PADDING: 10, // 우측 여백 칸 수
+let originalTableData = []; // ⭐️ 원본 백업용 변수 추가
+let sortState = ""; // 'desc'(내림) -> 'asc'(오름) -> ''(제자리)
+// 초기 로딩은 가장 가볍게 50개로 시작
+const RENDER_CHUNK = 50; // 스크롤 바닥 칠 때마다 50개씩 추가
+// ⭐️ 파일 위쪽 전역 변수 모여있는 곳에 2줄 추가
+// 웹 소캣
+// --- 📏 1. 전역 상태 및 DOM 요소 (간소화) ---
+  cachedPriceTd = null; // 🚀 DOM 캐싱용 변수
+// 요소 생성 (스타일은 CSS 파일로 빼는 것을 강력 추천하지만, 일단 유지)
 
 
 
@@ -1436,9 +790,6 @@ window.onload = () => {
 const getUnixSeconds = (t) => {
 function initChart() {
   const container = document.getElementById("chart-container");
-  // 🚀 과거와의 작별 (이게 메모리 아끼는 핵심!)
-    chart.remove(); // 엔진 내부 메모리 해제
-    countdownPriceLine = null; // 👈 유령 방지
   const isDark = currentTheme === "binance" || currentTheme === "upbit-dark";
   const upColor = currentTheme === "binance" ? "#26a69a" : "#c84a31";
   const downColor = currentTheme === "binance" ? "#ef5350" : "#1261c4";
@@ -1472,13 +823,14 @@ function initChart() {
     const ghostData = Array.from(
     // VISIBLE_COUNT, RIGHT_PADDING 변수 사용
   // 측정 도구 세팅
+  // 🚀 [여기에 추가!!!] 차트 그려진 직후에 카운트다운 DOM 세팅!
   // 리사이즈 옵저버 디바운스
   if (window.chartResizeObserver) window.chartResizeObserver.disconnect();
   window.chartResizeObserver = new ResizeObserver(([entry]) => {
     // 1. 부모 컨테이너 크기 실시간 감지
     const { width, height } = entry.contentRect;
     // 2. 0달러 방지 (크기가 0일 땐 패스)
-    // 3. 디바운스 (너무 자주 그리면 렉 걸리니까 잠시 대기)
+    // 3. 디바운스 (너무 자주 그리면 렉 걸리니까 0.05초 대기)
         // 🚀 리사이즈 직후 차트 범위를 다시 맞춰야 안 찌그러짐
         // console.log(`📏 리사이즈 완료: ${width}x${height}`);
       // 🚀 모바일 오버레이 방어 (아까 그 기준 적용!)
@@ -1487,13 +839,13 @@ function initChart() {
   const chartContainer = document.getElementById("chart-container");
     window.chartResizeObserver.observe(chartContainer);
 function setTF(tf) {
-  const isSimMode = document.getElementById("tab-btn-sim").classList.contains("active");
+  const isSimMode = document
 function executeSetTF(tf) {
     const onClickAttr = b.getAttribute("onclick") || "";
-    // 현재 버튼이 클릭된 타임프레임(tf)과 일치하는지 확인
+    // 1. 현재 버튼이 클릭된 타임프레임(tf)과 일치하는지 확인
     const isMatch = onClickAttr.includes(`'${tf}'`);
-    // active 클래스 토글
-    // 투명도 조절 (Tailwind 기준) - 반드시 루프 안에서 실행!
+    // 2. active 클래스 토글
+    // 3. 투명도 조절 (Tailwind 기준) - 반드시 루프 안에서 실행!
   // 4. 차트 데이터 갱신 함수 호출
 function toggleLogScale() {
   const btn = document.getElementById("log-btn");
@@ -1531,27 +883,42 @@ function initMeasureEvents() {
 function toggleCountdown(isChecked) {
   const knob = document.getElementById("countdown-knob");
   // UI 토글 애니메이션
+// _main.js 빈 곳에 추가 (기존 updateCountdownPosition이 있다면 덮어쓰기)
 function updateRealtimeCountdown(serverMs) {
-  // 1. 기본 방어 (차트 시리즈 없으면 삭제)
-  // 2. 보간 엔진 가동 조건 (serverMs가 유효할 때만)
-    // 🚀 보간 계산
-    const interpolatedMs = lastServerMs + (performance.now() - localTimeAtUpdate);
-    // 🎯 마감 시간 체크 로직 추가
-    const secondsPerBar = tfSec[currentTF] || 60;
-    const lastCandleTime = mainData[mainData.length - 1].time; // Unix Sec
-    const nextBarTimeMs = (lastCandleTime + secondsPerBar) * 1000; // MS 변환
-      // 🚨 시간이 이미 지났다? 서버 신호 올 때까지 "Wait..."으로 강제 고정!
-      // 아직 시간 남았으면 정상 카운트다운
-  // 3. 봉 색상 및 상태 파악
+  // 1. 서버 시간 기반으로 남은 시간 텍스트 계산
+  const timeText = calculateTimeRemaining(currentTF, serverMs);
+  // 2. 현재 봉 상태 가져오기
   const lastCandle = mainData[mainData.length - 1];
-  const isDown = lastCandle.close < lastCandle.open;
-  const style = getComputedStyle(document.body);
-  const varName = isDown ? '--down' : '--up';
-  const rawColor = style.getPropertyValue(varName).trim() || (isDown ? '#ef5350' : '#26a69a');
-  // 4. 차트 레이블 옵션 (보간된 displayTime 적용)
-  const lineOptions = {
-    title: showCountdown ? `${displayTime} ` : "", // 🚀 Wait... 또는 05:20
-  // 5. 생성 및 갱신
-// 실시간 카운트다운 보간 
-
-
+  const { open, close } = lastCandle;
+  // 3. 색상 및 위치 계산
+  const bgCol = close < open ? "var(--down)" : "var(--up)";
+  const yCoordinate = candleSeries.priceToCoordinate(close);
+  // 4. DOM 업데이트 (단 한 번의 Reflow만 발생)
+function setupCountdownDOM() {
+  const container = document.getElementById("chart-container");
+  // 🚀 [개선 포인트] container 내부뿐만 아니라, 이사 간 부모(table) 전체에서 가격축(td:nth-child(3))을 찾습니다.
+  const priceScaleTd = container.closest('table')?.querySelector("tr:nth-child(1) td:nth-child(3)") 
+    // 차트가 아직 안 그려졌거나 렌더링 전이면 재시도
+  // 🚀 [중요] 기존에 그려진 잔상이 있다면 제거하고 새로 붙입니다 (중복 방지)
+  // 🚀 [핵심] 스타일 재설정 (기존 스타일 유지)
+  // 🚀 최종적으로 현재 활성화된 가격 축에 찰싹 붙이기!
+// // 🚀 [실시간 브라우저 감시관] - initChart 밖에 두세요!
+// window.addEventListener('resize', () => {
+//   const width = window.innerWidth; // 창 전체 너비 측정
+//   const overlay = document.getElementById("mobile-chart-overlay");
+//   const isOverlayOpen = overlay && !overlay.classList.contains("hidden");
+//   // 1. 📱 PC -> 모바일 자동 전환
+//   if (width < SCREEN_WIDTH && !isOverlayOpen) {
+//     // 현재 차트를 보고 있는 상태일 때만 자동으로 오버레이 띄우기
+//     const btnChart = document.getElementById("mob-btn-chart");
+//     if (btnChart && btnChart.classList.contains("text-theme-accent")) {
+//       console.log("📱 창 크기 감지: 모바일 모드 자동 전환");
+//       showMobileChart();
+//     }
+//   }
+//   // 2. 🖥️ 모바일 -> PC 자동 복구
+//   if (width >= SCREEN_WIDTH && isOverlayOpen) {
+//     console.log("🖥️ 창 크기 감지: PC 레이아웃 자동 복구");
+//     closeMobileChart();
+//   }
+// });

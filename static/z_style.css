@@ -14,7 +14,7 @@
 :root {
   --bg: #ffffff;
   --panel: #f4f5f8;
-  --border: #d5d6dc;
+  --border: #d5d5d5;
   --text: #333;
   --up: #c84a31;
   --down: #1261c4;
@@ -43,24 +43,31 @@ body.theme-binance {
   --bg: #131722;
   --panel: #1e222d;
   --border: #2a2e39;
-  --text: #d1d4dc;
+  --text: #d2d2d2;
   --up: #26a69a;
   --down: #ef5350;
   --accent: #f0b90b;
+  --flash-up: rgba(38, 166, 154, 0.2);
+  --flash-down: rgba(239, 83, 80, 0.2);
 }
 
-body.theme-upbit-dark {
-  --bg: #0f111a;
-  --panel: #161922;
-  --border: #2a2e39;
-  --text: #d1d4dc;
+body.theme-upbit {
+  --bg: #ffffff;
+  --panel: #f4f5f8;
+  --border: #d5d5d5;
+  --text: #333;
   --up: #c84a31;
   --down: #1261c4;
-  --accent: #fbc02d;
+  --accent: #1261c4;
+  --flash-up: rgba(200, 74, 49, 0.2);
+  --flash-down: rgba(18, 97, 196, 0.2);
 }
 
 body {
-  background-color: #e2e8f0;
+  background-color: var(--bg);
+  color: var(--text);
+  transition: background-color 0.1s ease;
+  /* 테마 전환 시 부드럽게 */
 }
 
 body.theme-binance {
@@ -137,21 +144,31 @@ body.theme-binance {
   border: none !important;
 }
 
-/* ⭐️ 애니메이션 대신 부드러운 전환(Transition) 효과 사용 */
-.price-cell {
-  transition:
-    background-color 0.4s ease,
-    color 0.4s ease;
-}
-
 .flash-up {
-  background-color: rgba(38, 166, 154, 0.5) !important;
-  color: white !important;
+  color: color-mix(in srgb, var(--up), transparent 50%) !important;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--up), transparent 50%) !important;
+  background: radial-gradient(circle, var(--flash-up) 0%, transparent 80%) !important;
+  box-shadow: inset 2px 0 0 0 var(--up) !important;
+  transition: none !important;
 }
 
 .flash-down {
-  background-color: rgba(239, 83, 80, 0.5) !important;
-  color: white !important;
+  color: color-mix(in srgb, var(--down), transparent 50%) !important;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--down), transparent 50%) !important;
+  background: radial-gradient(circle, var(--flash-down) 0%, transparent 80%) !important;
+  box-shadow: inset 2px 0 0 0 var(--down) !important;
+  transition: none !important;
+}
+
+/* 🚀 평소 상태로 복귀할 때 (부드러운 잔상 효과) */
+.price-cell {
+  transition:
+    color 0.4s ease,
+    text-shadow 0.4s ease,
+    background 0.4s ease,
+    box-shadow 0.4s ease;
+  padding-left: 8px;
+  /* 좌측 보더 공간 확보 */
 }
 
 /* 🚨 고급 HTS 스타일 커스텀 스크롤바 */
@@ -229,6 +246,7 @@ body.theme-binance {
 
 /* 차트가 들어갈 알맹이 공간 */
 #mobile-chart-content {
+  z-index: 120;
   display: flex !important;
   flex-direction: column !important;
   height: 100% !important;
@@ -254,7 +272,7 @@ body.theme-binance {
     height: calc(100dvh - 10px) !important;
     max-height: calc(100dvh - 10px) !important;
     overflow-y: auto !important;
-    z-index: 50;
+    z-index: 101;
     background-color: var(--bg);
     padding-bottom: 20px;
     /* 🚀 밑바닥 여유 살짝 추가 */
