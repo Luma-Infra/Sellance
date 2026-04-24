@@ -4,7 +4,7 @@ function initSniperSocket() {
   if (sniperWs && sniperWs.readyState === WebSocket.OPEN) return;
 
   // 바이낸스 선물 복합 스트림 (개별 티커 전용)
-  sniperWs = new WebSocket("wss://fstream.binance.com/ws");
+  sniperWs = new WebSocket("wss://fstream.binance.com/market/ws");
   sniperWs.onopen = () => {
     console.log("🎯 스나이퍼 엔진 가동: 보이는 놈들 정밀 타격 시작");
     syncSniperSubscriptions(); // 연결되자마자 현재 보이는 놈들 구독
@@ -51,27 +51,26 @@ function syncSniperSubscriptions() {
 
 // ⚡ 정밀 렌더링 시작하기
 function renderSniperPrice(data) {
-  // 🚀 [광클/유튜브 방어 1선] 화면 안 보고 있으면 DOM 조작 즉시 컷! (CPU 쌀먹)
-  if (document.hidden) return;
-
   const symbol = data.s.replace("USDT", "");
   const priceCell = document.getElementById(`price-${symbol}`);
   if (!priceCell) return;
 
+  // 🚀 족보(p)와 시가(open) 한 번에 찾기 (최적화)
   const row = currentTableData.find(r => r.Symbol === symbol);
   if (!row) return;
   const p = row.precision || 2;
 
   const newPrice = parseFloat(data.c);
+  // 🚀 에러 방어: 텍스트가 없어도 뻗지 않게!
   const oldPrice = parseFloat((priceCell.innerText || "").replace(/[^0-9.-]+/g, "")) || 0;
 
-  // 🚀 [방어 2선] 가격이 진짜로 변했을 때만 DOM을 건드린다! (불필요한 렌더링 차단)
   if (newPrice !== oldPrice) {
     priceCell.innerText = `${formatSmartPrice(newPrice, p)}`;
+    // 🚀 공용 함수 호출로 통일!
     applyPriceFlash(priceCell, newPrice, oldPrice);
   }
 
-  // 24시간 등락률 (innerHTML도 진짜 변했을 때만 덮어쓰는 게 좋지만 일단 유지)
+  // 24시간 등락률 (기존 동일)
   const changeCell = document.getElementById(`change-${symbol}`);
   if (changeCell) {
     const change24h = parseFloat(data.P);
@@ -79,7 +78,7 @@ function renderSniperPrice(data) {
     changeCell.innerHTML = `<span class="${themeClass} font-bold">${change24h > 0 ? "+" : ""}${change24h.toFixed(2)}%</span>`;
   }
 
-  // 당일 등락률 
+  // 당일 등락률 (row.utc0_open_Raw 활용)
   const todayCell = document.getElementById(`today-${symbol}`);
   if (todayCell && row.utc0_open_Raw) {
     const openPrice = parseFloat(row.utc0_open_Raw);
