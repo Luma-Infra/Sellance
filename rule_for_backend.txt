@@ -1,0 +1,23 @@
+Initial stage_
+
+1 업비트 바낸으로부터 가져온 실시간 티커들에게서 쓰레기 필터링
+(지금처럼 only 숫자영어만 챙기기 및 티커 앞에 붙은 단위 표기용 숫자 제거)
+2 그리고 한 거래소라도 있거나 신규로 감지되면 TICKER_DATA에 저장
+3 두 거래소 모두 상폐거나 목록 없다면 해당되는 놈만 TICKER_DATA에서 제거를 한다
+4 그리고 이때는 처음이라서 배열에 uid 값이 없엇을테니 티커로 cmc api 호출해서 가져와야겠지
+5 문제가 생기는 부분은 아래 하드코딩 규칙에 따라서 커버하는거야
+6 SYMBOL_TO_ID_MAP은 거래소티커 : uid로 구성됏으니 여기 해당하는 티커는 uid 이거 쓰면 됨
+이거는 TICKER_DATA에 거래소티커 넣어서 저장해
+7 SPECIAL_SYMBOL_MAP은 거래소티커 : cmc호출용티커 이렇게 구성된거니 매칭 상태보고 cmc호출을 문제없이 하면 되고 이거도 TICKER_DATA에 거래소티커 넣어서 저장해
+8 DUPLICATED_LIST는 프론트용티커 : [uid, chain, 거래소티커, 거래소명] 이렇게 구성된거임
+그러니 거래소티커 보면서 uid 이거 써서 호출하면 됨
+9 자 이제 cmc에 티커 + 하드코딩 uid 가 모두 갖추어 졋으니 호출하면 되겟지
+
+Second and Loop stage_
+
+10 여기부터는 처음아니고 두번째이니 TICKER_DATA에도 uid가 완성된 상황이야
+11 그러면 TICKER_DATA에 존재하는 코인들 uid로 호출하면 되겟지
+12 문제는 DUPLICATED_LIST는 TICKER_DATA에 일부로 저장안한 놈들이니 8번 규칙따라서 호출하면 되겠지, 그리고 DUPLICATED_LIST 내부 규칙은 다음과 같다
+12-1 uid가 같으면 같은 코인이지만 프론트로 업비트 바낸 둘 다 넘겨줄거고 binance json 규칙 우선
+12-2 uid가 다르면 반드시 다른 코인임
+13 어쨋든 DUPLICATED_LIST에 잇는 uid로도 cmc api 호출하면 완성되는 거임

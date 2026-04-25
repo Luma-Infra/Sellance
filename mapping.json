@@ -25,17 +25,13 @@
     "USDS": "33039",
     "ACT": "33566",
     "AVAAI": "34116",
-    "BOB(BNB)": "34422",
     "BROCCOLI714": "35749",
     "BROCCOLIF3B": "35753",
     "PUMPBTC": "36166",
-    "EDGE(Definitive)": "36288",
     "LIGHT": "38506",
     "币安人生": "38590",
-    "BOB(BTC)": "38970",
     "我踏马来了": "39322",
-    "龙虾": "39671",
-    "EDGE(edgeX)": "39720"
+    "龙虾": "39671"
   },
   "SPECIAL_SYMBOL_MAP": {
     "DODOX": "DODO",
