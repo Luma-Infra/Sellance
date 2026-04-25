@@ -253,9 +253,20 @@ def fetch_exchange_market_data():
             'change_24h': float(i['priceChangePercent']),
             'vol': float(i['quoteVolume']) # 🚀 현물 거래대금
         } for i in prices_s if i['symbol'] in active_s}
+        
+        
+        all_active = active_f.union(active_s)
+        
+        
+        # 바이낸스 9시 시가 병렬 수집
+        utc0_open_dict = {}
+        binance_symbols = {s.replace('USDT', '') for s in all_active}
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            results = executor.map(_fetch_binance_open, binance_symbols)
+            for sym, open_p in results:
+                if open_p: utc0_open_dict[sym] = open_p
 
         # 합치기 (선물을 기본으로 하되, 현물 거래대금을 더해주고, 현물 전용 코인도 추가)
-        all_active = active_f.union(active_s)
         for ticker in all_active:
             sym = ticker.replace('USDT', '')
             binance_base_assets.add(sym)
@@ -275,7 +286,8 @@ def fetch_exchange_market_data():
                 'precision': b_precisions.get(ticker, 2), # (기존 로직 유지)
                 'is_spot_only': ticker not in active_f,   # 🚀 뱃지용
                 'is_futures': ticker in active_f,
-                'is_spot': ticker in active_s
+                'is_spot': ticker in active_s,
+                'utc0_open': utc0_open_dict.get(sym)
             }
             
     except Exception as e: 
@@ -353,28 +365,68 @@ def fetch_cmc_market_data(binance_data, upbit_only_assets):
         alias_name = REVERSE_LOOKUP.get(f"{a.upper()}_{exchange_tag}", a)
 
         # ⭐️ 격리 출신이면 무조건 [0]번값(UID)을 꽂아버리기~
+        # if alias_name in DUPLICATED_LIST:
+        #     cmc_id = str(DUPLICATED_LIST[alias_name][0])
+        #     id_lookup.append(cmc_id)
+        #     asset_to_lookup_key[f"{exchange_tag}_{a.upper()}"] = cmc_id
+        # elif alias_name in SYMBOL_TO_ID_MAP:
+        #     cmc_id = SYMBOL_TO_ID_MAP[alias_name]
+        #     id_lookup.append(cmc_id)
+        #     asset_to_lookup_key[f"{exchange_tag}_{a.upper()}"] = cmc_id
+        # else:
+        #     norm = SPECIAL_SYMBOL_MAP.get(get_pure_base_asset(a), get_pure_base_asset(a))
+        #     sym_lookup.append(norm)
+        #     asset_to_lookup_key[f"{exchange_tag}_{a.upper()}"] = norm
+            
+        # 🚀 [수정] 누님의 완벽한 3단계 족보 조회 로직 완성!
         if alias_name in DUPLICATED_LIST:
             cmc_id = str(DUPLICATED_LIST[alias_name][0])
             id_lookup.append(cmc_id)
             asset_to_lookup_key[f"{exchange_tag}_{a.upper()}"] = cmc_id
+            
         elif alias_name in SYMBOL_TO_ID_MAP:
-            cmc_id = SYMBOL_TO_ID_MAP[alias_name]
+            cmc_id = str(SYMBOL_TO_ID_MAP[alias_name])
             id_lookup.append(cmc_id)
             asset_to_lookup_key[f"{exchange_tag}_{a.upper()}"] = cmc_id
-        else:
-            # norm = SPECIAL_SYMBOL_MAP.get(get_pure_base_asset(a), get_pure_base_asset(a))
-            # sym_lookup.append(norm)
-            # asset_to_lookup_key[f"{exchange_tag}_{a.upper()}"] = norm
             
-            # 1. 일단 깎아본 이름(norm) 가져오기
+        # ⭐️ [핵심 추가] TICKER_DATA에 이미 저장된 놈들도 무조건 UID로 호출!!!
+        elif alias_name in TICKER_DATA:
+            cmc_id = str(TICKER_DATA[alias_name][0])
+            id_lookup.append(cmc_id)
+            asset_to_lookup_key[f"{exchange_tag}_{a.upper()}"] = cmc_id
+            
+        else:
+            # # 🚀 [진짜 쌩초보 신규 상장 코인만 여기로 옴]
+            # norm = SPECIAL_SYMBOL_MAP.get(get_pure_base_asset(a), get_pure_base_asset(a))
+            
+            # # 여기서 마지막으로 찌꺼기(언더바 등) 한 번 더 걸러주기!
+            # if "_" not in norm and is_valid_ticker(norm):
+            #     sym_lookup.append(norm)
+            # else:
+            #     print(f"🚫 [최종 차단] 불량 티커 폐기: {norm}")
+            
+            # # 1. 일단 깎아본 이름(norm) 가져오기
+            # norm = SPECIAL_SYMBOL_MAP.get(get_pure_base_asset(a), get_pure_base_asset(a))
+            
+            # # 🚀 [범인 검거용 로그] UID가 없어서 이름으로 조회되는 놈들 싹 다 찍어보기
+            # print(f"🕵️ [CMC 이름조회 대기열] 원본: {a} -> 변환: {norm}")
+            
+            # # 2. 만약 이름에 언더바(_)가 있다면 즉시 경고!
+            # if "_" in norm:
+            #     print(f"🚨 [검거 완료] 이 자식이 400 에러 주범임!!! -> {norm}")
+            
+            #######################################################################
+            # 🚀 [범인 검거 및 사살 구간]
             norm = SPECIAL_SYMBOL_MAP.get(get_pure_base_asset(a), get_pure_base_asset(a))
             
-            # 🚀 [범인 검거용 로그] UID가 없어서 이름으로 조회되는 놈들 싹 다 찍어보기
-            print(f"🕵️ [CMC 이름조회 대기열] 원본: {a} -> 변환: {norm}")
-            
-            # 2. 만약 이름에 언더바(_)가 있다면 즉시 경고!
-            if "_" in norm:
-                print(f"🚨 [검거 완료] 이 자식이 400 에러 주범임!!! -> {norm}")
+            # 1. 여기서 누님이 만든 필터를 "한 번 더" 무조건 통과해야 합니다.
+            # is_valid_ticker는 언더바(_)가 있으면 무조건 False를 뱉으므로 여기서 걸러집니다.
+            if is_valid_ticker(norm):
+                # print(f"🕵️ [통과] 신규/정상 티커: {norm}")
+                sym_lookup.append(norm)
+            else:
+                # 🚨 [검거] BTC_260925 같은 놈들은 여기로 와서 버려집니다.
+                print(f"🚨 [검거 및 사설] CMC 폭파 주범 차단 완료: {norm}")
             
             sym_lookup.append(norm)
 
@@ -655,10 +707,12 @@ def build_final_market_list(
         
         # (루프 안에서) 현재 코인의 상장 거래소 목록 만들기
         listed_on = set(global_listings.get(base, set()))
-        if b_info.get('is_spot'): listed_on.add('BINANCE')
-        if b_info.get('is_futures'): listed_on.add('BINANCE_FUTURES')
+        if up_info.get('is_spot'): listed_on.add('BINANCE')
+        if up_info.get('is_futures'): listed_on.add('BINANCE_FUTURES')
         if base in upbit_krw_set: listed_on.add('UPBIT')
-        # if base in bithumb_krw_set: listed_on.add('BITHUMB') # 빗썸 셋 넘겨받았다면!
+        if base in bithumb_krw_set: listed_on.add('BITHUMB') # 빗썸 셋 넘겨받았다면!
+
+# 바로 위에 추가해둔거 맞나.......??
 
         # 🚀 [깔끔한 Append] 바이낸스와 복붙 수준으로 통일
         final_results.append({
@@ -713,6 +767,20 @@ def _fetch_and_process_data():
     final_results, is_mapping_updated, updated_chain_map = build_final_market_list(
         global_listings, binance_data, upbit_data, market_data_map, asset_to_lookup_key, upbit_krw_set, upbit_only_assets, bithumb_krw_set
     )
+    
+    all_live_assets = binance_data.keys() | upbit_krw_set # 현재 살아있는 모든 티커(원본)
+    live_bases = {get_pure_base_asset(a).upper() for a in all_live_assets}
+    
+    keys_to_delete = []
+    for saved_name in MAPPING_DATA["TICKER_DATA"].keys():
+        # TICKER_DATA에 있는 놈이 현재 라이브 목록에 없으면 사형 선고!
+        if saved_name not in live_bases and saved_name not in SPECIAL_SYMBOL_MAP and saved_name not in SYMBOL_TO_ID_MAP:
+            keys_to_delete.append(saved_name)
+            
+    for k in keys_to_delete:
+        del MAPPING_DATA["TICKER_DATA"][k]
+        is_mapping_updated = True
+        print(f"🧹 [청소] 상폐/미거래 코인 {k} 족보에서 삭제 완료!")
 
     # 4. JSON 덮어쓰기 (체인 변경 시)
     if is_mapping_updated:
