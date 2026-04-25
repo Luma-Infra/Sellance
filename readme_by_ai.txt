@@ -371,7 +371,7 @@ function startRealtimeCandle(symbol, interval, isFutures, isSpot) {
     // upbit
     const upbitTicker = `KRW-${symbol}`;
       const msg = [
-    currentWs.onmessage = async (e) => {
+    upbitChartWs.onmessage = async (e) => {
       const text = await e.data.text();
       const res = JSON.parse(text);
       const serverMs = res.timestamp; // 🚨 업비트가 보내준 현재 서버 시간

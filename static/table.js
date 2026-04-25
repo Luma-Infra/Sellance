@@ -77,8 +77,7 @@ function sortTable(colKey) {
   }
 }
 
-// 표 그리기 함수 수정
-// 🚀 [추가] 행(TR) 생성 헬퍼 (초기 렌더링 & 신규 진입 시 사용)
+// 🚀 [추가] 표 그리기 행(TR) 생성 헬퍼 (초기 렌더링 & 신규 진입 시 사용)
 function createRowElement(row) {
   const tr = document.createElement("tr");
   const pureSymbol = row.Symbol;
@@ -137,7 +136,8 @@ function simpleSortData() {
     "Price": "Price_Raw",
     "Change_24h": "Change_24h_Raw",
     "Change_Today": "Change_Today_Raw",
-    "Volume": "Volume_Raw",
+    // "Volume": "Volume_Raw",
+    "Volume": "Binance_Vol_Futures",
     "Ticker": "DisplayTicker"
   };
 
@@ -145,7 +145,11 @@ function simpleSortData() {
   const isAsc = sortState === "asc";
 
   currentTableData.sort((a, b) => {
-    let valA = a[key], valB = b[key];
+    // 🚀 [수정] 실시간 버퍼(tickerBuffer)에 최신값이 있다면 그걸 우선 사용!
+    let valA = (tickerBuffer[a.Symbol] && key.includes("Change"))
+      ? tickerBuffer[a.Symbol].P : a[key];
+    let valB = (tickerBuffer[b.Symbol] && key.includes("Change"))
+      ? tickerBuffer[b.Symbol].P : b[key];
 
     // 1. 둘 다 숫자인 경우 (MarketCap, Price, Change 등)
     if (typeof valA === "number" && typeof valB === "number") {
@@ -183,14 +187,19 @@ function applyRealtimeSort() {
     "Price": "Price_Raw",
     "Change_24h": "Change_24h_Raw",
     "Change_Today": "Change_Today_Raw",
-    "Volume": "Volume_Raw",
+    // "Volume": "Volume_Raw",
+    "Volume": "Binance_Vol_Futures",
     "Ticker": "DisplayTicker"
   };
 
   // 🚀 2. 메모리 정렬 실행 (정규식 완전 삭제!!!!)
   currentTableData.sort((a, b) => {
     const key = sortKeyMap[currentSortCol] || currentSortCol;
-    let valA = a[key], valB = b[key];
+    // 🚀 [수정] 실시간 버퍼(tickerBuffer)에 최신값이 있다면 그걸 우선 사용!
+    let valA = (tickerBuffer[a.Symbol] && key.includes("Change"))
+      ? tickerBuffer[a.Symbol].P : a[key];
+    let valB = (tickerBuffer[b.Symbol] && key.includes("Change"))
+      ? tickerBuffer[b.Symbol].P : b[key];
 
     const isAsc = sortState === "asc";
 
@@ -352,6 +361,38 @@ function updateRowInnerHTML(tr, row) {
   const favorites = JSON.parse(localStorage.getItem("sellnance_favs") || "[]");
   const isFav = favorites.includes(pureSymbol);
 
+  // 거래소 로고 이미지
+  const EX_LOGOS = {
+    "BINANCE": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/270.png",
+    "COINBASE": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/89.png",
+    "UPBIT": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/351.png",
+    "BITHUMB": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/200.png",
+    "BITGET": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/513.png",
+    "BYBIT": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/521.png",
+    "GATEIO": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/302.png",
+    "OKX": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/294.png"
+  };
+
+  const exchanges = row.Listed_Exchanges || [];
+  let listedExchangesHtml = exchanges.map(ex => {
+    // 선물(FUTURES)은 로고에 노란색 테두리를 주거나 작게 'F'를 달아주면 꿀잼입니다 ㅋㅋㅋ
+    if (ex === "BINANCE_FUTURES") {
+      return `<div class="relative inline-block"><img src="${EX_LOGOS["BINANCE"]}" class="w-4 h-4 rounded-full border border-yellow-400"><span class="absolute -top-1 -right-1 text-[8px] bg-yellow-400 text-black font-bold rounded px-[2px]">F</span></div>`;
+    }
+    if (EX_LOGOS[ex]) {
+      return `<img src="${EX_LOGOS[ex]}" class="w-4 h-4 rounded-full" title="${ex}">`;
+    }
+    return "";
+  }).join('<span class="w-1"></span>'); // 로고 사이 간격
+
+  let tagsHtml = "";
+  if (row.Tags) {
+    // 너무 많으면 지저분하니까 딱 2개만 자르기!
+    tagsHtml = row.Tags.split(',').slice(0, 2).map(tag =>
+      `<span class="text-[9px] bg-gray-700 text-gray-300 px-1 py-0.5 rounded mr-1">${tag}</span>`
+    ).join('');
+  }
+
   tr.innerHTML = `
   <td class="p-4">
     <div class="flex items-center gap-2">
@@ -505,7 +546,7 @@ function applyPriceFlash(element, newPrice, oldPrice) {
   void element.offsetWidth;
 
   element.classList.add(flashClass);
-  setTimeout(() => element.classList.remove(flashClass), 100); // 150ms가 딱 쫀득함
+  setTimeout(() => element.classList.remove(flashClass), 100);
 }
 
 // <td class="p-4 text-right">

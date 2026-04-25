@@ -109,22 +109,16 @@ function showMobileChart() {
 
   if (!overlay || !panel || !content || !rightPanel) return;
 
-  // 1. 이사 로직 (중복 방지)
-  if (!content.contains(rightPanel)) {
+  // 🚀 [이사] 원래 부모가 누구였는지 기억할 필요 없이 그냥 옮깁니다.
+  if (content && rightPanel && !content.contains(rightPanel)) {
     content.appendChild(rightPanel);
   }
 
-  // 2. 스타일 강제 초기화
-  rightPanel.style.setProperty('display', 'flex', 'important');
-  rightPanel.style.height = "100%";
-  rightPanel.style.width = "100%";
-  rightPanel.classList.remove("hidden", "md:flex");
+  // 🚀 [스타일] style 속성 대신 클래스로 제어하는 게 나중에 복구가 쉽습니다.
+  rightPanel.classList.remove("hidden");
+  rightPanel.classList.add("flex"); // 모바일 풀화면용
 
-  // 3. 배경 소환
   overlay.classList.remove("hidden");
-  overlay.classList.add("active");
-  overlay.style.opacity = "1";
-  overlay.style.pointerEvents = "auto";
 
   // 4. 애니메이션 (패널 등장)
   setTimeout(() => {
@@ -149,19 +143,28 @@ function closeMobileChart() {
   const rightPanel = document.getElementById("right-panel");
   const mainContainer = document.querySelector(".max-w-\\[1600px\\]");
 
-  if (!overlay || !panel) return;
+  if (!overlay || !rightPanel || !mainContainer) return;
 
   // 1. 유령 장벽 즉시 제거
-  panel.style.transform = "translateY(100%)";
-  overlay.classList.remove("active"); // pointer-events: none 효과 발생
+  // panel.style.transform = "translateY(100%)";
+  // overlay.classList.remove("active");
+  // pointer-events: none 효과 발생
 
-  setTimeout(() => {
-    overlay.classList.add("hidden");
-    // 2. 원래 자리로 복구
-    if (rightPanel && mainContainer) {
-      mainContainer.appendChild(rightPanel);
-    }
-  }, 50);
+  // 1. 애니메이션/오버레이 숨기기
+  overlay.classList.add("hidden");
+
+  // 2. 🚀 [복구 핵심] 강제로 넣었던 style 속성들을 싹 지워야 합니다!
+  rightPanel.style.display = "";
+  rightPanel.style.height = "";
+  rightPanel.style.width = "";
+
+  // 3. 🚀 [원위치] 원래 데스크톱 레이아웃 클래스로 복구
+  rightPanel.classList.add("hidden", "md:flex");
+
+  // 4. 부모 컨테이너로 다시 이사
+  if (!mainContainer.contains(rightPanel)) {
+    mainContainer.appendChild(rightPanel);
+  }
 }
 
 // ⭐️ 1. 탭 전환 기능 (차트 ↔ 시뮬레이터) ⭐️
@@ -201,12 +204,19 @@ function executeTabSwitch(mode) {
     btnSim.classList.add("active");
     btnChart.classList.remove("active");
     controls.style.display = "flex";
-    if (currentWs) {
-      currentWs.close();
-      currentWs = null;
-      document.getElementById("status-dot").style.background = "gray";
-      document.getElementById("status-text").innerText = "SIMULATION MODE";
-    }
+
+    // 🚀 [수정] 바이낸스와 업비트 차트 소켓 둘 다 확실히 처단!
+    [binanceChartWs, upbitChartWs].forEach(ws => {
+      if (ws) {
+        ws.onmessage = null;
+        ws.close();
+      }
+    });
+    binanceChartWs = null;
+    upbitChartWs = null;
+
+    document.getElementById("status-dot").style.background = "gray";
+    document.getElementById("status-text").innerText = "SIMULATION";
   }
   if (window.chart) {
     setTimeout(() => {

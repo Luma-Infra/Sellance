@@ -44,12 +44,12 @@ function updateLegend(d) {
   };
 
   leg.innerHTML = `
-    <span class="opacity-60 text-[11px] mr-1">시</span><span class="${cls} font-mono font-bold mr-3">${safeFormat(d.open, p)}</span>
-    <span class="opacity-60 text-[11px] mr-1">고</span><span class="${cls} font-mono font-bold mr-3">${safeFormat(d.high, p)}</span>
-    <span class="opacity-60 text-[11px] mr-1">저</span><span class="${cls} font-mono font-bold mr-3">${safeFormat(d.low, p)}</span>
-    <span class="opacity-60 text-[11px] mr-1">종</span><span class="${cls} font-mono font-bold mr-3">${safeFormat(d.close, p)}</span>
-    <span class="ml-2 px-1 py-0.5 ${cls} font-black bg-black/10 rounded font-mono">${sign}${safeFormat(chg, p)}</span>
-    <span class="${cls} font-black font-mono ml-1">(${sign}${chgPercent}%)</span>
+    <span class="opacity-60 text-[11px] mr-1">시</span><span class="${cls} font-bold mr-3">${safeFormat(d.open, p)}</span>
+    <span class="opacity-60 text-[11px] mr-1">고</span><span class="${cls} font-bold mr-3">${safeFormat(d.high, p)}</span>
+    <span class="opacity-60 text-[11px] mr-1">저</span><span class="${cls} font-bold mr-3">${safeFormat(d.low, p)}</span>
+    <span class="opacity-60 text-[11px] mr-1">종</span><span class="${cls} font-bold mr-3">${safeFormat(d.close, p)}</span>
+    <span class="ml-2 px-1 py-0.5 ${cls} font-black bg-black/10 rounded ">${sign}${safeFormat(chg, p)}</span>
+    <span class="${cls} font-black ml-1">(${sign}${chgPercent}%)</span>
   `;
 }
 

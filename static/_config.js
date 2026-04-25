@@ -1,14 +1,15 @@
 // _config.js
 // 🌐 1. 차트 & 데이터 엔진
-window.chartWs = null;
-let currentWs = null, currentKlineStream = null;
+window.binanceChartWs = null;
+window.isFetchingChart = null;
+let upbitChartWs = null, currentKlineStream = null;
 let chart, candleSeries, previewSeries;
 let mainData = [];
 let curDir = "bull", currentTheme = "binance";
 let currentMarket = "SPOT", currentTF = "1d";
 let isCollapsed = false, allSymbols = [], isHover = false, isLogMode = false;
 let marketDataMap = {};
-let binanceWs = null, upbitWs = null;
+let binanceRadarWs = null, upbitRadarWs = null;
 let tickerBuffer = {}, radarIntervalId = null;
 let lastFetchTime = 0;
 let currentAsset = "BTC";
@@ -42,6 +43,18 @@ let isSidebarOpen = true;
 // 📏 5. 측정 도구 및 DOM 캐싱
 let isMeasuring = false, measureStart = null, measureEnd = null;
 let cachedChartTd = null, cachedPriceTd = null;
+
+// 거래소 로고 이미지
+// const EX_LOGOS = {
+//     "BINANCE": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/270.png",
+//     "COINBASE": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/89.png",
+//     "UPBIT": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/351.png",
+//     "BITHUMB": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/200.png",
+//     "BITGET": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/513.png",
+//     "BYBIT": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/521.png",
+//     "GATEIO": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/302.png",
+//     "OKX": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/294.png"
+// };
 
 // 시스템 상수
 const SCREEN_WIDTH = 768;

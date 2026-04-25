@@ -78,7 +78,7 @@ function setupButtonEvents() {
   }
 }
 
-// ⚙️ 2. 시간 변환 통합 헬퍼 (전역으로 이동!)
+// ⚙️ 시간 변환 통합 헬퍼 (전역으로 이동!)
 // 이제 initChart와 startRealtimeCandle 양쪽에서 모두 사용 가능합니다.
 const getUnixSeconds = (t) => {
   if (typeof t === "object" && t !== null)
@@ -174,16 +174,20 @@ function initChart() {
     },
   });
 
-  // 🚀 1. 공통 커스텀 가격 포맷 설정 (함수 추가 없이 기존 formatSmartPrice 재활용!)
-  const p = currentTableData.find(c => c.Symbol === currentAsset)?.precision ?? 2;
-  const safeMinMove = Number((1 / Math.pow(10, p)).toFixed(p));
+  // 🚀 공통 커스텀 가격 포맷 설정 (함수 추가 없이 기존 formatSmartPrice 재활용!)
+  // 🚀 p 값을 무조건 '순수 숫자(Number)'로 강제 변환! (문자열 방어)
+  const row = currentTableData.find(c => c.Symbol === currentAsset);
+  const p = row && row.precision !== undefined ? Number(row.precision) : 2;
+
+  // 🚀 minMove도 안전하게 계산
+  const safeMinMove = p > 0 ? Number((1 / Math.pow(10, p)).toFixed(p)) : 1;
   const customPriceFormat = {
-    type: "custom",
+    type: "price",
     precision: p,
     minMove: safeMinMove,
     formatter: (price) => {
-      if (typeof price !== 'number') return "";
-      // 🚨 여기서 한 번 더 p값으로 강제 컷트!
+      if (price === null || price === undefined || isNaN(price)) return "";
+      // 💡 formatSmartPrice가 똑똑하게 소수점을 찍어줄 겁니다.
       return formatSmartPrice(price, p);
     },
   };
@@ -507,7 +511,7 @@ function updateRealtimeCountdown(serverMs) {
     const nextBarTimeMs = (lastCandleTime + secondsPerBar) * 1000; // MS 변환
 
     if (interpolatedMs >= nextBarTimeMs) {
-      // 🚨 시간이 이미 지났다? 서버 신호 올 때까지 "Wait..."으로 강제 고정!
+      // 🚨 시간이 이미 지났다? 서버 신호 올 때까지 "00:00"으로 강제 고정!
       displayTime = "00:00";
     } else {
       // 아직 시간 남았으면 정상 카운트다운
@@ -548,7 +552,7 @@ setInterval(() => {
   }
 }, 50);
 
-// 🚀 [특수수사대] 정렬 순서 박제형 방향키 엔진
+// 🚀 정렬 순서 퀵 서칭 탐색형 방향키 엔진
 document.addEventListener("keydown", (e) => {
   if (document.activeElement.tagName === "INPUT") return;
 

@@ -139,10 +139,38 @@ function updateExchangeBadges(s) {
   if (badgeContainer) badgeContainer.innerHTML = badges;
 }
 
+// executeSetTF나 코인 클릭 함수(selectSymbol) 등 마켓이 바뀌는 모든 시점에 이 '세척기'를 돌려야 합니다.
+function clearChartData() {
+  // 🚀 전역 데이터 장부 완전 소각
+  mainData = [];
+
+  // 🚀 차트 시리즈 데이터 즉시 비우기
+  // if (candleSeries) candleSeries.setData([]);
+  // if (previewSeries) previewSeries.setData([]);
+
+  // 🚀 [추가] 캔들은 남겨두되, 가격축은 미리 '오토'로 풀어서 
+  // 새 데이터가 올 때 부드럽게 적응할 준비를 시킵니다.
+  if (chart) {
+    chart.priceScale("right").applyOptions({ autoScale: true });
+  }
+
+  // 🚀 카운트다운 라벨도 유령 방지를 위해 삭제
+  if (countdownPriceLine && candleSeries) {
+    candleSeries.removePriceLine(countdownPriceLine);
+    countdownPriceLine = null;
+  }
+  console.log("🧹 차트 찌꺼기 청소 및 잔상 제거 준비 완료! (장대봉 방지)");
+}
+
 async function fetchHistory(symbol) {
   const now = Date.now();
-  if (now - lastFetchTime < 50) return;
+  if (now - lastFetchTime < 10) return;
   lastFetchTime = now;
+
+  // 🚀 [셔터 내림] 지금부터 차트 공사 중! 소켓 데이터 난입 금지!
+  window.isFetchingChart = true;
+
+  clearChartData();
 
   const displayName = symbol || currentAsset;
   const rawSymbol = displayName.split('(')[0].trim().toUpperCase();
@@ -227,20 +255,43 @@ async function fetchHistory(symbol) {
     }
 
     // 3. 차트 렌더링
-    if (mainData.length > 0) {
+    if (mainData.length > 0 && candleSeries) {
       if (candleSeries) {
+        // 🚀 [해결] 새로운 코인에 맞게 가격 포맷(precision) 즉시 갱신
+        const row = currentTableData.find(c => c.Symbol === rawSymbol);
+        const p = row ? Number(row.precision) : 2;
+
+        candleSeries.applyOptions({
+          priceFormat: {
+            type: "price", // 0.0 방지를 위해 'custom' 대신 'price' + formatter 조합 추천
+            precision: p,
+            minMove: p > 0 ? Number((1 / Math.pow(10, p)).toFixed(p)) : 1,
+            formatter: (price) => formatSmartPrice(price, p)
+          }
+        });
+
+        // 🚀 데이터를 넣기 직전에만 '잠깐' 축 잡아두는 로직 제거
+        // chart.priceScale("right").applyOptions({ autoScale: false });
         candleSeries.setData(mainData);
 
-        // 🚀 [보정] 데이터가 셋팅되고 '실제로 화면에 그려질 시간' 약간 주기
+        // 🚀 [이동] 실시간 소켓은 미리 시동을 걸어둡니다.
+        if (typeof startRealtimeCandle === "function") {
+          startRealtimeCandle(rawSymbol, currentTF, isFutures, isSpot);
+        }
+
+        // 🚀 [핵심] 브라우저가 다음 화면을 그릴 때(딱 0.01초 뒤) 축을 풉니다.
         requestAnimationFrame(() => {
-          // setupCountdownDOM();
+          chart.priceScale("right").applyOptions({ autoScale: true }); // 다시 축 가동
+          chart.timeScale().fitContent();
           updateStatus();
-          autoFit();
+          if (typeof autoFit === "function") autoFit();
+
+          // 🚀 [셔터 올림] 차트 세팅 끝! 이제 소켓 데이터 받아도 됨!
+          setTimeout(() => {
+            window.isFetchingChart = false;
+            console.log("🔓 [셔터 개방] 모든 준비가 끝났습니다. 이제 틱을 받습니다.");
+          }, 50);
         });
-      }
-      // 실시간 캔들 시작
-      if (typeof startRealtimeCandle === "function") {
-        startRealtimeCandle(rawSymbol, currentTF, isFutures, isSpot);
       }
     }
   } catch (e) {

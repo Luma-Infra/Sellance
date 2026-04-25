@@ -8,6 +8,7 @@ import requests
 import decimal
 import config
 import json
+import math
 import pytz
 import sys
 import re
@@ -31,6 +32,7 @@ except FileNotFoundError:
     MAPPING_DATA = {}
 
 NOTE_MAP = MAPPING_DATA.get("NOTE_MAP", {})
+TICKER_DATA = MAPPING_DATA.get("TICKER_DATA", {})
 CHAIN_LOGO_MAP = MAPPING_DATA.get("CHAIN_LOGO_MAP", {})
 EXCLUSION_LIST = MAPPING_DATA.get("EXCLUSION_LIST", [])
 DUPLICATED_LIST = MAPPING_DATA.get("DUPLICATED_LIST", {})
@@ -42,16 +44,22 @@ HARDCODE_VERIFY_SKIP_LIST = MAPPING_DATA.get("HARDCODE_VERIFY_SKIP_LIST", [])
 # --- ⭐️ FORMATTING FUNCTIONS ⭐️ ---
 def format_market_cap_string(mc):
     if mc is None or mc == 0: return "0"
-    if mc >= 1_000_000_000_000: return f"$ {mc / 1_000_000_000_000:,.2f} T"
-    if mc >= 1_000_000_000: return f"$ {mc / 1_000_000_000:,.2f} B"
-    if mc >= 1_000_000: return f"$ {mc / 1_000_000:,.2f} M"
-    return f"$ {mc:,.0f}"
+    if mc >= 1_000_000_000_000: return f"{mc / 1_000_000_000_000:,.2f} T"
+    if mc >= 1_000_000_000: return f"{mc / 1_000_000_000:,.2f} B"
+    if mc >= 1_000_000: return f"{mc / 1_000_000:,.2f} M"
+    return f"{mc:,.0f}"
 
 def format_volume_string(vol):
     if vol is None or vol == 0: return "0"
-    if vol >= 1_000_000_000: return f"$ {vol / 1_000_000_000:,.2f} B"
-    if vol >= 1_000_000: return f"$ {vol / 1_000_000:,.2f} M"
-    return f"$ {vol:,.0f}"
+    if vol >= 1_000_000_000: return f"{vol / 1_000_000_000:,.2f} B"
+    if vol >= 1_000_000: return f"{vol / 1_000_000:,.2f} M"
+    return f"{vol:,.0f}"
+
+def js_round(number, decimals=0):
+    """자바스크립트의 Math.round()와 완벽히 동일하게 동작하는 사사오입 함수"""
+    multiplier = 10 ** decimals
+    # 0.5를 더하고 내림(floor) 처리하는 것이 JS 엔진의 방식입니다.
+    return math.floor(number * multiplier + 0.5) / multiplier
 
 # 1. 초기화 단계에서 딱 한 번만 계산 (JavaScript든 Python이든 로직 동일)
 def get_precision(tick_size_str):
@@ -124,7 +132,11 @@ def _fetch_cmc_api_chunk(task):
         resp = requests.get(url, headers=headers, params=params, timeout=10)
         resp.raise_for_status()
         if resp.text: return resp.json()
-    except: return None
+    except Exception as e:
+        # 🚨 [핵심] 범인의 얼굴을 확인하기 위해 에러 내용과 파라미터를 출력합니다!
+        print(f"🚨 [CMC 폭파] API 에러 발생: {e}")
+        print(f"🚨 실패한 심볼 목록: {params.get('symbol', 'UID 요청임')}")
+        return None
 
 def get_korean_exchange_markets():
     upbit_krw_set, bithumb_krw_set = set(), set()
@@ -153,19 +165,51 @@ def is_valid_ticker(ticker):
         return True
     return False
 
-# (파일 상단의 임포트와 글로벌 설정, format 함수들은 그대로 두시면 됩니다!)
+def fetch_global_listings():
+    """8대 메이저 거래소 중 외부 5개(OKX, BYBIT, BITGET, GATEIO, COINBASE) 현물 상장 수집"""
+    listings = {}
+    
+    def add_tags(coins, tag):
+        for c in coins:
+            base = c.upper()
+            if base not in listings: listings[base] = set()
+            listings[base].add(tag)
+            
+    def get_okx():
+        try: add_tags([i['baseCcy'] for i in requests.get("https://www.okx.com/api/v5/public/instruments?instType=SPOT", timeout=3).json().get('data', [])], 'OKX')
+        except: pass
+    def get_bybit():
+        try: add_tags([i['baseCoin'] for i in requests.get("https://api.bybit.com/v5/market/instruments-info?category=spot", timeout=3).json().get('result', {}).get('list', [])], 'BYBIT')
+        except: pass
+    def get_bitget():
+        try: add_tags([i['baseCoin'] for i in requests.get("https://api.bitget.com/api/v2/spot/public/symbols", timeout=3).json().get('data', [])], 'BITGET')
+        except: pass
+    def get_gateio():
+        try: add_tags([i['base'] for i in requests.get("https://api.gateio.ws/api/v4/spot/currency_pairs", timeout=3).json()], 'GATEIO')
+        except: pass
+    def get_coinbase():
+        try: add_tags([i['base_currency'] for i in requests.get("https://api.exchange.coinbase.com/products", timeout=3).json()], 'COINBASE')
+        except: pass
 
+    # 🚀 병렬로 5개 대문 동시 타격
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        for func in [get_okx, get_bybit, get_bitget, get_gateio, get_coinbase]:
+            executor.submit(func)
+            
+    return listings
+
+# (파일 상단의 임포트와 글로벌 설정, format 함수들은 그대로 두시면 됩니다!)
 def _fetch_binance_open(symbol):
     """(보조) 바이낸스 9시 시가 단일 수집기"""
     try:
-        res = requests.get(f"https://fapi.binance.com/fapi/v1/klines?symbol={symbol}USDT&interval=1d&limit=1", timeout=2).json()
+        res = requests.get(f"https://fapi.binance.com/fapi/v1/klines?symbol={symbol}USDT&interval=1d&limit=1", timeout=3).json()
         if res and len(res) > 0: return symbol, float(res[0][1])
     except Exception as e: 
         print(f"🚨 [디버그] 바이낸스 API 에러: {e}") # 👈 pass 대신 이걸 넣으세요!
     return symbol, None
 
 # ==========================================
-# 🧱 모듈 1: 거래소 시세 수집기 (Binance & Upbit)
+# 🧱 모듈 1: 거래소 시세 수집기 (바낸 업비트 빗썸)
 # ==========================================
 
 def fetch_exchange_market_data():
@@ -174,43 +218,87 @@ def fetch_exchange_market_data():
     binance_base_assets = set()
     binance_data = {}
     try:
-        info = requests.get("https://fapi.binance.com/fapi/v1/exchangeInfo").json()
-        active = {s['symbol'] for s in info['symbols'] if s['status'] == 'TRADING' and s['quoteAsset'] == 'USDT' and '_' not in s['symbol']}
-        for s in active: binance_base_assets.add(s.replace('USDT', ''))
-
-        prices = requests.get("https://fapi.binance.com/fapi/v1/ticker/price").json()
-        changes = requests.get("https://fapi.binance.com/fapi/v1/ticker/24hr").json()
-
-        p_dict = {i['symbol']: float(i['price']) for i in prices if i['symbol'] in active}
-        c_dict = {i['symbol']: float(i['priceChangePercent']) for i in changes if i['symbol'] in active}
-
-        # 바이낸스 9시 시가 병렬 수집
-        utc0_open_dict = {}
-        with ThreadPoolExecutor(max_workers=10) as executor:
-            results = executor.map(_fetch_binance_open, binance_base_assets)
-            for sym, open_p in results:
-                if open_p: utc0_open_dict[sym] = open_p
-                
+        # --- 기존 선물 데이터 수집 유지 ---
+        info_f = requests.get("https://fapi.binance.com/fapi/v1/exchangeInfo").json()
+        active_f = {s['symbol'] for s in info_f['symbols'] if s['status'] == 'TRADING' and s['quoteAsset'] == 'USDT'}
+        prices_f = requests.get("https://fapi.binance.com/fapi/v1/ticker/24hr").json() # 🚀 price 대신 24hr 호출 (거래대금 포함)
+        
+        # 🚀 [추가] 현물(Spot) 데이터 수집!
+        info_s = requests.get("https://api.binance.com/api/v3/exchangeInfo").json()
+        active_s = {s['symbol'] for s in info_s['symbols'] if s['status'] == 'TRADING' and s['quoteAsset'] == 'USDT'}
+        prices_s = requests.get("https://api.binance.com/api/v3/ticker/24hr").json()
+        
+        # [추가] 선물/현물 틱사이즈 긁어오기
         b_precisions = {}
-        for s in info['symbols']:
+        for s in info_f['symbols']:
             if s['quoteAsset'] == 'USDT':
                 f = {filt['filterType']: filt for filt in s['filters']}
-                t_size = f.get('PRICE_FILTER', {}).get('tickSize', '0.01')
-                b_precisions[s['symbol']] = get_precision(t_size)
+                b_precisions[s['symbol']] = get_precision(f.get('PRICE_FILTER', {}).get('tickSize', '0.01'))
+        
+        for s in info_s['symbols']:
+            if s['quoteAsset'] == 'USDT' and s['symbol'] not in b_precisions:
+                f = {filt['filterType']: filt for filt in s['filters']}
+                b_precisions[s['symbol']] = get_precision(f.get('PRICE_FILTER', {}).get('tickSize', '0.01'))
 
-        for ticker, price in p_dict.items():
+        # 선물 거래대금 및 시세
+        f_dict = {i['symbol']: {
+            'price': float(i['lastPrice']), 
+            'change_24h': float(i['priceChangePercent']),
+            'vol': float(i['quoteVolume']) # 🚀 선물 거래대금
+        } for i in prices_f if i['symbol'] in active_f}
+
+        # 현물 거래대금 및 시세
+        s_dict = {i['symbol']: {
+            'price': float(i['lastPrice']),
+            'change_24h': float(i['priceChangePercent']),
+            'vol': float(i['quoteVolume']) # 🚀 현물 거래대금
+        } for i in prices_s if i['symbol'] in active_s}
+
+        # 합치기 (선물을 기본으로 하되, 현물 거래대금을 더해주고, 현물 전용 코인도 추가)
+        all_active = active_f.union(active_s)
+        for ticker in all_active:
             sym = ticker.replace('USDT', '')
+            binance_base_assets.add(sym)
+            
+            f_data = f_dict.get(ticker, {})
+            s_data = s_dict.get(ticker, {})
+            
+            # 가격은 선물이 있으면 선물, 없으면 현물
+            base_price = f_data.get('price', s_data.get('price', 0))
+            base_change = f_data.get('change_24h', s_data.get('change_24h', 0))
+            
             binance_data[ticker] = {
-                'price': price,
-                'change_24h': c_dict.get(ticker, 0.0),
-                'utc0_open': utc0_open_dict.get(sym),
-                'precision': b_precisions.get(ticker, 2)
+                'price': base_price,
+                'change_24h': base_change,
+                'vol_futures': f_data.get('vol', 0.0), # 🚀 분리
+                'vol_spot': s_data.get('vol', 0.0),    # 🚀 분리
+                'precision': b_precisions.get(ticker, 2), # (기존 로직 유지)
+                'is_spot_only': ticker not in active_f,   # 🚀 뱃지용
+                'is_futures': ticker in active_f,
+                'is_spot': ticker in active_s
             }
+            
     except Exception as e: 
         print(f"🚨 fetch_exchange_market_data 에러: {e}") # 👈 pass 대신 이걸 넣으세요!
 
     binance_pure = {get_pure_base_asset(a) for a in binance_base_assets}
-    upbit_only_assets = {k for k in upbit_krw_set if k not in EXCLUSION_LIST and not is_scaled_symbol(k) and k not in binance_pure and k not in binance_base_assets}
+    
+    # 🚨 [수정] 모듈 1 하단부 upbit_only_assets 생성 로직 교체
+    REVERSE_LOOKUP = {}
+    for alias, info in DUPLICATED_LIST.items():
+        if len(info) >= 4:
+            REVERSE_LOOKUP[f"{info[2].upper()}_{info[3].upper()}"] = alias
+
+    upbit_only_assets = set()
+    for k in upbit_krw_set:
+        if k in EXCLUSION_LIST or is_scaled_symbol(k): continue
+        
+        # 🚀 이제 정상적으로 별명을 찾아와서 비교합니다!
+        alias_upbit = REVERSE_LOOKUP.get(f"{k.upper()}_UPBIT", k)
+        alias_binance = REVERSE_LOOKUP.get(f"{k.upper()}_BINANCE", k)
+        
+        if k not in binance_pure or alias_upbit != alias_binance:
+            upbit_only_assets.add(k)
 
     upbit_data = {}
     if upbit_only_assets:
@@ -235,7 +323,7 @@ def fetch_exchange_market_data():
             except Exception as e: 
                 print(f" 업비트 데이터 수집 에러 (Chunk): {e}")
 
-    return binance_data, upbit_data, upbit_krw_set, upbit_only_assets
+    return binance_data, upbit_data, upbit_krw_set, bithumb_krw_set, upbit_only_assets
 
 # ==========================================
 # 🧱 모듈 2: 코인마켓캡(CMC) 정보 수집기
@@ -248,8 +336,6 @@ def fetch_cmc_market_data(binance_data, upbit_only_assets):
     asset_to_lookup_key = {}
     id_lookup, sym_lookup = [], []
     
-    DUPLICATED_LIST = MAPPING_DATA.get("DUPLICATED_LIST", {})
-
     # 🚀 [추가] 역방향 족보 생성: "진짜티커_거래소" -> "별명(임의이름)"
     REVERSE_LOOKUP = {}
     for alias, info in DUPLICATED_LIST.items():
@@ -276,9 +362,21 @@ def fetch_cmc_market_data(binance_data, upbit_only_assets):
             id_lookup.append(cmc_id)
             asset_to_lookup_key[f"{exchange_tag}_{a.upper()}"] = cmc_id
         else:
+            # norm = SPECIAL_SYMBOL_MAP.get(get_pure_base_asset(a), get_pure_base_asset(a))
+            # sym_lookup.append(norm)
+            # asset_to_lookup_key[f"{exchange_tag}_{a.upper()}"] = norm
+            
+            # 1. 일단 깎아본 이름(norm) 가져오기
             norm = SPECIAL_SYMBOL_MAP.get(get_pure_base_asset(a), get_pure_base_asset(a))
+            
+            # 🚀 [범인 검거용 로그] UID가 없어서 이름으로 조회되는 놈들 싹 다 찍어보기
+            print(f"🕵️ [CMC 이름조회 대기열] 원본: {a} -> 변환: {norm}")
+            
+            # 2. 만약 이름에 언더바(_)가 있다면 즉시 경고!
+            if "_" in norm:
+                print(f"🚨 [검거 완료] 이 자식이 400 에러 주범임!!! -> {norm}")
+            
             sym_lookup.append(norm)
-            asset_to_lookup_key[f"{exchange_tag}_{a.upper()}"] = norm
 
     headers = {'Accepts': 'application/json', 'X-CMC_PRO_API_KEY': config.CMC_API_KEY}
     quote_tasks = []
@@ -304,13 +402,18 @@ def fetch_cmc_market_data(binance_data, upbit_only_assets):
             platform = info.get('platform')
             chain_symbol = platform.get('symbol') if platform else info.get('symbol', '')
             
+            # 🚀 [수정] tags 리스트를 콤마로 연결해서 추출! (거래소 상장 정보는 API 한계로 제외)
+            tags_list = info.get('tags', [])
+            tags_str = ",".join([t['name'] for t in tags_list]) if isinstance(tags_list, list) else ""
+            
             market_data_map[k] = {
                 'name': info.get('name'),
                 'market_cap': q.get('market_cap'),
                 'cmc_price': q.get('price'),
                 'volume_24h': q.get('volume_24h'),
                 'ucid': str(info.get('id')),
-                'chain_symbol': chain_symbol
+                'chain_symbol': chain_symbol,
+                'tags': tags_str # 🚀 새로 추가된 태그
             }
     return market_data_map, asset_to_lookup_key
 
@@ -319,12 +422,10 @@ def fetch_cmc_market_data(binance_data, upbit_only_assets):
 # ==========================================
 
 def build_final_market_list(
-    binance_data, upbit_data, market_data_map, asset_to_lookup_key, upbit_krw_set, upbit_only_assets):
+    global_listings, binance_data, upbit_data, market_data_map, asset_to_lookup_key, upbit_krw_set, bithumb_krw_set, upbit_only_assets):
     global MAPPING_DATA
     PRICE_DIFFERENCE_THRESHOLD = 0.20
     # MAJOR_COINS = {'BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'SUI'}
-    TICKER_DATA = MAPPING_DATA.get("TICKER_DATA", {})
-    DUPLICATED_LIST = MAPPING_DATA.get("DUPLICATED_LIST", {})
 
     # 🚀 1. 실시간 테더 환율 가져오기 (두나무 api 에러 방지)
     krw_usd_rate = 1450.0 
@@ -346,11 +447,10 @@ def build_final_market_list(
 
     # 🚀 [추가] 중복 출입 통제소 (같은 UID는 두 번 못 들어옴!)
     processed_uids = set()
-
+    
     # ---------------------------------------------------------
-    # 1. 바이낸스 선물 조립
+    # 바이낸스 선물 조립
     # ---------------------------------------------------------
-    # --- 1. 바이낸스 선물 조립 루프 내부 ---
     for ticker, b_info in binance_data.items():
         price = b_info['price']
         mcap = 0
@@ -373,7 +473,7 @@ def build_final_market_list(
         lookup_id = asset_to_lookup_key.get(f"BINANCE_{raw_symbol.upper()}") or asset_to_lookup_key.get(f"BINANCE_{base.upper()}")
         info = market_data_map.get(lookup_id) if lookup_id else None
 
-        if not info: continue # 정보 없으면 스킵
+        # if not info: continue # 정보 없으면 스킵
         
         ucid = info.get('ucid', '') if info else ''
 
@@ -384,7 +484,7 @@ def build_final_market_list(
             processed_uids.add(ucid)
 
         if info or base in MANUAL_SUPPLY_MAP:
-            logo = create_image_tag(f"https://s2.coinmarketcap.com/static/img/coins/128x128/{ucid}.png" if ucid else "")
+            logo = create_image_tag(f"https://s2.coinmarketcap.com/static/img/coins/64x64/{ucid}.png" if ucid else "")
 
             # 🚀 [철벽 방어 2] 격리 병동 놈들은 체인 덮어씌우고 TICKER_DATA에 저장 안 함!
             if display_name in DUPLICATED_LIST:
@@ -427,8 +527,8 @@ def build_final_market_list(
                 #     continue
         # else: continue
 
-        utc0_open = round(b_info.get('utc0_open', 0), 8) if b_info.get('utc0_open') else 0.0
-        change_today = round(((price - utc0_open) / utc0_open * 100), 2) if utc0_open and utc0_open > 0 else 0.0
+        utc0_open = js_round(b_info.get('utc0_open', 0), 8) if b_info.get('utc0_open') else 0.0
+        change_today = js_round(((price - utc0_open) / utc0_open * 100), 2) if utc0_open and utc0_open > 0 else 0.0
 
         # 🚀 [사전 변수 통일] append 안에 들어갈 놈들을 미리 깔끔하게 정리
         coin_name = info.get('name', base) if info else base
@@ -436,6 +536,13 @@ def build_final_market_list(
         change_24h = b_info.get('change_24h', 0.0)
         is_upbit = 'O' if base in upbit_krw_set else 'X'
         precision = b_info.get('precision', 2)
+        
+        # (루프 안에서) 현재 코인의 상장 거래소 목록 만들기
+        listed_on = set(global_listings.get(base, set()))
+        if b_info.get('is_spot'): listed_on.add('BINANCE')
+        if b_info.get('is_futures'): listed_on.add('BINANCE_FUTURES')
+        if base in upbit_krw_set: listed_on.add('UPBIT')
+        if base in bithumb_krw_set: listed_on.add('BITHUMB') # 빗썸 셋 넘겨받았다면!
 
         # 🚀 [깔끔한 Append] 바이낸스/업비트 완벽하게 동일한 구조
         final_results.append({
@@ -465,6 +572,13 @@ def build_final_market_list(
             "Volume_Raw": vol_24h,
             "MarketCap_Raw": mcap,
             "utc0_open_Raw": utc0_open,
+            
+            # 추가 데이터 정리 예정
+            "Binance_Vol_Futures": b_info.get('vol_futures', 0.0),
+            "Binance_Vol_Spot": b_info.get('vol_spot', 0.0),
+            "Spot_Only": 'O' if b_info.get('is_spot_only') else 'X',
+            "Tags": info.get('tags', '') if info else '',
+            "Listed_Exchanges": list(listed_on), # 🚀 프론트엔드야, 이거 보고 이미지 박아라!
         })
 
     # ---------------------------------------------------------
@@ -492,7 +606,7 @@ def build_final_market_list(
         if ucid: processed_uids.add(ucid)
         
         # --- 여기서부터는 데이터 조립 ---
-        logo = create_image_tag(f"https://s2.coinmarketcap.com/static/img/coins/128x128/{ucid}.png" if ucid else "")
+        logo = create_image_tag(f"https://s2.coinmarketcap.com/static/img/coins/64x64/{ucid}.png" if ucid else "")
 
         # 🚀 [철벽 방어] 격리 놈들은 체인 덮어씌우고 TICKER_DATA 저장 안 함!
         if display_name in DUPLICATED_LIST:
@@ -527,7 +641,7 @@ def build_final_market_list(
             if up_open_krw > 0:
                 utc0_open = up_open_krw / krw_usd_rate
 
-        change_today = round(((current_p - utc0_open) / utc0_open * 100), 2) if utc0_open > 0 else 0.0
+        change_today = js_round(((current_p - utc0_open) / utc0_open * 100), 2) if utc0_open > 0 else 0.0
         
         # 🚀 [사전 변수 통일] 바이낸스와 똑같은 변수명으로 맞춤
         coin_name = info.get('name', base) if info else base
@@ -538,6 +652,13 @@ def build_final_market_list(
         p = up_info['price']
         # 🚀 하드코딩 대신 자릿수 판별 로직 (표준 호가 단위 규칙만 적용)
         up_precision = 0 if p >= 100 else 1 if p >= 10 else 2 if p >= 1 else 3 if p >= 0.1 else 4
+        
+        # (루프 안에서) 현재 코인의 상장 거래소 목록 만들기
+        listed_on = set(global_listings.get(base, set()))
+        if b_info.get('is_spot'): listed_on.add('BINANCE')
+        if b_info.get('is_futures'): listed_on.add('BINANCE_FUTURES')
+        if base in upbit_krw_set: listed_on.add('UPBIT')
+        # if base in bithumb_krw_set: listed_on.add('BITHUMB') # 빗썸 셋 넘겨받았다면!
 
         # 🚀 [깔끔한 Append] 바이낸스와 복붙 수준으로 통일
         final_results.append({
@@ -567,6 +688,10 @@ def build_final_market_list(
             "Volume_Raw": vol_24h,
             "MarketCap_Raw": final_mcap,
             "utc0_open": utc0_open,
+            
+            # 추가 예정
+            "Upbit_Vol": up_info.get('acc_trade_price_24h', 0.0),
+            "Listed_Exchanges": list(listed_on), # 🚀 프론트엔드야, 이거 보고 이미지 박아라!
         })
 
     return final_results, is_mapping_updated, TICKER_DATA
@@ -576,14 +701,17 @@ def build_final_market_list(
 # ==========================================
 def _fetch_and_process_data():
     global MAPPING_DATA
-
     # 1. 시세 수집
-    binance_data, upbit_data, upbit_krw_set, upbit_only_assets = fetch_exchange_market_data()
+    binance_data, upbit_data, upbit_krw_set, upbit_only_assets, bithumb_krw_set, = fetch_exchange_market_data()
     # 2. 정보 수집 (CMC)
     market_data_map, asset_to_lookup_key = fetch_cmc_market_data(binance_data, upbit_only_assets)
     # 3. 조립 및 계산
+    
+    # 🚀 [추가] 조립 직전에 글로벌 상장 족보 긁어오기
+    global_listings = fetch_global_listings()
+    
     final_results, is_mapping_updated, updated_chain_map = build_final_market_list(
-        binance_data, upbit_data, market_data_map, asset_to_lookup_key, upbit_krw_set, upbit_only_assets
+        global_listings, binance_data, upbit_data, market_data_map, asset_to_lookup_key, upbit_krw_set, upbit_only_assets, bithumb_krw_set
     )
 
     # 4. JSON 덮어쓰기 (체인 변경 시)

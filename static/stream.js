@@ -5,7 +5,7 @@ function startRealtimeCandle(symbol, interval, isFutures, isSpot) {
   const wsBase = isFutures ? "wss://fstream.binance.com/market/ws" : "wss://stream.binance.com:9443/ws";
 
   // 🚀 [광클 방어 1선] 이미 똑같은 차트(코인+시간)를 보고 있으면 즉시 컷! (부하 0%)
-  if ((isFutures || isSpot) && currentKlineStream === streamName && chartWs && chartWs.readyState === WebSocket.OPEN) {
+  if ((isFutures || isSpot) && currentKlineStream === streamName && binanceChartWs && binanceChartWs.readyState === WebSocket.OPEN) {
     console.log(`😎 [스킵] 이미 ${streamName} 채널 시청 중입니다. (서버 부하 방지)`);
     return;
   }
@@ -44,10 +44,10 @@ function startRealtimeCandle(symbol, interval, isFutures, isSpot) {
   // ---------------------------------------------------------
   // 📌 2. 이전 업비트 소켓 무조건 청소 (충돌 방지)
   // ---------------------------------------------------------
-  if (currentWs) {
-    currentWs.onmessage = null; // 핸들러 먼저 죽여야 안전!
-    currentWs.close();
-    currentWs = null;
+  if (upbitChartWs) {
+    upbitChartWs.onmessage = null; // 핸들러 먼저 죽여야 안전!
+    upbitChartWs.close();
+    upbitChartWs = null;
   }
 
   // ---------------------------------------------------------
@@ -55,17 +55,28 @@ function startRealtimeCandle(symbol, interval, isFutures, isSpot) {
   // ---------------------------------------------------------
   if (isFutures || isSpot) {
     // 1️⃣ 소켓이 없거나 닫혔으면 새로 생성
-    if (!chartWs || chartWs.readyState !== WebSocket.OPEN) {
-      chartWs = new WebSocket(wsBase);
-      chartWs.onopen = () => {
-        chartWs.send(JSON.stringify({ method: "SUBSCRIBE", params: [streamName], id: getWsId() }));
+    if (!binanceChartWs || binanceChartWs.readyState !== WebSocket.OPEN) {
+      binanceChartWs = new WebSocket(wsBase);
+      binanceChartWs.onopen = () => {
+        binanceChartWs.send(JSON.stringify({ method: "SUBSCRIBE", params: [streamName], id: getWsId() }));
         currentKlineStream = streamName;
         console.log(`✅ [차트소켓] 신규 연결 및 구독 완료: ${streamName}`);
+        document.getElementById("status-dot").style.background = "#26a69a";
+        document.getElementById("status-text").innerText = "Binance LIVE";
       };
 
-      chartWs.onmessage = (e) => {
+      binanceChartWs.onmessage = (e) => {
+        // 🚀 [방어막] 차트 로딩 중이면 기존 코인의 틱 데이터는 가차 없이 씹는다!
+        if (window.isFetchingChart) return;
+
         const res = JSON.parse(e.data);
         if (res.e !== "kline") return; // 캔들 아니면 무시
+
+        // 🚀 [가장 중요] 다른 코인 데이터 새치기 방어
+        const tickSymbol = res.k.s.toUpperCase();
+        const currentAssetClean = currentAsset.split('(')[0].trim().toUpperCase();
+
+        if (!tickSymbol.includes(currentAssetClean)) return; // 👈 튀는 현상 막아주는 1등 공신
 
         const k = res.k;
         const liveData = { time: k.t / 1000, open: +k.o, high: +k.h, low: +k.l, close: +k.c };
@@ -76,6 +87,12 @@ function startRealtimeCandle(symbol, interval, isFutures, isSpot) {
           else if (liveData.time > mainData[lastIdx].time) mainData.push(liveData);
         }
 
+        // 🚀 [결정적 수리] 바낸도 카운트다운 엔진에 '서버 시간(res.E)'을 먹여준다!
+        if (typeof updateRealtimeCountdown === "function") {
+          // res.E 는 바이낸스가 밀리초 단위로 쏴주는 정확한 서버 현재 시간입니다.
+          updateRealtimeCountdown(res.E);
+        }
+
         updateStatus(liveData);
         renderWithGhosts();
       };
@@ -83,9 +100,9 @@ function startRealtimeCandle(symbol, interval, isFutures, isSpot) {
     // 2️⃣ 이미 열려있으면 채널만 교체 (구독/해지)
     else {
       if (currentKlineStream && currentKlineStream !== streamName) {
-        chartWs.send(JSON.stringify({ method: "UNSUBSCRIBE", params: [currentKlineStream], id: getWsId() }));
+        binanceChartWs.send(JSON.stringify({ method: "UNSUBSCRIBE", params: [currentKlineStream], id: getWsId() }));
       }
-      chartWs.send(JSON.stringify({ method: "SUBSCRIBE", params: [streamName], id: getWsId() }));
+      binanceChartWs.send(JSON.stringify({ method: "SUBSCRIBE", params: [streamName], id: getWsId() }));
       currentKlineStream = streamName;
       console.log(`🎯 [타겟교체] ${streamName}`);
     }
@@ -96,32 +113,45 @@ function startRealtimeCandle(symbol, interval, isFutures, isSpot) {
   // ---------------------------------------------------------
   else {
     // 🚀 바이낸스 보던 게 있다면 데이터 안 섞이게 매너 해지!
-    if (chartWs && chartWs.readyState === WebSocket.OPEN && currentKlineStream) {
-      chartWs.send(JSON.stringify({ method: "UNSUBSCRIBE", params: [currentKlineStream], id: getWsId() }));
+    if (binanceChartWs && binanceChartWs.readyState === WebSocket.OPEN && currentKlineStream) {
+      binanceChartWs.send(JSON.stringify({ method: "UNSUBSCRIBE", params: [currentKlineStream], id: getWsId() }));
       currentKlineStream = null;
     }
 
     const upbitTicker = `KRW-${symbol}`;
-    currentWs = new WebSocket("wss://api.upbit.com/websocket/v1");
+    upbitChartWs = new WebSocket("wss://api.upbit.com/websocket/v1");
 
-    currentWs.onopen = () => {
+    upbitChartWs.onopen = () => {
       const msg = [
         { ticket: "UNIQUE_TICKET" },
         { type: "ticker", codes: [upbitTicker] },
       ];
-      currentWs.send(JSON.stringify(msg));
-      document.getElementById("status-dot").style.background = "#26a69a";
-      document.getElementById("status-text").innerText = "LIVE";
+      upbitChartWs.send(JSON.stringify(msg));
+      document.getElementById("status-dot").style.background = "#1261c4";
+      document.getElementById("status-text").innerText = "Upbit LIVE";
     };
 
-    currentWs.onmessage = async (e) => {
-      if (!currentWs) return;
+    upbitChartWs.onmessage = async (e) => {
+      if (window.isFetchingChart) return;
 
-      const text = await e.data.text();
-      const res = JSON.parse(text);
+      // 데이터 파싱 (Blob/Text 대응)
+      let res;
+      try {
+        const text = (typeof e.data === 'string') ? e.data : await e.data.text();
+        res = JSON.parse(text);
+      } catch (err) { return; }
+
+      // 🚨 [핵심] 업비트 전용 방어막 설치
+      // 업비트는 티커가 'KRW-BTC' 형식으로 옵니다.
+      const tickSymbol = res.code ? res.code.toUpperCase() : "";
+      const currentAssetClean = currentAsset.split('(')[0].trim().toUpperCase();
+
+      // 🚀 업비트 규격(KRW-BTC)에 내 코인 이름(BTC)이 포함되어 있는지 확인!
+      if (!tickSymbol.includes(currentAssetClean)) return;
+
+      // 서버 시간 및 캔들 시작 시간 계산
       const serverMs = res.timestamp;
-
-      const candleStartTime = getUpbitCandleStartTime(res.timestamp, currentTF);
+      const candleStartTime = getUpbitCandleStartTime(serverMs, currentTF);
 
       if (candleSeries && mainData.length > 0) {
         const p = currentTableData.find(c => c.Symbol === currentAsset)?.precision;
@@ -155,29 +185,28 @@ function startRealtimeCandle(symbol, interval, isFutures, isSpot) {
         renderWithGhosts();
       }
     };
-
-    currentWs.onclose = () => {
-      document.getElementById("status-dot").style.background = "#ef5350";
-      document.getElementById("status-text").innerText = "OFFLINE";
-    };
+    // upbitChartWs.onclose = () => {
+    //   document.getElementById("status-dot").style.background = "#ef5350";
+    //   document.getElementById("status-text").innerText = "OFFLINE";
+    // };
   }
 }
 
 function startBinanceMarketRadar() {
   // 🚀 안전하게 기존 소켓 닫기
-  if (binanceWs) {
-    binanceWs.onmessage = null;
-    binanceWs.close();
+  if (binanceRadarWs) {
+    binanceRadarWs.onmessage = null;
+    binanceRadarWs.close();
   }
 
-  binanceWs = new WebSocket("wss://fstream.binance.com/market/ws/!ticker@arr");
+  binanceRadarWs = new WebSocket("wss://fstream.binance.com/market/ws/!ticker@arr");
 
-  binanceWs.onopen = () => {
-    console.log("✅ [전체소켓] 바이낸스 선물 스트림 연결 성공!");
-    document.getElementById("status-dot").style.background = "#26a69a";
+  binanceRadarWs.onopen = () => {
+    // console.log("✅ [전체소켓] 바이낸스 선물 스트림 연결 성공!");
+    // document.getElementById("status-dot").style.background = "#26a69a";
   };
 
-  binanceWs.onmessage = (event) => {
+  binanceRadarWs.onmessage = (event) => {
     const data = JSON.parse(event.data);
 
     // 🚀 데이터가 들어오는지 딱 한 번만 확인
@@ -189,30 +218,30 @@ function startBinanceMarketRadar() {
     });
   };
 
-  binanceWs.onclose = (e) => {
+  binanceRadarWs.onclose = (e) => {
     console.log(`❌ [전체소켓] 연결 끊김! ${UI_UPDATE_INTERVAL / 1000}초 후 재시도...`, e.reason);
     setTimeout(startBinanceMarketRadar, UI_UPDATE_INTERVAL); // 🚀 자동 재연결!
   };
 
-  binanceWs.onerror = (err) => {
+  binanceRadarWs.onerror = (err) => {
     console.error("🚨 [전체소켓] 에러 발생:", err);
   };
 }
 
 function startUpbitMarketRadar() {
-  if (upbitWs) {
-    upbitWs.onmessage = null;
-    upbitWs.close();
+  if (upbitRadarWs) {
+    upbitRadarWs.onmessage = null;
+    upbitRadarWs.close();
   }
 
-  upbitWs = new WebSocket("wss://api.upbit.com/websocket/v1");
-  upbitWs.binaryType = 'arraybuffer';
+  upbitRadarWs = new WebSocket("wss://api.upbit.com/websocket/v1");
+  upbitRadarWs.binaryType = 'arraybuffer';
 
-  upbitWs.onopen = () => {
+  upbitRadarWs.onopen = () => {
     // 🚀 [핵심 최적화] 
     // Upbit 상장('O') 되어 있어야 함
     // 바이낸스 티커가 없거나, Note에 'Upbit Only'라고 명시된 놈들만 필터링
-    // Ticker가 'OXOXUSDT'면 바이낸스에 있는 놈이니 제외 대상!)
+    // Ticker가 '...USDT'면 바이낸스에 있는 놈이니 제외 대상!)
     const upbitOnlyCodes = currentTableData
       .filter(row => {
         const isUpbit = row.Upbit === 'O';
@@ -231,12 +260,13 @@ function startUpbitMarketRadar() {
       { ticket: "UNIQUE_TICKET" },
       { type: "ticker", codes: upbitOnlyCodes }
     ];
-    upbitWs.send(JSON.stringify(msg));
-    console.log(`🎯 [업비트 전용] ${upbitOnlyCodes.length}개 순수 국내주만 타격 시작!`);
+    upbitRadarWs.send(JSON.stringify(msg));
+    console.log(`🎯 [업비트 전용] ${upbitOnlyCodes.length}개 국내산 코인들 타격 시작!`);
   };
 
   const decoder = new TextDecoder('utf-8');
-  upbitWs.onmessage = (event) => {
+  upbitRadarWs.onmessage = (event) => {
+
     const ticker = JSON.parse(decoder.decode(event.data));
     const pureSymbol = ticker.code.replace("KRW-", "");
 
@@ -248,7 +278,7 @@ function startUpbitMarketRadar() {
     };
   };
 
-  upbitWs.onclose = () => setTimeout(startUpbitMarketRadar, UI_UPDATE_INTERVAL);
+  upbitRadarWs.onclose = () => setTimeout(startUpbitMarketRadar, UI_UPDATE_INTERVAL);
 }
 
 // ✅ 업비트 시간 계산기 (어떤 TF가 와도 0.1초 컷)

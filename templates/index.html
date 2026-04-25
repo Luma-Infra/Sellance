@@ -151,7 +151,7 @@
 
         <div id="connection-status" class="flex items-center gap-2 px-4 py-2 text-[11px]">
           <span id="status-dot" class="w-2 h-2 rounded-full bg-gray-500 shadow-[0_0_5px_rgba(0,0,0,0.5)]"></span>
-          <span id="status-text" class="font-bold opacity-70 tracking-wide">DISCONNECTED</span>
+          <span id="status-text" class="font-bold opacity-70 tracking-wide">Waiting...</span>
         </div>
 
         <div class="flex items-center gap-3">
@@ -342,13 +342,13 @@
 
       <div id="chart-container"
         class="flex-1 relative overflow-hidden m-[15px] w-[calc(100%-30px)] border border-theme-border rounded-lg bg-theme-panel shadow-[inset_0_0_15px_rgba(0,0,0,0.15)]">
-        <div id="chart-loading-modal"
+        <!-- <div id="chart-loading-modal"
           class="absolute z-[200] inset-0 hidden flex flex-col justify-center items-center bg-transparent backdrop-blur-[2px] text-theme-text transition-opacity duration-100">
           <div class="chart-spinner"></div>
           <div class="text-[10px] opacity-60 mt-3 font-black tracking-[0.2em] uppercase">
             Loading Chart
           </div>
-        </div>
+        </div> -->
         <div id="ohlc-legend"
           class="absolute top-2 left-2 z-[50] font-mono text-[13px] flex items-center px-2 gap-2 bg-black/5 rounded pointer-events-none">
           <span class="opacity-50 text-xs">Hover on chart to see OHLC...</span>
