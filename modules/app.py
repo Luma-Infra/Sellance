@@ -1,12 +1,9 @@
 # app.py
-from modules.api_manager import get_cached_data
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Request
 from datetime import datetime
-from pathlib import Path
-import webbrowser
 import threading
 import requests
 import pytz
@@ -14,6 +11,13 @@ import time
 import sys
 import io
 import os
+
+from pathlib import Path              # 👈 추가됨!
+from fastapi import FastAPI, Request   # 👈 대문자 R 확인!
+
+from . import api_manager             # 👈 우리 지휘관
+
+# from modules import api_manager, 
 
 # 윈도우 터미널 인코딩 문제를 해결하기 위해 표준 출력을 utf-8로 강제 설정
 sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
@@ -35,7 +39,7 @@ app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="stat
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 @app.get("/")
-async def home(request: Request):
+async def home(request: v):
     # 뼈대만 렌더링하고 데이터는 AJAX로 그림
     return templates.TemplateResponse(request=request, name="index.html")
 
@@ -43,7 +47,7 @@ async def home(request: Request):
 @app.get("/api/market-data")
 def get_market_data(force: bool = False):
     """프론트엔드의 표(Table)를 그리기 위한 데이터를 JSON으로 반환합니다."""
-    data, last_updated = get_cached_data(force_reload=force)
+    data, last_updated = api_manager.get_cached_data(force_reload=force)
     return {"data": data, "last_updated": last_updated}
 
 # ⭐️ async 삭제됨!
@@ -77,7 +81,7 @@ def get_coin_info(asset: str):
     """캐시된 데이터에서 코인 정보를 찾아 반환합니다. (CMC 호출 안 함 = 크레딧 0원)"""
     try:
         # api_manager.py의 캐시 데이터를 가져옵니다 (force=False 이므로 API 새로 안 찌름)
-        cached_data, _ = get_cached_data(force_reload=False)
+        cached_data, _ = api_manager.get_cached_data(force_reload=False)
         
         # 캐시된 600개 리스트 중에서 내가 클릭한 코인을 찾습니다
         for coin in cached_data:
@@ -136,7 +140,7 @@ def auto_reset_scheduler():
         # 9시 0분 0초 ~ 30초 사이에만 한 번 트리거
         if now_kst.hour == 9 and now_kst.minute == 0 and now_kst.second < 30:
             print("⏰ 스케줄러: 9시 정각입니다. 캐시를 갱신합니다.")
-            get_cached_data(force_reload=True)
+            api_manager.get_cached_data(force_reload=True)
             time.sleep(40) # 중복 실행 방지용 40초 휴식
         
         time.sleep(10) # 10초마다 시계 확인    
@@ -147,7 +151,7 @@ def on_startup():
     threading.Thread(target=auto_reset_scheduler, daemon=True).start()
     
     # ⭐️ 데이터 긁어오기 (이건 배포든 로컬이든 필수!)
-    threading.Thread(target=get_cached_data, args=(True,)).start()
+    threading.Thread(target=api_manager.get_cached_data, args=(True,)).start()
     
     # 🚀 로컬(127.0.0.1) 환경이고, 아직 브라우저 안 열었을 때만 실행
     # Railway 같은 곳에서는 이 환경변수가 없으므로 브라우저를 열지 않는다는 소문이 있네요
