@@ -20,8 +20,7 @@ PHASES = [
 status_list = ["대기중"] * len(PHASES)
 
 def draw_dashboard():
-    """터미널을 지우고 고정된 대시보드를 그립니다."""
-    # 터미널 커서를 맨 위로 이동 (화면 깜빡임 최소화)
+    """터미널 커서 위치 제어를 통해 무조건 일렬 정렬합니다."""
     sys.stdout.write("\033[H") 
     
     print(f"\n{'='*60}")
@@ -31,9 +30,20 @@ def draw_dashboard():
     completed_count = 0
     for i, msg in enumerate(PHASES):
         status = status_list[i]
-        icon = "⏳" if status == "대기중" else "🏃" if status == "진행중" else "✅"
-        print(f" {icon} Phase {i+1}/9: {msg.ljust(35)} [{status}]")
-        if status == "완료":
+        icon = "⏳" if status.strip() == "대기중" else "🏃" if status.strip() == "진행중..." else "✅"
+        
+        # 🚀 1. 앞부분 출력
+        line_start = f" {icon} Phase {i+1}/9: {msg}"
+        sys.stdout.write(line_start)
+        
+        # 🚀 2. 커서를 현재 줄의 N번째 칸으로 강제 이동 (\033[자릿수G)
+        # 한글 폭 문제를 무시하고 무조건 안착시킵니다.
+        sys.stdout.write("\033[50G") 
+        
+        # 🚀 3. 상태 출력
+        print(f"{status}")
+        
+        if status.strip() == "완료!!":
             completed_count += 1
 
     # 📊 하단 프로그레스 바 계산
@@ -52,13 +62,13 @@ def phase_trace(phase_idx):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             # 1. 상태를 [진행중]으로 변경
-            status_list[phase_idx] = "진행중"
+            status_list[phase_idx] = "진행중..."
             draw_dashboard()
             
             result = func(*args, **kwargs)
             
             # 2. 상태를 [완료]로 변경
-            status_list[phase_idx] = "완료"
+            status_list[phase_idx] = "완료!!"
             draw_dashboard()
             return result
         return wrapper

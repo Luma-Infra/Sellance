@@ -261,7 +261,7 @@ def assemble_final_dashboard(
     # 테더 환율
     krw_usd_rate = 1450.0 
     try:
-        tether_res = requests.get("https://api.upbit.com/v1/ticker?markets=KRW-USDT", timeout=3).json()
+        tether_res = requests.get("https://api.upbit.com/v1/ticker?markets=KRW-USDT", timeout=5).json()
         if tether_res and len(tether_res) > 0:
             krw_usd_rate = float(tether_res[0]['trade_price'])
     except Exception as e:

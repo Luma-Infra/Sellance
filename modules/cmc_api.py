@@ -20,9 +20,11 @@ def _fetch_cmc_api_chunk(task):
         resp.raise_for_status()
         if resp.text: return resp.json()
     except Exception as e:
-        # 🚨 [핵심] 범인의 얼굴을 확인하기 위해 에러 내용과 파라미터를 출력합니다!
-        print(f"🚨 [CMC 폭파] API 에러 발생: {e}")
-        print(f"🚨 실패한 심볼 목록: {params.get('symbol', 'UID 요청임')}")
+        # 에러가 나도 당황하지 않고 '어떤' 에러인지 깔끔하게 보고!
+        if "timeout" in str(e).lower():
+            print(f"⏳ [CMC 지연] {params.get('symbol')} 수집 중 시간 초과 (10초 경과)")
+        else:
+            print(f"🚨 [CMC 에러] {e} | 대상: {params.get('symbol')}")
         return None
 
 # 심볼 검사하고 ID로 찌를지 티커로 찌를지 대기열(queue) 만드는 로직.
@@ -106,7 +108,7 @@ def execute_cmc_requests(id_lookup, sym_lookup):
             quote_tasks.append((url, headers, {'symbol': ",".join(chunk), 'convert': 'USD'}))
 
     market_data_map = {}
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=25) as executor:
         results = list(executor.map(_fetch_cmc_api_chunk, quote_tasks))
 
     for res in results:

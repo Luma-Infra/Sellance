@@ -154,7 +154,7 @@ def get_cached_data(force_reload=False):
             is_expired = True # 처음 켰을 때는 무조건 갱신
 
         if force_reload or needs_reset or is_expired:
-            print("💡 API 데이터를 수집합니다... (약 5~10초 소요)")
+            # print("💡 API 데이터를 수집합니다... (약 5~10초 소요)")
             try:
                 raw_data = _fetch_and_process_data() 
 

@@ -1,5 +1,5 @@
 # exchange_api.py
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait
 import requests
 from modules import config_manager, utils
 
@@ -30,25 +30,26 @@ def fetch_global_listings():
             listings[base].add(tag)
             
     def get_okx():
-        try: add_tags([i['baseCcy'] for i in requests.get("https://www.okx.com/api/v5/public/instruments?instType=SPOT", timeout=3).json().get('data', [])], 'OKX')
+        try: add_tags([i['baseCcy'] for i in requests.get("https://www.okx.com/api/v5/public/instruments?instType=SPOT", timeout=5).json().get('data', [])], 'OKX')
         except: pass
     def get_bybit():
-        try: add_tags([i['baseCoin'] for i in requests.get("https://api.bybit.com/v5/market/instruments-info?category=spot", timeout=3).json().get('result', {}).get('list', [])], 'BYBIT')
+        try: add_tags([i['baseCoin'] for i in requests.get("https://api.bybit.com/v5/market/instruments-info?category=spot", timeout=5).json().get('result', {}).get('list', [])], 'BYBIT')
         except: pass
     def get_bitget():
-        try: add_tags([i['baseCoin'] for i in requests.get("https://api.bitget.com/api/v2/spot/public/symbols", timeout=3).json().get('data', [])], 'BITGET')
+        try: add_tags([i['baseCoin'] for i in requests.get("https://api.bitget.com/api/v2/spot/public/symbols", timeout=5).json().get('data', [])], 'BITGET')
         except: pass
     def get_gateio():
-        try: add_tags([i['base'] for i in requests.get("https://api.gateio.ws/api/v4/spot/currency_pairs", timeout=3).json()], 'GATEIO')
+        try: add_tags([i['base'] for i in requests.get("https://api.gateio.ws/api/v4/spot/currency_pairs", timeout=5).json()], 'GATEIO')
         except: pass
     def get_coinbase():
-        try: add_tags([i['base_currency'] for i in requests.get("https://api.exchange.coinbase.com/products", timeout=3).json()], 'COINBASE')
+        try: add_tags([i['base_currency'] for i in requests.get("https://api.exchange.coinbase.com/products", timeout=5).json()], 'COINBASE')
         except: pass
 
     # 🚀 병렬로 5개 대문 동시 타격
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        for func in [get_okx, get_bybit, get_bitget, get_gateio, get_coinbase]:
-            executor.submit(func)
+    target_funcs = [get_okx, get_bybit, get_bitget, get_gateio, get_coinbase]
+    with ThreadPoolExecutor(max_workers=len(target_funcs)) as executor:
+        futures = [executor.submit(func) for func in target_funcs]
+        wait(futures)  # 👈 깔끔하게 한 줄로 끝!
             
     return listings
 
@@ -102,7 +103,7 @@ def fetch_binance_open(task):
         url = f"https://api.binance.com/api/v3/klines?symbol={symbol}USDT&interval=1d&limit=1"
         
     try:
-        res = requests.get(url, timeout=2).json()
+        res = requests.get(url, timeout=5).json()
         if res and isinstance(res, list) and len(res) > 0:
             return symbol, float(res[0][1])
     except Exception as e:
@@ -144,7 +145,7 @@ def fetch_binance_futures_spot():
         # 4. 🚀 9시 시가 병렬 수집 가동
         open_price_tasks = [(ticker.replace('USDT', ''), ticker in active_f) for ticker in all_active]
         utc0_open_dict = {}
-        with ThreadPoolExecutor(max_workers=20) as executor:
+        with ThreadPoolExecutor(max_workers=25) as executor:
             results = executor.map(fetch_binance_open, open_price_tasks)
             for sym, open_p in results:
                 if open_p: utc0_open_dict[sym] = open_p
