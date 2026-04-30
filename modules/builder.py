@@ -43,14 +43,26 @@ def build_binance_row(
     logo = utils.create_image_tag(f"https://s2.coinmarketcap.com/static/img/coins/64x64/{ucid}.png" if ucid else "")
 
     # 5. 족보 업데이트 및 시총 계산
+    # 🚀 [신규 상장 캐치!] 족보에 없고, 체인 정보가 확인되면 등록!
+    ticker_info = TICKER_DATA.get(display_name)
+    if not ticker_info or (isinstance(ticker_info, list) and len(ticker_info) < 4):
+        TICKER_DATA[display_name] = [
+            ucid,                             # 1. UID
+            ch_sym,                           # 2. 체인명
+            info.get('name', base) if info else (ticker_info[2] if ticker_info and len(ticker_info) >= 3 else base), # 3. 별명
+            base                              # 4. 실제티커
+        ]
+        is_updated = True
+        print(f"🆕 [신규 등록] 바이낸스 상장 감지: {display_name}")
+            
+        # if ch_sym and display_name not in TICKER_DATA and base not in CHAIN_LOGO_MAP:
+        #     TICKER_DATA[display_name] = [ucid, ch_sym]
+        #     is_updated = True
+        
+    # 시총 계산 (생략된 기존 로직 그대로 삽입)
     price = b_info['price']
     mcap = 0
     if info or base in MANUAL_SUPPLY_MAP:
-        if ch_sym and display_name not in TICKER_DATA and base not in CHAIN_LOGO_MAP:
-            TICKER_DATA[display_name] = [ucid, ch_sym]
-            is_updated = True
-        
-        # 시총 계산 (생략된 기존 로직 그대로 삽입)
         mcap = info.get('market_cap', 0) if info else 0 # 예시 간소화
 
     # 6. 상장 거래소 목록
@@ -131,7 +143,6 @@ def build_upbit_row(
     # -------------------------------
     
     is_updated = False
-
     if up_info is None: return None, False
     
     # CMC 데이터 매칭
@@ -162,6 +173,18 @@ def build_upbit_row(
     ch_sym = saved_chain or CHAIN_LOGO_MAP.get(display_name) or (info.get('chain_symbol') if info else '')
     chain = utils.create_image_tag(CHAIN_LOGO_MAP.get(ch_sym, '')) if ch_sym in CHAIN_LOGO_MAP else ch_sym
     logo = utils.create_image_tag(f"https://s2.coinmarketcap.com/static/img/coins/64x64/{ucid}.png" if ucid else "")
+
+    # 🚀 [신규 상장 캐치!] 업비트에만 있는 코인 등록
+    ticker_info = TICKER_DATA.get(display_name)
+    if not ticker_info or (isinstance(ticker_info, list) and len(ticker_info) < 4):
+        TICKER_DATA[display_name] = [
+            ucid,                                 # 1. UID
+            ch_sym,                               # 2. 체인명
+            info.get('name', base) if info else (ticker_info[2] if ticker_info and len(ticker_info) >= 3 else base), # 3. 별명[cite: 1]
+            base                                  # 4. 실제티커
+        ]
+        is_updated = True
+        print(f"🆕 [신규 등록] 업비트 전용 상장 감지: {display_name}")
 
     # 가격 및 정밀도
     p = up_info['price']
@@ -209,7 +232,7 @@ def build_upbit_row(
             "Upbit_Vol": up_info.get('acc_trade_price_24h', 0.0),
             "Listed_Exchanges": list(listed_on), # 🚀 프론트엔드야, 이거 보고 이미지 박아라!
     }
-    return row, False # 업데이트 로직 필요시 추가
+    return row, is_updated
 
 # 족보 청소기 로직 분리.
 def clean_stale_tickers(
@@ -269,22 +292,43 @@ def assemble_final_dashboard(
 
     # 1. 바이낸스 투입
     for ticker, b_info in binance_data.items():
+        base = utils.get_pure_base_asset(ticker).upper() # 👈 base 추출
+        # 🚀 [누님 솔루션 적용!] EXCLUSION_LIST 거르고, is_valid_ticker로 잡동사니 차단!
+        if base in EXCLUSION_LIST or not utils.is_valid_ticker(base): 
+            continue
+        
         row, updated = build_binance_row(ticker, b_info, market_data_map, asset_to_lookup_key, global_listings, upbit_krw_set, bithumb_krw_set, REVERSE_LOOKUP, processed_uids, mapping)
         if row: 
             final_results.append(row)
             if updated: any_update = True
 
-    # 2. 업비트 투입
-    for base in upbit_only_assets:
-        row, updated = build_upbit_row(base.upper(), upbit_data.get(base), binance_data, 
-                                        market_data_map, asset_to_lookup_key,global_listings,
-                                        upbit_krw_set, bithumb_krw_set,
-                                        REVERSE_LOOKUP, processed_uids, krw_usd_rate, mapping)
+    # 2. 업비트 투입 (upbit_only_assets 버리고 upbit_krw_set 사용!)
+    binance_base_set = {t.replace('USDT', '') for t in binance_data.keys()} # 🚀 비교를 위해 바낸 셋 준비
+    for base in upbit_krw_set:
+        # 🚀 [추가] 업비트 심볼의 '진짜 이름(Display Name)'을 확인
+        alias_upbit = REVERSE_LOOKUP.get(f"{base}_UPBIT", base)
+        
+        # 🚀 [중요!] 바이낸스에서도 이 코인을 처리했는지 확인합니다.
+        # 만약 바이낸스에 이 코인이 있고, 바이낸스에서의 '진짜 이름'도 같다면 중복이므로 패스!
+        alias_binance = REVERSE_LOOKUP.get(f"{base}_BINANCE", base)
+        if base in binance_base_set and alias_binance == alias_upbit:
+            continue
+        
+        # 🚀 만약 이 코인이 EXCLUSION_LIST에 있다면 패스
+        if base in EXCLUSION_LIST: continue
+        
+        # 🚀 이제 build_upbit_row로 넘깁니다! 
+        row, updated = build_upbit_row(
+            base, upbit_data.get(base), binance_data, 
+            market_data_map, asset_to_lookup_key, global_listings,
+            upbit_krw_set, bithumb_krw_set,
+            REVERSE_LOOKUP, processed_uids, krw_usd_rate, mapping
+        )
         if row: final_results.append(row)
         if updated: any_update = True
 
     # 3. 청소기 가동
-    if clean_stale_tickers(binance_data, upbit_krw_set, mapping):
-        any_update = True
+    # if clean_stale_tickers(binance_data, upbit_krw_set, mapping):
+    #     any_update = True
         
     return final_results, any_update

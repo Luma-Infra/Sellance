@@ -37,7 +37,6 @@ def save_mapping_data(mapping_data):
         return False
 
 # --- ⭐️ 아래는 다른 파일에서 "부품"으로 쓰기 좋게 파싱해주는 함수들 ⭐️ ---
-
 def get_mapping_parts(mapping_data):
     """조립에 필요한 각 리스트/맵을 튜플로 한 방에 뱉어줌"""
     return (

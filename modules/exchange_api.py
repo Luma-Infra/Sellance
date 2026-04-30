@@ -87,7 +87,7 @@ def fetch_exchange_market_data(mapping):
     # 4. 업비트 시세 타격
     upbit_data = fetch_upbit_prices(upbit_only_assets)
 
-    return binance_data, upbit_data, upbit_krw_set, bithumb_krw_set, upbit_only_assets
+    return binance_data, upbit_data, upbit_krw_set, upbit_only_assets, bithumb_krw_set
 
 # 9시 시가 수집
 def fetch_binance_open(task):

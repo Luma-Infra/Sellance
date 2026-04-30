@@ -55,8 +55,6 @@ def suppress_output():
 # 👑 최종 함수 BOSS
 # ==========================================
 def _fetch_and_process_data():
-    global MAPPING_DATA
-    
     # 🚀 1. 족보 로드 (항상 최신본으로 시작!)
     MAPPING_DATA = config_manager.load_mapping_data()
     (   
@@ -67,9 +65,9 @@ def _fetch_and_process_data():
     ) = config_manager.get_mapping_parts(MAPPING_DATA)
         
     # 1. 시세 수집
-    binance_data, upbit_data, upbit_krw_set, upbit_only_assets, bithumb_krw_set, = exchange_api.fetch_exchange_market_data(mapping)
+    binance_data, upbit_data, upbit_krw_set, upbit_only_assets, bithumb_krw_set, = exchange_api.fetch_exchange_market_data(MAPPING_DATA)
     # 2. 정보 수집 (CMC)
-    market_data_map, asset_to_lookup_key = cmc_api.fetch_cmc_market_data(binance_data, upbit_only_assets, mapping)
+    market_data_map, asset_to_lookup_key = cmc_api.fetch_cmc_market_data(binance_data, upbit_only_assets, MAPPING_DATA)
     # 3. 조립 및 계산
     # 🚀 [추가] 조립 직전에 글로벌 상장 족보 긁어오기
     global_listings = exchange_api.fetch_global_listings()
@@ -84,8 +82,8 @@ def _fetch_and_process_data():
         upbit_krw_set, 
         bithumb_krw_set, 
         upbit_only_assets,
-        mapping  # 🚀 보따리 전달 잊지 마시고요!
-)
+        MAPPING_DATA  # 🚀 보따리 전달 잊지 마시고요!
+    )
     
     all_live_assets = binance_data.keys() | upbit_krw_set # 현재 살아있는 모든 티커(원본)
     live_bases = {utils.get_pure_base_asset(a).upper() for a in all_live_assets}
@@ -120,7 +118,7 @@ def _fetch_and_process_data():
     
     # ✅ [수정] 저장을 시키세요!
     if is_mapping_updated:
-        config_manager.save_mapping_data(mapping) # 🚀 드디어 도구를 사용함!
+        config_manager.save_mapping_data(MAPPING_DATA) # 🚀 드디어 도구를 사용함!
         print(f"💾 새로운 코인 정보가 mapping.json에 저장 완료되었습니다!")
 
     return final_results

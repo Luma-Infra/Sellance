@@ -1,5 +1,6 @@
 # app.py
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Request
@@ -8,7 +9,9 @@ from pathlib import Path
 import webbrowser
 import threading
 import requests
+import asyncio
 import pytz
+import json
 import time
 import sys
 import io
@@ -50,20 +53,18 @@ def get_market_data(force: bool = False):
     data, last_updated = api_manager.get_cached_data(force_reload=force)
     return {"data": data, "last_updated": last_updated}
 
-# ⭐️ async 삭제됨!
+# app.py 내부 라우터 교체
 @app.get("/api/market-map")
 def get_market_map():
-    """업비트, 바낸 현물, 바낸 선물의 모든 심볼을 통합하여 가져옵니다."""
+    """🚨 생짜 API 호출 삭제! 중앙 캐시에서 0.01초 만에 뽑아옵니다."""
     try:
-        u_res = requests.get("https://api.upbit.com/v1/market/all").json()
-        upbit = [m['market'].replace('KRW-', '') for m in u_res if m['market'].startswith('KRW-')]
+        # 중앙 통제소에서 데이터 가져오기 (force=False 라서 크레딧 소모 0)
+        cached_data, _ = api_manager.get_cached_data(force_reload=False)
         
-        f_res = requests.get("https://fapi.binance.com/fapi/v1/exchangeInfo").json()
-        futures = [s['symbol'].replace('USDT', '') for s in f_res['symbols'] if s['quoteAsset'] == 'USDT' and s['status'] == 'TRADING']
-        
-        s_res = requests.get("https://api.binance.com/api/v3/exchangeInfo").json()
-        spot = [s['symbol'].replace('USDT', '') for s in s_res['symbols'] if s['quoteAsset'] == 'USDT' and s['status'] == 'TRADING']
-        
+        # 조립된 데이터 안에서 슥슥 뽑아내기만 하면 끝!
+        upbit = [c["Symbol"] for c in cached_data if c.get("Upbit") == "O"]
+        futures = [c["Symbol"] for c in cached_data if "BINANCE_FUTURES" in c.get("Listed_Exchanges", [])]
+        spot = [c["Symbol"] for c in cached_data if "BINANCE" in c.get("Listed_Exchanges", [])]
         all_assets = list(set(upbit + futures + spot))
         
         return {
@@ -141,9 +142,29 @@ def auto_reset_scheduler():
         if now_kst.hour == 9 and now_kst.minute == 0 and now_kst.second < 30:
             print("⏰ 스케줄러: 9시 정각입니다. 캐시를 갱신합니다.")
             api_manager.get_cached_data(force_reload=True)
-            time.sleep(40) # 중복 실행 방지용 40초 휴식
+            time.sleep(30) # 중복 실행 방지용 휴식
         
-        time.sleep(10) # 10초마다 시계 확인    
+        time.sleep(10) # 10초마다 시계 확인   
+        
+@app.get("/api/progress")
+async def progress_stream():
+    """프론트엔드에 현재 진행 상황을 실시간으로 쏴주는 빨대"""
+    async def event_generator():
+        while True:
+            # trace_hooking에 있는 status_list와 PHASES를 가져옴
+            data = {
+                "phases": trace_hooking.PHASES,
+                "status": trace_hooking.status_list,
+                "percent": int((trace_hooking.status_list.count("완료!!") / len(trace_hooking.PHASES)) * 100)
+            }
+            yield f"data: {json.dumps(data)}\n\n"
+            
+            # 모든 단계가 완료되면 중단하거나 계속 대기
+            if data["percent"] == 100:
+                break
+            await asyncio.sleep(0.5) # 0.5초마다 업데이트
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream") 
 
 @app.on_event("startup")
 def on_startup():

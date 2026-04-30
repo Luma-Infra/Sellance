@@ -37,8 +37,8 @@ function startRealtimeCandle(symbol, interval, isFutures, isSpot) {
     candleSeries.setData([...mainData, ...ghostData]);
 
     const lastPrice = mainData[mainData.length - 1].close;
-    const p = currentTableData.find(c => c.Symbol === symbol)?.precision || 2;
-    document.title = `${formatSmartPrice(lastPrice, p)} ${symbol} | sellance 🚀`;
+    const p = currentTableData.find(c => c.Symbol === symbol.toUpperCase)?.precision || 2;
+    document.title = `${formatSmartPrice(lastPrice, p)} ${symbol} | ?sellance 🚀`;
   };
 
   // ---------------------------------------------------------

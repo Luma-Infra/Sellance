@@ -308,7 +308,7 @@ function applyRealtimeSort() {
   if (typeof refreshSniperTarget === "function") {
     refreshSniperTarget();
   }
-  applySelectedHighlight(); // 🚀 [추가] 순위 바뀌어도 내 코인은 빛나리라
+  applySelectedHighlight(); // 🚀 [추가] 순위 바뀌어도 내 코인은 빛나자
 }
 
 function applySelectedHighlight() {
