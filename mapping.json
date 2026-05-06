@@ -1,744 +1,4022 @@
 {
-  "CHAIN_LOGO_MAP": {
-    "ETH": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png",
-    "BNB": "https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png",
-    "SOL": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png",
-    "SUI": "https://s2.coinmarketcap.com/static/img/coins/64x64/20947.png"
-  },
-  "__MEMO_1": "BTC ETH 파생형 너무 많아서 고정 + 중국어 포함 모든 언어 티커 대응",
-  "__MEMO_2": "-------------------------------------------------------------",
-  "EXCLUSION_LIST": ["BTCDOM", "WBTC", "ALL", "COIN"],
-  "HARDCODE_VERIFY_SKIP_LIST": ["币安人生", "我踏马来了", "龙虾"],
-  "NOTE_MAP": {
-    "币安人生": "bianrensheng",
-    "我踏马来了": "wotamalaile",
-    "龙虾": "lobster-2"
-  },
-  "SPECIAL_SYMBOL_MAP": {},
-  "MANUAL_SUPPLY_MAP": {},
-  "SYMBOL_TO_ID_MAP": {
-    "BTC": "1",
-    "USDT": "825",
-    "ETH": "1027",
-    "FCT2": "4953",
-    "FXS": "6953",
-    "DODOX": "7224",
-    "RAYSOL": "8526",
-    "BABYDOGE": "10407",
-    "RONIN": "14101",
-    "QUICK": "19966",
-    "LUNA2": "20314",
-    "VELODROME": "20435",
-    "WBETH": "24760",
-    "RATS": "28452",
-    "AI": "28846",
-    "GAME2": "31246",
-    "MOVE": "32452",
-    "USDS": "33039",
-    "ACT": "33566",
-    "AVAAI": "34116",
-    "BROCCOLI714": "35749",
-    "BROCCOLIF3B": "35753",
-    "PUMPBTC": "36166",
-    "LIGHT": "38506",
-    "4": "38557",
-    "币安人生": "38590",
-    "SPORTFUN": "38647",
-    "我踏马来了": "39322",
-    "龙虾": "39671",
-    "AIGENSYN": "39883"
-  },
-  "DUPLICATED_LIST": {
-    "BOB(BNB)": ["34422", "", "1000000BOB", "binance"],
-    "BOB(BTC)": ["38970", "", "BOB", "binance"],
-    "EDGE(Definitive)": ["36288", "", "EDGE", "upbit"],
-    "EDGE(edgeX)": ["39720", "", "EDGE", "binance"],
-    "BEAMX": ["28298", "ETH", "BEAMX", "binance"],
-    "BEAM": ["28298", "ETH", "BEAM", "upbit"],
-    "MET": ["38353", "SOL", "MET", "binance"],
-    "MET2": ["38353", "SOL", "MET", "upbit"],
-    "BTTC": ["16086", "TRX", "BTTC", "binance"],
-    "BTT": ["16086", "TRX", "BTT", "upbit"]
-  },
-  "TICKER_DATA": {
-    "0G": ["38337", "ETH", "0G", "0G"],
-    "1INCH": ["8104", "ETH", "1inch", "1INCH"],
-    "2Z": ["38515", "SOL", "DoubleZero", "2Z"],
-    "4": ["38557", "BNB", "4", "4"],
-    "A": ["36462", "A", "Vaulta", "A"],
-    "AAPL": ["39624", "HYPE", "Apple Tokenized Stock (Hyperliquid)", "AAPL"],
-    "AAVE": ["7278", "ETH", "Aave", "AAVE"],
-    "ACE": ["28674", "BNB", "Fusionist", "ACE"],
-    "ACH": ["6958", "ETH", "Alchemy Pay", "ACH"],
-    "ACM": ["8538", "CHZ", "AC Milan Fan Token", "ACM"],
-    "ACT": ["33566", "SOL", "ACT", "ACT"],
-    "ACU": ["36492", "ETH", "Acurast", "ACU"],
-    "ACX": ["22620", "ETH", "Across Protocol", "ACX"],
-    "ADA": ["2010", "ADA", "Cardano", "ADA"],
-    "ADX": ["1768", "ETH", "heyAura", "ADX"],
-    "AERGO": ["3637", "AERGO", "Aergo", "AERGO"],
-    "AERO": ["29270", "-", "Aerodrome Finance", "AERO"],
-    "AEUR": ["28596", "ETH", "Anchored Coins AEUR", "AEUR"],
-    "AEVO": ["29676", "ETH", "Aevo", "AEVO"],
-    "AGLD": ["11568", "ETH", "Adventure Gold", "AGLD"],
-    "AGT": ["36195", "BNB", "Alaya Governance Token", "AGT"],
-    "AHT": ["6641", "AHT", "AhaToken", "AHT"],
-    "AI": ["28846", "BNB", "AI", "AI"],
-    "AIA": ["38430", "BNB", "DeAgentAI", "AIA"],
-    "AIGENSYN": ["39883", "", "AIGENSYN", "AIGENSYN"],
-    "AIN": ["36770", "BNB", "Infinity Ground", "AIN"],
-    "AIO": ["37562", "BNB", "OLAXBT", "AIO"],
-    "AIOT": ["36319", "BNB", "OKZOO", "AIOT"],
-    "AIXBT": ["34103", "ETH", "aixbt", "AIXBT"],
-    "AKE": ["38127", "BNB", "AKEDO", "AKE"],
-    "AKT": ["7431", "AKT", "Akash Network", "AKT"],
-    "ALCH": ["34880", "SOL", "Alchemist AI", "ALCH"],
-    "ALCX": ["8613", "ETH", "Alchemix", "ALCX"],
-    "ALGO": ["4030", "ALGO", "Algorand", "ALGO"],
-    "ALICE": ["8766", "ETH", "MyNeighborAlice", "ALICE"],
-    "ALLO": ["38908", "ETH", "Allora", "ALLO"],
-    "ALPINE": ["18112", "BNB", "Alpine F1 Team Fan Token", "ALPINE"],
-    "ALT": ["29073", "ETH", "Altlayer", "ALT"],
-    "AMP": ["6945", "ETH", "Amp", "AMP"],
-    "AMZN": ["39619", "HYPE", "Amazon Tokenized Stock (Hyperliquid)", "AMZN"],
-    "ANIME": ["35319", "ETH", "Animecoin", "ANIME"],
-    "ANKR": ["3783", "ETH", "Ankr", "ANKR"],
-    "APE": ["18876", "ETH", "ApeCoin", "APE"],
-    "API3": ["7737", "ETH", "API3", "API3"],
-    "APR": ["38569", "ETH", "aPriori", "APR"],
-    "APT": ["21794", "APT", "Aptos", "APT"],
-    "AQT": ["7460", "ETH", "Alpha Quark Token", "AQT"],
-    "AR": ["5632", "AR", "Arweave", "AR"],
-    "ARB": ["11841", "ARB", "Arbitrum", "ARB"],
-    "ARC": ["34926", "SOL", "AI Rig Complex", "ARC"],
-    "ARDR": ["1320", "ARDR", "Ardor", "ARDR"],
-    "ARIA": ["38102", "BNB", "AriaAI", "ARIA"],
-    "ARK": ["1586", "ARK", "Ark", "ARK"],
-    "ARKM": ["27565", "ETH", "Arkham", "ARKM"],
-    "ARPA": ["4039", "ETH", "ARPA", "ARPA"],
-    "ASR": ["5229", "CHZ", "AS Roma Fan Token", "ASR"],
-    "ASTER": ["36341", "BNB", "Aster", "ASTER"],
-    "ASTR": ["12885", "ASTR", "Astar", "ASTR"],
-    "AT": ["38757", "ETH", "APRO", "AT"],
-    "ATA": ["10188", "ETH", "Automata Network", "ATA"],
-    "ATH": ["30083", "ETH", "Aethir", "ATH"],
-    "ATM": ["5227", "CHZ", "Atletico De Madrid Fan Token", "ATM"],
-    "ATOM": ["3794", "ATOM", "Cosmos", "ATOM"],
-    "AUCTION": ["8602", "ETH", "Bounce Token", "AUCTION"],
-    "AUDIO": ["7455", "ETH", "Audius", "AUDIO"],
-    "AVA": ["2776", "ETH", "AVA (Travala)", "AVA"],
-    "AVAAI": ["34116", "SOL", "AVAAI", "AVAAI"],
-    "AVAX": ["5805", "AVAX", "Avalanche", "AVAX"],
-    "AVGO": ["39871", "AVGO", "Broadcom Inc (Derivatives)", "AVGO"],
-    "AVNT": ["38299", "-", "Avantis", "AVNT"],
-    "AWE": ["4006", "-", "AWE", "AWE"],
-    "AXL": ["17799", "ETH", "Axelar", "AXL"],
-    "AXS": ["6783", "ETH", "Axie Infinity", "AXS"],
-    "AZTEC": ["39521", "ETH", "Aztec", "AZTEC"],
-    "B": ["36532", "BNB", "BUILDon", "B"],
-    "B2": ["36352", "BNB", "BSquared Network", "B2"],
-    "BABA": [
-      "39486",
-      "BABA",
-      "Alibaba Group Holding Limited (Derivatives)",
-      "BABA"
+    "CHAIN_LOGO_MAP": {
+        "ETH": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png",
+        "BNB": "https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png",
+        "SOL": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png",
+        "SUI": "https://s2.coinmarketcap.com/static/img/coins/64x64/20947.png"
+    },
+    "__MEMO_1": "BTC ETH 파생형 너무 많아서 고정 + 중국어 포함 모든 언어 티커 대응",
+    "__MEMO_2": "-------------------------------------------------------------",
+    "EXCLUSION_LIST": [
+        "BTCDOM",
+        "WBTC",
+        "ALL",
+        "COIN"
     ],
-    "BABY": ["32198", "BABY", "Babylon", "BABY"],
-    "BABYDOGE": ["10407", "ETH", "Baby Doge Coin", "BABYDOGE"],
-    "BAN": ["33881", "SOL", "Comedian", "BAN"],
-    "BANANA": ["28066", "ETH", "Banana Gun", "BANANA"],
-    "BANANAS31": ["34118", "BNB", "Banana For Scale", "BANANAS31"],
-    "BAND": ["4679", "ETH", "Band", "BAND"],
-    "BANK": ["36296", "BNB", "Lorenzo Protocol", "BANK"],
-    "BAR": ["5225", "CHZ", "FC Barcelona Fan Token", "BAR"],
-    "BARD": ["38408", "ETH", "Lombard", "BARD"],
-    "BAS": ["37387", "BNB", "BNB Attestation Service", "BAS"],
-    "BASED": ["39812", "ETH", "Based", "BASED"],
-    "BAT": ["1697", "ETH", "Basic Attention Token", "BAT"],
-    "BB": ["30746", "BB", "BounceBit", "BB"],
-    "BCH": ["1831", "BCH", "Bitcoin Cash", "BCH"],
-    "BEAM": ["28298", "ETH", "Beam", "BEAM"],
-    "BEAMX": ["28298", "ETH", "BEAMX", "BEAMX"],
-    "BEAT": ["38837", "BNB", "Audiera", "BEAT"],
-    "BEL": ["6928", "ETH", "Bella Protocol", "BEL"],
-    "BERA": ["24647", "BERA", "Berachain", "BERA"],
-    "BFUSD": ["37760", "BFUSD", "BFUSD", "BFUSD"],
-    "BICO": ["9543", "ETH", "Biconomy", "BICO"],
-    "BIGTIME": ["28230", "ETH", "Big Time", "BIGTIME"],
-    "BIO": ["34812", "ETH", "Bio Protocol", "BIO"],
-    "BIRB": ["19765", "SOL", "Moonbirds", "BIRB"],
-    "BLAST": ["28480", "BLAST", "Blast", "BLAST"],
-    "BLEND": ["39666", "ETH", "Fluent", "BLEND"],
-    "BLESS": ["38466", "BNB", "Bless", "BLESS"],
-    "BLUAI": ["38717", "BNB", "Bluwhale", "BLUAI"],
-    "BLUR": ["23121", "ETH", "Blur", "BLUR"],
-    "BMT": ["35214", "BNB", "Bubblemaps", "BMT"],
-    "BNB": [
-      "1839",
-      "https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png",
-      "BNB",
-      "BNB"
+    "HARDCODE_VERIFY_SKIP_LIST": [
+        "币安人生",
+        "我踏马来了",
+        "龙虾"
     ],
-    "BNSOL": ["32882", "SOL", "Binance Staked SOL", "BNSOL"],
-    "BNT": ["1727", "ETH", "Bancor", "BNT"],
-    "BOB(BNB)": ["34422", "BNB", "Build On BNB", "BOB"],
-    "BOB(BTC)": ["38970", "BOB"],
-    "BOME": ["29870", "SOL", "BOOK OF MEME", "BOME"],
-    "BONK": ["23095", "SOL", "Bonk", "BONK"],
-    "BORA": ["3801", "KAIA", "BORA", "BORA"],
-    "BOUNTY": ["2866", "ARB", "Chainbounty", "BOUNTY"],
-    "BR": ["36063", "BNB", "Bedrock", "BR"],
-    "BRETT": ["29743", "-", "Brett (Based)", "BRETT"],
-    "BREV": ["39159", "ETH", "Brevis", "BREV"],
-    "BROCCOLI714": ["35749", "BNB", "BROCCOLI714", "BROCCOLI714"],
-    "BROCCOLIF3B": ["35753", "BNB", "BROCCOLIF3B", "BROCCOLIF3B"],
-    "BSB": ["38889", "BNB", "Block Street", "BSB"],
-    "BSV": ["3602", "BSV", "Bitcoin SV", "BSV"],
-    "BTC": ["1", "BTC", "BTC", "BTC"],
-    "BTR": ["36277", "BTR", "Bitlayer", "BTR"],
-    "BTT": ["16086", "TRX", "BitTorrent [New]", "BTT"],
-    "BTTC": ["16086", "TRX", "BTTC", "BTTC"],
-    "BULLA": ["36769", "BNB", "Bulla", "BULLA"],
-    "BZ": ["39804", "BZ", "Brent Oil (Derivatives)", "BZ"],
-    "C": ["37340", "BNB", "Chainbase", "C"],
-    "C98": ["10903", "ETH", "Coin98", "C98"],
-    "CAKE": ["7186", "ETH", "PancakeSwap", "CAKE"],
-    "CARV": ["33372", "ETH", "CARV", "CARV"],
-    "CAT": ["32724", "BNB", "Simon's Cat", "CAT"],
-    "CATI": ["32966", "TON", "Catizen", "CATI"],
-    "CBK": ["8107", "ETH", "Cobak Token", "CBK"],
-    "CC": ["37263", "CC", "Canton", "CC"],
-    "CELO": ["5567", "CELO", "Celo", "CELO"],
-    "CELR": ["3814", "ETH", "Celer Network", "CELR"],
-    "CETUS": ["25114", "SUI", "Cetus Protocol", "CETUS"],
-    "CFG": ["6748", "CFG", "Centrifuge", "CFG"],
-    "CFX": ["7334", "CFX", "Conflux", "CFX"],
-    "CGPT": ["23756", "ETH", "ChainGPT", "CGPT"],
-    "CHEEMS": ["33280", "BNB", "Cheems (cheems.pet)", "CHEEMS"],
-    "CHILLGUY": ["34125", "SOL", "Just a chill guy", "CHILLGUY"],
-    "CHIP": ["39870", "CHIP", "USD.AI", "CHIP"],
-    "CHR": ["3978", "ETH", "Chromia", "CHR"],
-    "CHZ": ["4066", "ETH", "Chiliz", "CHZ"],
-    "CITY": ["10049", "CHZ", "Manchester City Fan Token", "CITY"],
-    "CKB": ["4948", "CKB", "Nervos Network", "CKB"],
-    "CL": ["39487", "CL", "Crude Oil Futures (Derivatives)", "CL"],
-    "CLANKER": ["34285", "-", "tokenbot", "CLANKER"],
-    "CLO": ["38634", "BNB", "Yei Finance", "CLO"],
-    "COAI": ["38489", "BNB", "ChainOpera AI", "COAI"],
-    "COLLECT": ["39170", "BNB", "Collect on Fanable", "COLLECT"],
-    "COMP": ["5692", "ETH", "Compound", "COMP"],
-    "COOKIE": ["31838", "BNB", "Cookie DAO", "COOKIE"],
-    "COPPER": ["36847", "SOL", "$COPPER", "COPPER"],
-    "COS": ["4036", "BNB", "Contentos", "COS"],
-    "COTI": ["3992", "COTI", "COTI", "COTI"],
-    "COW": ["19269", "ETH", "CoW Protocol", "COW"],
-    "CPOOL": ["12573", "ETH", "Clearpool", "CPOOL"],
-    "CRCL": ["36949", "-", "[Fake]Circle (crcl.top)", "CRCL"],
-    "CRO": ["3635", "CRO", "Cronos", "CRO"],
-    "CROSS": ["37166", "BNB", "CROSS", "CROSS"],
-    "CRV": ["6538", "ETH", "Curve DAO Token", "CRV"],
-    "CTC": ["5198", "CTC", "Creditcoin", "CTC"],
-    "CTK": ["4807", "CTK", "Shentu", "CTK"],
-    "CTSI": ["5444", "ETH", "Cartesi", "CTSI"],
-    "CVC": ["1816", "ETH", "Civic", "CVC"],
-    "CVX": ["9903", "ETH", "Convex Finance", "CVX"],
-    "CYBER": ["24781", "ETH", "Cyber", "CYBER"],
-    "CYS": ["39071", "BNB", "Cysic", "CYS"],
-    "D": ["11374", "ETH", "DAR Open Network", "D"],
-    "DASH": ["131", "DASH", "Dash", "DASH"],
-    "DCR": ["1168", "DCR", "Decred", "DCR"],
-    "DEEP": ["33391", "SUI", "DeepBook Protocol", "DEEP"],
-    "DEXE": ["7326", "ETH", "DeXe", "DEXE"],
-    "DGB": ["109", "DGB", "DigiByte", "DGB"],
-    "DIA": ["6138", "ETH", "DIA", "DIA"],
-    "DKA": ["5908", "ETH", "dKargo", "DKA"],
-    "DODO": ["7224", "ETH", "DODO", "DODO"],
-    "DODOX": ["7224", "ETH", "DODOX", "DODOX"],
-    "DOGE": ["74", "DOGE", "Dogecoin", "DOGE"],
-    "DOGS": ["32698", "TON", "DOGS", "DOGS"],
-    "DOLO": ["35929", "ETH", "Dolomite", "DOLO"],
-    "DOOD": ["35747", "SOL", "Doodles", "DOOD"],
-    "DOT": ["6636", "DOT", "Polkadot", "DOT"],
-    "DRIFT": ["31278", "SOL", "Drift", "DRIFT"],
-    "DUSK": ["4092", "ETH", "Dusk", "DUSK"],
-    "DYDX": ["28324", "OSMO", "dYdX", "DYDX"],
-    "DYM": ["28932", "DYM", "Dymension", "DYM"],
-    "EDEN": ["38513", "ETH", "OpenEden", "EDEN"],
-    "EDGE(Definitive)": ["36288", "BASE", "Definitive", "EDGE"],
-    "EDGE(edgeX)": ["39720", "ETH", "edgeX", "EDGE"],
-    "EDU": ["24613", "BNB", "Open Campus", "EDU"],
-    "EGLD": ["6892", "EGLD", "MultiversX", "EGLD"],
-    "EIGEN": ["30494", "ETH", "EigenCloud", "EIGEN"],
-    "ELF": ["2299", "ELF", "aelf", "ELF"],
-    "ELSA": ["39387", "MNT", "HeyElsa", "ELSA"],
-    "ENA": ["30171", "ETH", "Ethena", "ENA"],
-    "ENJ": ["2130", "ENJ", "Enjin Coin", "ENJ"],
-    "ENS": ["13855", "ETH", "Ethereum Name Service", "ENS"],
-    "ENSO": ["38668", "ETH", "Enso", "ENSO"],
-    "EPIC": ["8615", "ETH", "Epic Chain", "EPIC"],
-    "ERA": ["37374", "ETH", "Caldera", "ERA"],
-    "ESP": ["39548", "ARB", "Espresso", "ESP"],
-    "ESPORTS": ["37414", "BNB", "Yooldo", "ESPORTS"],
-    "ETC": ["1321", "ETC", "Ethereum Classic", "ETC"],
-    "ETH": ["1027", "ETH", "Ethereum", "ETH"],
-    "ETHFI": ["29814", "ETH", "ether.fi", "ETHFI"],
-    "ETHW": ["21296", "ETHW", "EthereumPoW", "ETHW"],
-    "EUL": ["14280", "ETH", "Euler", "EUL"],
-    "EUR": ["", "", "EUR", "EUR"],
-    "EURI": ["32644", "ETH", "Eurite", "EURI"],
-    "EVAA": ["38376", "BNB", "EVAA Protocol", "EVAA"],
-    "EWJ": ["39685", "EWJ", "iShares MSCI Japan ETF (Derivatives)", "EWJ"],
-    "EWY": [
-      "39654",
-      "EWY",
-      "Ishares Msci South Korea ETF (Derivatives)",
-      "EWY"
-    ],
-    "F": ["34297", "ETH", "SynFutures", "F"],
-    "FARM": ["6859", "ETH", "Harvest Finance", "FARM"],
-    "FARTCOIN": ["33597", "SOL", "Fartcoin", "FARTCOIN"],
-    "FCT2": ["4953", "", "FCT2", "FCT2"],
-    "FDUSD": ["26081", "ETH", "First Digital USD", "FDUSD"],
-    "FET": ["3773", "FET", "Artificial Superintelligence Alliance", "FET"],
-    "FF": ["38482", "ETH", "Falcon Finance", "FF"],
-    "FHE": ["36153", "ETH", "Mind Network", "FHE"],
-    "FIDA": ["7978", "SOL", "Bonfida", "FIDA"],
-    "FIGHT": ["38963", "BNB", "FIGHT", "FIGHT"],
-    "FIL": ["2280", "FIL", "Filecoin", "FIL"],
-    "FLOCK": ["34987", "SOL", "FLock.io", "FLOCK"],
-    "FLOKI": ["10804", "ETH", "FLOKI", "FLOKI"],
-    "FLOW": ["4558", "FLOW", "Flow", "FLOW"],
-    "FLUID": ["10508", "ETH", "Fluid", "FLUID"],
-    "FLUX": ["3029", "FLUX", "Flux", "FLUX"],
-    "FOGO": ["38356", "FOGO", "Fogo", "FOGO"],
-    "FOLKS": ["38864", "ETH", "Folks Finance", "FOLKS"],
-    "FORM": ["23635", "BNB", "Four", "FORM"],
-    "FRAX": ["6952", "ETH", "Legacy Frax Dollar", "FRAX"],
-    "FTT": ["4195", "BNB", "FTX Token", "FTT"],
-    "G": ["32120", "G", "Gravity", "G"],
-    "GALA": ["7080", "ETH", "Gala", "GALA"],
-    "GAME2": ["31246", "", "GAME2", "GAME2"],
-    "GAS": ["1785", "NEO", "Gas", "GAS"],
-    "GENIUS": ["39841", "BNB", "Genius Terminal", "GENIUS"],
-    "GIGGLE": ["38470", "BNB", "Giggle Fund", "GIGGLE"],
-    "GLM": ["1455", "ETH", "Golem", "GLM"],
-    "GLMR": ["6836", "GLMR", "Moonbeam", "GLMR"],
-    "GMT": ["18069", "ETH", "GMT", "GMT"],
-    "GMX": ["11857", "SOL", "GMX", "GMX"],
-    "GNO": ["1659", "ETH", "Gnosis", "GNO"],
-    "GNS": ["13663", "POL", "Gains Network", "GNS"],
-    "GOAT": ["33440", "SOL", "Goatseus Maximus", "GOAT"],
-    "GOOGL": ["39470", "GOOGL", "Alphabet Inc (Derivatives)", "GOOGL"],
-    "GPS": ["35268", "BNB", "GoPlus Security", "GPS"],
-    "GRASS": ["32956", "SOL", "Grass", "GRASS"],
-    "GRIFFAIN": ["34792", "SOL", "GRIFFAIN", "GRIFFAIN"],
-    "GRT": ["6719", "ETH", "The Graph", "GRT"],
-    "GTC": ["10052", "ETH", "Gitcoin", "GTC"],
-    "GUA": ["38984", "BNB", "SUPERFORTUNE", "GUA"],
-    "GUN": ["36156", "GUN", "GUNZ", "GUN"],
-    "GWEI": ["39379", "ETH", "ETHGas", "GWEI"],
-    "H": ["36922", "ETH", "Humanity Protocol", "H"],
-    "HAEDAL": ["36369", "BNB", "Haedal Protocol", "HAEDAL"],
-    "HANA": ["38468", "BNB", "Hana Network", "HANA"],
-    "HBAR": ["4642", "HBAR", "Hedera", "HBAR"],
-    "HEI": ["35724", "ETH", "Heima", "HEI"],
-    "HEMI": ["38159", "ETH", "Hemi", "HEMI"],
-    "HFT": ["22461", "ETH", "Hashflow", "HFT"],
-    "HIGH": ["11232", "ETH", "Highstreet", "HIGH"],
-    "HIVE": ["5370", "HIVE", "Hive", "HIVE"],
-    "HMSTR": ["32195", "HMSTR", "Hamster Kombat", "HMSTR"],
-    "HOLO": ["38309", "BNB", "Holoworld AI", "HOLO"],
-    "HOME": ["36133", "BNB", "Defi App", "HOME"],
-    "HOOD": ["35566", "SOL", "Robinhood", "HOOD"],
-    "HOT": ["2682", "ETH", "Holo", "HOT"],
-    "HP": ["36556", "HP", "Hippo Protocol", "HP"],
-    "HUMA": ["36576", "BNB", "Huma Finance", "HUMA"],
-    "HUNT": ["5380", "ETH", "Hunt Town", "HUNT"],
-    "HYPE": ["32196", "HYPE", "Hyperliquid", "HYPE"],
-    "HYPER": ["36281", "ETH", "Hyperlane", "HYPER"],
-    "ICNT": ["37070", "ETH", "Impossible Cloud Network", "ICNT"],
-    "ICP": ["8916", "ICP", "Internet Computer", "ICP"],
-    "ICX": ["2099", "ICX", "ICON", "ICX"],
-    "ID": ["21846", "ETH", "SPACE ID", "ID"],
-    "IDOL": ["36775", "BNB", "MEET48", "IDOL"],
-    "ILV": ["8719", "ETH", "Illuvium", "ILV"],
-    "IMX": ["10603", "ETH", "Immutable", "IMX"],
-    "IN": ["37609", "ETH", "INFINIT", "IN"],
-    "INIT": ["33120", "INIT", "Initia", "INIT"],
-    "INJ": ["7226", "ETH", "Injective", "INJ"],
-    "INTC": ["39472", "INTC", "Intel Corp (Derivatives)", "INTC"],
-    "INX": ["39461", "ETH", "Infinex", "INX"],
-    "IO": ["29835", "SOL", "io.net", "IO"],
-    "IOST": ["2405", "IOST", "IOST", "IOST"],
-    "IOTA": ["1720", "IOTA", "IOTA", "IOTA"],
-    "IOTX": ["2777", "IOTX", "IoTeX", "IOTX"],
-    "IP": ["35626", "IP", "Story", "IP"],
-    "IQ": ["2930", "ETH", "IQ", "IQ"],
-    "IRYS": ["38978", "ETH", "Irys", "IRYS"],
-    "JASMY": ["8425", "ETH", "JasmyCoin", "JASMY"],
-    "JCT": ["38909", "ETH", "Janction", "JCT"],
-    "JELLYJELLY": ["35537", "SOL", "Jelly-My-Jelly", "JELLYJELLY"],
-    "JOE": ["11396", "AVAX", "JOE", "JOE"],
-    "JST": ["5488", "TRX", "JUST", "JST"],
-    "JTO": ["28541", "SOL", "Jito", "JTO"],
-    "JUP": ["29210", "SOL", "Jupiter", "JUP"],
-    "JUV": ["5224", "CHZ", "Juventus Fan Token", "JUV"],
-    "KAIA": ["32880", "KAIA", "Kaia", "KAIA"],
-    "KAITO": ["35763", "-", "KAITO", "KAITO"],
-    "KAS": ["20396", "KAS", "Kaspa", "KAS"],
-    "KAT": ["38769", "KAT", "Katana", "KAT"],
-    "KAVA": ["4846", "ETH", "Kava", "KAVA"],
-    "KERNEL": ["36180", "ETH", "KernelDAO", "KERNEL"],
-    "KGEN": ["38554", "BNB", "KGeN", "KGEN"],
-    "KGST": ["39162", "BNB", "KGST", "KGST"],
-    "KITE": ["38828", "KITE", "Kite", "KITE"],
-    "KMNO": ["30986", "SOL", "Kamino", "KMNO"],
-    "KNC": ["9444", "ETH", "Kyber Network Crystal v2", "KNC"],
-    "KOMA": ["33405", "BNB", "Koma Inu", "KOMA"],
-    "KSM": ["5034", "KSM", "Kusama", "KSM"],
-    "LA": ["36510", "ETH", "Lagrange", "LA"],
-    "LAB": ["33223", "BNB", "LAB", "LAB"],
-    "LAYER": ["35429", "SOL", "Solayer", "LAYER"],
-    "LAZIO": ["12687", "BNB", "S.S. Lazio Fan Token", "LAZIO"],
-    "LDO": ["8000", "ETH", "Lido DAO", "LDO"],
-    "LIGHT": ["38506", "BNB", "LIGHT", "LIGHT"],
-    "LINEA": ["27657", "LINEA", "Linea", "LINEA"],
-    "LINK": ["1975", "ETH", "Chainlink", "LINK"],
-    "LISTA": ["21533", "BNB", "Lista DAO", "LISTA"],
-    "LIT": ["39125", "ETH", "Lighter", "LIT"],
-    "LPT": ["3640", "ETH", "Livepeer", "LPT"],
-    "LQTY": ["7429", "ETH", "Liquity", "LQTY"],
-    "LSK": ["1214", "LSK", "Lisk", "LSK"],
-    "LTC": ["2", "LTC", "Litecoin", "LTC"],
-    "LUMIA": ["33439", "BNB", "Lumia", "LUMIA"],
-    "LUNA": ["20314", "LUNA", "Terra", "LUNA"],
-    "LUNA2": ["20314", "LUNA", "LUNA2", "LUNA2"],
-    "LUNC": ["4172", "LUNC", "Terra Classic", "LUNC"],
-    "LYN": ["38561", "BNB", "Everlyn AI", "LYN"],
-    "M": ["35491", "M", "MemeCore", "M"],
-    "MAGIC": ["14783", "ETH", "Treasure", "MAGIC"],
-    "MAGMA": ["39121", "SUI", "Magma Finance", "MAGMA"],
-    "MANA": ["1966", "ETH", "Decentraland", "MANA"],
-    "MANTA": ["13631", "MANTA", "Manta Network", "MANTA"],
-    "MANTRA": ["39611", "MANTRA", "MANTRA", "MANTRA"],
-    "MASK": ["8536", "ETH", "Mask Network", "MASK"],
-    "MAV": ["18037", "ETH", "Maverick Protocol", "MAV"],
-    "MAVIA": ["28829", "ETH", "Heroes of Mavia", "MAVIA"],
-    "MBL": ["4038", "ONT", "MovieBloc", "MBL"],
-    "MBOX": ["9175", "BNB", "MOBOX", "MBOX"],
-    "ME": ["32197", "SOL", "Magic Eden", "ME"],
-    "MED": ["2303", "MED", "MediBloc", "MED"],
-    "MEGA": ["38770", "MEGA", "MegaETH", "MEGA"],
-    "MELANIA": ["35347", "SOL", "Official Melania Meme", "MELANIA"],
-    "MEME": ["28301", "ETH", "Memecoin", "MEME"],
-    "MERL": ["30712", "ETH", "Merlin Chain", "MERL"],
-    "MET": ["38353", "SOL", "Meteora", "MET"],
-    "MET2": ["", "SOL", "MET2", "MET2"],
-    "META": ["3418", "META", "Metadium", "META"],
-    "METIS": ["9640", "ETH", "Metis", "METIS"],
-    "MEW": ["30126", "SOL", "cat in a dogs world", "MEW"],
-    "MINA": ["8646", "MINA", "Mina", "MINA"],
-    "MIRA": ["38495", "BNB", "Mira", "MIRA"],
-    "MITO": ["38204", "BNB", "Mitosis", "MITO"],
-    "MLK": ["5266", "ARB", "MiL.k", "MLK"],
-    "MLN": ["1552", "ETH", "Enzyme", "MLN"],
-    "MMT": ["38231", "SUI", "Momentum", "MMT"],
-    "MNT": ["27075", "ETH", "Mantle", "MNT"],
-    "MOC": ["2915", "ETH", "Moss Coin", "MOC"],
-    "MOCA": ["31526", "ETH", "Moca Network", "MOCA"],
-    "MOG": ["27659", "ETH", "Mog Coin", "MOG"],
-    "MON": ["30495", "MON", "Monad", "MON"],
-    "MOODENG": ["33093", "SOL", "Moo Deng (moodengsol.com)", "MOODENG"],
-    "MORPHO": ["34104", "ETH", "Morpho", "MORPHO"],
-    "MOVE": ["32452", "APT", "MOVE", "MOVE"],
-    "MOVR": ["9285", "MOVR", "Moonriver", "MOVR"],
-    "MSFT": ["39495", "MSFT", "Microsoft Corporation (Derivatives)", "MSFT"],
-    "MSTR": ["33356", "ETH", "MSTR2100", "MSTR"],
-    "MTL": ["1788", "MTL", "Metal DAO", "MTL"],
-    "MU": ["39469", "MU", "Micron Technology Inc (Derivatives)", "MU"],
-    "MUBARAK": ["36041", "BNB", "Mubarak", "MUBARAK"],
-    "MVL": ["2982", "ETH", "MVL", "MVL"],
-    "MYX": ["36410", "BNB", "MYX Finance", "MYX"],
-    "NAORIS": ["35114", "ETH", "Naoris Protocol", "NAORIS"],
-    "NATGAS": ["39464", "NATGAS", "Natural Gas (Derivatives)", "NATGAS"],
-    "NEAR": ["6535", "NEAR", "NEAR Protocol", "NEAR"],
-    "NEIRO": ["32521", "ETH", "Neiro", "NEIRO"],
-    "NEO": ["1376", "NEO", "Neo", "NEO"],
-    "NEWT": ["36861", "ETH", "Newton Protocol", "NEWT"],
-    "NEXO": ["2694", "ETH", "Nexo", "NEXO"],
-    "NFP": ["28778", "BNB", "NFPrompt", "NFP"],
-    "NIGHT": ["39064", "BNB", "Midnight", "NIGHT"],
-    "NIL": ["35702", "ETH", "Nillion", "NIL"],
-    "NMR": ["1732", "ETH", "Numeraire", "NMR"],
-    "NOM": ["38464", "ETH", "Nomina", "NOM"],
-    "NOT": ["28850", "TON", "Notcoin", "NOT"],
-    "NVDA": ["38153", "NVDA", "NVIDIA (Derivatives)", "NVDA"],
-    "NXPC": ["36044", "BNB", "NEXPACE", "NXPC"],
-    "OG": ["5309", "CHZ", "OG Fan Token", "OG"],
-    "OGN": ["5117", "ETH", "Origin Protocol", "OGN"],
-    "ON": ["38750", "ETH", "Orochi Network", "ON"],
-    "ONDO": ["21159", "ETH", "Ondo", "ONDO"],
-    "ONE": ["3945", "ONE", "Harmony", "ONE"],
-    "ONG": ["3217", "BNB", "Ontology Gas", "ONG"],
-    "ONT": ["2566", "ONT", "Ontology", "ONT"],
-    "OP": ["11840", "OP", "Optimism", "OP"],
-    "OPEN": ["37456", "ETH", "OpenLedger", "OPEN"],
-    "OPG": ["39800", "-", "OpenGradient", "OPG"],
-    "OPN": ["39564", "ETH", "Opinion", "OPN"],
-    "ORBS": ["3835", "ETH", "Orbs", "ORBS"],
-    "ORCA": ["11165", "SOL", "Orca", "ORCA"],
-    "ORDER": ["32809", "ETH", "Orderly", "ORDER"],
-    "ORDI": ["25028", "BTC", "ORDI", "ORDI"],
-    "OSMO": ["12220", "OSMO", "Osmosis", "OSMO"],
-    "PARTI": ["36102", "BNB", "Particle Network", "PARTI"],
-    "PAXG": ["4705", "ETH", "PAX Gold", "PAXG"],
-    "PAYP": ["39725", "PAYP", "PayPay Corp (Derivatives)", "PAYP"],
-    "PENDLE": ["9481", "ETH", "Pendle", "PENDLE"],
-    "PENGU": ["34466", "SOL", "Pudgy Penguins", "PENGU"],
-    "PEOPLE": ["14806", "ETH", "ConstitutionDAO", "PEOPLE"],
-    "PEPE": ["24478", "ETH", "Pepe", "PEPE"],
-    "PHA": ["6841", "PHA", "Phala Network", "PHA"],
-    "PHB": ["13969", "PHB", "Phoenix", "PHB"],
-    "PIEVERSE": ["38849", "ETH", "Pieverse", "PIEVERSE"],
-    "PIPPIN": ["35053", "SOL", "pippin", "PIPPIN"],
-    "PIVX": ["1169", "PIVX", "PIVX", "PIVX"],
-    "PIXEL": ["29335", "ETH", "Pixels", "PIXEL"],
-    "PLAY": ["37534", "-", "PlaysOut", "PLAY"],
-    "PLTR": [
-      "39475",
-      "PLTR",
-      "Palantir Technologies Inc (Derivatives)",
-      "PLTR"
-    ],
-    "PLUME": ["35364", "PLUME", "Plume", "PLUME"],
-    "PNUT": ["33788", "SOL", "Peanut the Squirrel", "PNUT"],
-    "POKT": ["11823", "ETH", "Pocket Network", "POKT"],
-    "POL": ["28321", "ETH", "Polygon (prev. MATIC)", "POL"],
-    "POLYX": ["20362", "POLYX", "Polymesh", "POLYX"],
-    "POND": ["7497", "ETH", "Marlin", "POND"],
-    "POPCAT": ["28782", "SOL", "Popcat (SOL)", "POPCAT"],
-    "PORTAL": ["29555", "ETH", "Portal", "PORTAL"],
-    "PORTO": ["14052", "BNB", "FC Porto Fan Token", "PORTO"],
-    "POWER": ["39042", "ETH", "Power Protocol", "POWER"],
-    "POWR": ["2132", "ETH", "Powerledger", "POWR"],
-    "PRL": ["39797", "BNB", "Perle", "PRL"],
-    "PROM": ["4120", "ETH", "Prom", "PROM"],
-    "PROMPT": ["36223", "ETH", "Wayfinder", "PROMPT"],
-    "PROVE": ["37593", "ETH", "Succinct", "PROVE"],
-    "PSG": ["5226", "CHZ", "Paris Saint-Germain Fan Token", "PSG"],
-    "PTB": ["37372", "ETH", "Portal To Bitcoin", "PTB"],
-    "PUMP": ["36507", "SOL", "Pump.fun", "PUMP"],
-    "PUMPBTC": ["36166", "BNB", "PUMPBTC", "PUMPBTC"],
-    "PUNDIX": ["9040", "ETH", "Pundi X (New)", "PUNDIX"],
-    "PYR": ["9308", "ETH", "Vulcan Forged (PYR)", "PYR"],
-    "PYTH": ["28177", "SOL", "Pyth Network", "PYTH"],
-    "Q": ["38236", "ETH", "Quack AI", "Q"],
-    "QI": ["9288", "AVAX", "BENQI", "QI"],
-    "QKC": ["2840", "ETH", "QuarkChain", "QKC"],
-    "QNT": ["3155", "ETH", "Quant", "QNT"],
-    "QQQ": ["39517", "QQQ", "QQQ (Derivatives)", "QQQ"],
-    "QTUM": ["1684", "QTUM", "Qtum", "QTUM"],
-    "QUICK": ["19966", "ETH", "QUICK", "QUICK"],
-    "RAD": ["6843", "RAD", "Radworks", "RAD"],
-    "RARE": ["11294", "ETH", "SuperRare", "RARE"],
-    "RATS": ["33659", "BNB", "GoldenRat", "RATS"],
-    "RAVE": ["38967", "ETH", "RaveDAO", "RAVE"],
-    "RAY": ["8526", "SOL", "Raydium", "RAY"],
-    "RAYSOL": ["8526", "SOL", "RAYSOL", "RAYSOL"],
-    "RECALL": ["38669", "-", "Recall", "RECALL"],
-    "RED": ["21707", "ETH", "RedStone", "RED"],
-    "RENDER": ["5690", "ETH", "Render", "RENDER"],
-    "REQ": ["2071", "ETH", "Request", "REQ"],
-    "RESOLV": ["36713", "ETH", "Resolv", "RESOLV"],
-    "REZ": ["30843", "ETH", "Renzo", "REZ"],
-    "RIF": ["3701", "ETH", "Rootstock Infrastructure Framework", "RIF"],
-    "RIVER": ["38417", "ETH", "River", "RIVER"],
-    "RLC": ["1637", "ETH", "iExec RLC", "RLC"],
-    "RLUSD": ["34387", "XRP", "Ripple USD", "RLUSD"],
-    "ROBO": ["39595", "ETH", "Fabric Protocol", "ROBO"],
-    "RONIN": ["14101", "RON", "RONIN", "RONIN"],
-    "ROSE": ["7653", "BNB", "Oasis", "ROSE"],
-    "RPL": ["2943", "ETH", "Rocket Pool", "RPL"],
-    "RSR": ["3964", "ETH", "Reserve Rights", "RSR"],
-    "RUNE": ["4157", "RUNE", "THORChain", "RUNE"],
-    "RVN": ["2577", "RVN", "Ravencoin", "RVN"],
-    "S": ["32684", "S", "Sonic", "S"],
-    "SAFE": ["21585", "ETH", "Safe", "SAFE"],
-    "SAGA": ["30372", "ETH", "Saga", "SAGA"],
-    "SAHARA": ["36671", "SAHARA", "Sahara AI", "SAHARA"],
-    "SAND": ["6210", "ETH", "The Sandbox", "SAND"],
-    "SANTOS": ["15248", "BNB", "Santos FC Fan Token", "SANTOS"],
-    "SAPIEN": ["38117", "-", "Sapien", "SAPIEN"],
-    "SATS": ["28194", "BTC", "SATS (Ordinals)", "SATS"],
-    "SC": ["1042", "SC", "Siacoin", "SC"],
-    "SCR": ["26998", "SCR", "Scroll", "SCR"],
-    "SCRT": ["5604", "SCRT", "Secret", "SCRT"],
-    "SEI": ["23149", "SEI", "Sei", "SEI"],
-    "SENT": ["38868", "ETH", "Sentient", "SENT"],
-    "SFP": ["8119", "BNB", "SafePal", "SFP"],
-    "SHELL": ["35710", "ETH", "MyShell", "SHELL"],
-    "SHIB": ["5994", "ETH", "Shiba Inu", "SHIB"],
-    "SIGN": ["35600", "ETH", "Sign", "SIGN"],
-    "SIREN": ["35766", "BNB", "siren", "SIREN"],
-    "SKL": ["5691", "ETH", "SKALE", "SKL"],
-    "SKR": ["39377", "SOL", "Seeker", "SKR"],
-    "SKY": ["33038", "ETH", "Sky", "SKY"],
-    "SKYAI": ["36300", "BNB", "SKYAI", "SKYAI"],
-    "SLP": ["5824", "ETH", "Smooth Love Potion", "SLP"],
-    "SNDK": ["39507", "SNDK", "SanDisk Corporation (Derivatives)", "SNDK"],
-    "SNT": ["1759", "ETH", "Status", "SNT"],
-    "SNX": ["2586", "ETH", "Synthetix", "SNX"],
-    "SOL": ["5426", "Solana", "Solana", "SOL"],
-    "SOLV": ["12165", "BNB", "Solv Protocol", "SOLV"],
-    "SOMI": ["37637", "SOMI", "Somnia", "SOMI"],
-    "SONIC": ["35051", "SOL", "Sonic SVM", "SONIC"],
-    "SOON": ["36542", "BNB", "SOON", "SOON"],
-    "SOPH": ["32087", "ETH", "Sophon", "SOPH"],
-    "SPACE": ["38136", "ETH", "Spacecoin", "SPACE"],
-    "SPELL": ["11289", "ETH", "Spell Token", "SPELL"],
-    "SPK": ["36569", "ETH", "Spark", "SPK"],
-    "SPORTFUN": ["38647", "SOL", "SPORTFUN", "SPORTFUN"],
-    "SPX": ["28081", "ETH", "SPX6900", "SPX"],
-    "SPY": [
-      "39621",
-      "HYPE",
-      "SPDR S&P 500 ETF Trust Tokenized ETF (Hyperliquid)",
-      "SPY"
-    ],
-    "SQD": ["12894", "ARB", "Subsquid", "SQD"],
-    "SSV": ["12999", "ETH", "ssv.network", "SSV"],
-    "STABLE": ["38892", "STABLE", "Stable", "STABLE"],
-    "STBL": ["38359", "BNB", "STBL", "STBL"],
-    "STEEM": ["1230", "STEEM", "Steem", "STEEM"],
-    "STG": ["18934", "ETH", "Stargate Finance", "STG"],
-    "STO": ["32194", "ETH", "StakeStone", "STO"],
-    "STORJ": ["1772", "ETH", "Storj", "STORJ"],
-    "STRAX": ["30168", "STRAX", "Xertra", "STRAX"],
-    "STRK": ["22691", "ETH", "Starknet", "STRK"],
-    "STX": ["4847", "STX", "Stacks", "STX"],
-    "SUI": ["20947", "SUI", "Sui", "SUI"],
-    "SUN": ["10529", "TRX", "Sun [New]", "SUN"],
-    "SUPER": ["8290", "ETH", "SuperVerse", "SUPER"],
-    "SUSHI": ["6758", "ETH", "SushiSwap", "SUSHI"],
-    "SWARMS": ["34993", "SOL", "Swarms", "SWARMS"],
-    "SXT": ["36405", "ETH", "Space and Time", "SXT"],
-    "SYN": ["12147", "ETH", "Synapse", "SYN"],
-    "SYRUP": ["33824", "ETH", "Maple Finance", "SYRUP"],
-    "SYS": ["541", "SYS", "Syscoin", "SYS"],
-    "T": ["17751", "ETH", "Threshold", "T"],
-    "TA": ["37430", "BNB", "Trusta.AI", "TA"],
-    "TAC": ["37338", "ETH", "TAC Protocol", "TAC"],
-    "TAG": ["34958", "BNB", "Tagger", "TAG"],
-    "TAIKO": ["31525", "TAIKO", "Taiko", "TAIKO"],
-    "TAKE": ["38175", "BNB", "OVERTAKE", "TAKE"],
-    "TAO": ["22974", "TAO", "Bittensor", "TAO"],
-    "TFUEL": ["3822", "TFUEL", "Theta Fuel", "TFUEL"],
-    "THE": ["23335", "BNB", "THENA", "THE"],
-    "THETA": ["2416", "THETA", "Theta Network", "THETA"],
-    "TIA": ["22861", "OSMO", "Celestia", "TIA"],
-    "TKO": ["9020", "BNB", "Toko Token", "TKO"],
-    "TLM": ["9119", "ETH", "Alien Worlds", "TLM"],
-    "TNSR": ["30449", "SOL", "Tensor", "TNSR"],
-    "TOKAMAK": ["6731", "ETH", "Tokamak Network", "TOKAMAK"],
-    "TON": ["11419", "TON", "Toncoin", "TON"],
-    "TOSHI": ["27750", "BNB", "Toshi", "TOSHI"],
-    "TOWNS": ["37571", "ETH", "Towns", "TOWNS"],
-    "TRADOOR": ["36737", "BNB", "Tradoor", "TRADOOR"],
-    "TRB": ["4944", "ETH", "Tellor", "TRB"],
-    "TREE": ["37495", "ETH", "Treehouse", "TREE"],
-    "TRIA": ["39382", "ETH", "Tria", "TRIA"],
-    "TRUMP": ["35336", "SOL", "OFFICIAL TRUMP", "TRUMP"],
-    "TRUST": ["38863", "-", "Intuition", "TRUST"],
-    "TRUTH": ["38178", "SUI", "Swarm Network", "TRUTH"],
-    "TRX": ["1958", "TRX", "TRON", "TRX"],
-    "TSLA": ["39618", "HYPE", "Tesla Tokenized Stock (Hyperliquid)", "TSLA"],
-    "TSM": [
-      "39490",
-      "TSM",
-      "Taiwan Semiconductor Manufacturing (Derivatives)",
-      "TSM"
-    ],
-    "TST": ["35647", "BNB", "Test", "TST"],
-    "TT": ["3930", "TT", "ThunderCore", "TT"],
-    "TURBO": ["24911", "ETH", "Turbo", "TURBO"],
-    "TURTLE": ["38671", "ETH", "Turtle", "TURTLE"],
-    "TUSD": ["2563", "ETH", "TrueUSD", "TUSD"],
-    "TUT": ["35892", "BNB", "Tutorial", "TUT"],
-    "TWT": ["5964", "BNB", "Trust Wallet Token", "TWT"],
-    "U": ["39120", "BNB", "United Stables", "U"],
-    "UAI": ["38841", "BNB", "UnifAI Network", "UAI"],
-    "UB": ["38339", "ETH", "Unibase", "UB"],
-    "UMA": ["5617", "ETH", "UMA", "UMA"],
-    "UNI": ["7083", "ETH", "Uniswap", "UNI"],
-    "US": ["38869", "SUI", "Talus", "US"],
-    "USD1": ["36148", "ETH", "World Liberty Financial USD", "USD1"],
-    "USDC": ["3408", "ETH", "USDC", "USDC"],
-    "USDE": ["29470", "ETH", "Ethena USDe", "USDE"],
-    "USDP": ["3330", "ETH", "Pax Dollar", "USDP"],
-    "USDS": ["33039", "ETH", "USDS", "USDS"],
-    "USDT": ["825", "ETH", "USDT", "USDT"],
-    "USELESS": ["36828", "SOL", "Useless Coin", "USELESS"],
-    "USTC": ["7129", "USTC", "TerraClassicUSD", "USTC"],
-    "USUAL": ["33979", "ETH", "Usual", "USUAL"],
-    "VANA": ["34619", "ETH", "Vana", "VANA"],
-    "VANRY": ["8037", "ETH", "Vanar Chain", "VANRY"],
-    "VELODROME": ["20435", "OP", "VELODROME", "VELODROME"],
-    "VELVET": ["37298", "BNB", "Velvet", "VELVET"],
-    "VET": ["3077", "VET", "VeChain", "VET"],
-    "VIC": ["2570", "VIC", "Viction", "VIC"],
-    "VIRTUAL": ["29420", "ETH", "Virtuals Protocol", "VIRTUAL"],
-    "VTHO": ["3012", "VET", "VeThor Token", "VTHO"],
-    "VVV": ["35509", "-", "Venice Token", "VVV"],
-    "W": ["29587", "ETH", "Wormhole", "W"],
-    "WAL": ["36119", "SUI", "Walrus", "WAL"],
-    "WAVES": ["1274", "WAVES", "Waves", "WAVES"],
-    "WAXP": ["2300", "WAXP", "WAX", "WAXP"],
-    "WBETH": ["24760", "ETH", "WBETH", "WBETH"],
-    "WCT": ["33152", "ETH", "WalletConnect Token", "WCT"],
-    "WET": ["39049", "SOL", "Humidifi", "WET"],
-    "WIF": ["28752", "SOL", "dogwifhat", "WIF"],
-    "WIN": ["4206", "BNB", "WINkLink", "WIN"],
-    "WLD": ["13502", "ETH", "Worldcoin", "WLD"],
-    "WLFI": ["33251", "ETH", "World Liberty Financial", "WLFI"],
-    "WOO": ["7501", "ETH", "WOO", "WOO"],
-    "XAG": ["39343", "XAG", "Silver (Derivatives)", "XAG"],
-    "XAI": ["28933", "ARB", "Xai", "XAI"],
-    "XAN": ["38481", "ETH", "Anoma", "XAN"],
-    "XAU": ["37470", "ETH", "XAU9999 Meme", "XAU"],
-    "XAUT": ["5176", "ETH", "Tether Gold", "XAUT"],
-    "XCN": ["18679", "ETH", "Onyxcoin", "XCN"],
-    "XEC": ["10791", "XEC", "eCash", "XEC"],
-    "XLM": ["512", "XLM", "Stellar", "XLM"],
-    "XMR": ["328", "XMR", "Monero", "XMR"],
-    "XNO": ["1567", "XNO", "Nano", "XNO"],
-    "XNY": ["36933", "BNB", "Codatta", "XNY"],
-    "XPD": ["260", "XPD", "PetroDollar", "XPD"],
-    "XPIN": ["36238", "BNB", "XPIN Network", "XPIN"],
-    "XPL": ["36645", "XPL", "Plasma", "XPL"],
-    "XPT": ["39460", "XPT", "Platinum (Derivatives)", "XPT"],
-    "XRP": ["52", "XRP", "XRP", "XRP"],
-    "XTZ": ["2011", "XTZ", "Tezos", "XTZ"],
-    "XUSD": ["32372", "ETH", "StraitsX USD", "XUSD"],
-    "XVG": ["693", "XVG", "Verge", "XVG"],
-    "XVS": ["7288", "ETH", "Venus", "XVS"],
-    "YB": ["38651", "ETH", "YieldBasis", "YB"],
-    "YFI": ["5864", "ETH", "yearn.finance", "YFI"],
-    "YGG": ["10688", "ETH", "Yield Guild Games", "YGG"],
-    "ZAMA": ["39332", "ETH", "Zama", "ZAMA"],
-    "ZBT": ["38427", "ETH", "ZEROBASE", "ZBT"],
-    "ZEC": ["1437", "ZEC", "Zcash", "ZEC"],
-    "ZEN": ["1698", "ZEN", "Horizen", "ZEN"],
-    "ZEREBRO": ["34083", "SOL", "Zerebro", "ZEREBRO"],
-    "ZETA": ["21259", "ETH", "ZetaChain", "ZETA"],
-    "ZIL": ["2469", "ZIL", "Zilliqa", "ZIL"],
-    "ZK": ["24091", "ZK", "ZKsync", "ZK"],
-    "ZKC": ["38371", "ETH", "Boundless", "ZKC"],
-    "ZKP": ["39035", "ETH", "zkPass", "ZKP"],
-    "ZORA": ["35931", "-", "ZORA", "ZORA"],
-    "ZRO": ["26997", "ETH", "LayerZero", "ZRO"],
-    "ZRX": ["1896", "ETH", "0x Protocol", "ZRX"],
-    "币安人生": ["38590", "BNB"],
-    "我踏马来了": ["39322", "BNB"],
-    "龙虾": ["39671", "BNB"]
-  }
+    "NOTE_MAP": {
+        "币安人生": "bianrensheng",
+        "我踏马来了": "wotamalaile",
+        "龙虾": "lobster-2"
+    },
+    "SPECIAL_SYMBOL_MAP": {},
+    "MANUAL_SUPPLY_MAP": {},
+    "SYMBOL_TO_ID_MAP": {
+        "BTC": "1",
+        "USDT": "825",
+        "ETH": "1027",
+        "FCT2": "4953",
+        "FXS": "6953",
+        "DODOX": "7224",
+        "RAYSOL": "8526",
+        "BABYDOGE": "10407",
+        "RONIN": "14101",
+        "QUICK": "19966",
+        "LUNA2": "20314",
+        "VELODROME": "20435",
+        "WBETH": "24760",
+        "RATS": "28452",
+        "AI": "28846",
+        "GAME2": "31246",
+        "MOVE": "32452",
+        "USDS": "33039",
+        "ACT": "33566",
+        "AVAAI": "34116",
+        "BROCCOLI714": "35749",
+        "BROCCOLIF3B": "35753",
+        "PUMPBTC": "36166",
+        "LIGHT": "38506",
+        "4": "38557",
+        "币安人生": "38590",
+        "SPORTFUN": "38647",
+        "我踏马来了": "39322",
+        "龙虾": "39671",
+        "AIGENSYN": "39883"
+    },
+    "DUPLICATED_LIST": {
+        "BTT": [
+            "16086",
+            "TRX",
+            "BTT",
+            "upbit"
+        ],
+        "BTTC": [
+            "16086",
+            "TRX",
+            "BTTC",
+            "binance"
+        ],
+        "BEAM": [
+            "28298",
+            "ETH",
+            "BEAM",
+            "upbit"
+        ],
+        "BEAMX": [
+            "28298",
+            "ETH",
+            "BEAMX",
+            "binance"
+        ],
+        "BOB(BTC)": [
+            "38970",
+            "",
+            "BOB",
+            "binance"
+        ],
+        "BOB(BNB)": [
+            "34422",
+            "",
+            "1000000BOB",
+            "binance"
+        ],
+        "MET": [
+            "38353",
+            "SOL",
+            "MET",
+            "binance"
+        ],
+        "MET2": [
+            "38353",
+            "SOL",
+            "MET",
+            "upbit"
+        ],
+        "EDGE(edgeX)": [
+            "39720",
+            "",
+            "EDGE",
+            "binance"
+        ],
+        "EDGE(Definitive)": [
+            "36288",
+            "",
+            "EDGE",
+            "upbit"
+        ],
+        "RAYSOL": [
+            "8526",
+            "SOL",
+            "RAYSOL",
+            "binance"
+        ],
+        "RAY": [
+            "8526",
+            "SOL",
+            "RAY",
+            "upbit"
+        ]
+    },
+    "TICKER_DATA": {
+        "0G": [
+            "38337",
+            "ETH",
+            "0G",
+            "0G"
+        ],
+        "1INCH": [
+            "8104",
+            "ETH",
+            "1inch",
+            "1INCH"
+        ],
+        "2Z": [
+            "38515",
+            "SOL",
+            "DoubleZero",
+            "2Z"
+        ],
+        "4": [
+            "38557",
+            "BNB",
+            "4",
+            "4"
+        ],
+        "A": [
+            "36462",
+            "A",
+            "Vaulta",
+            "A"
+        ],
+        "AAPL": [
+            "39624",
+            "HYPE",
+            "Apple Tokenized Stock (Hyperliquid)",
+            "AAPL"
+        ],
+        "AAVE": [
+            "7278",
+            "ETH",
+            "Aave",
+            "AAVE"
+        ],
+        "ACE": [
+            "28674",
+            "BNB",
+            "Fusionist",
+            "ACE"
+        ],
+        "ACH": [
+            "6958",
+            "ETH",
+            "Alchemy Pay",
+            "ACH"
+        ],
+        "ACM": [
+            "8538",
+            "CHZ",
+            "AC Milan Fan Token",
+            "ACM"
+        ],
+        "ACT": [
+            "33566",
+            "SOL",
+            "ACT",
+            "ACT"
+        ],
+        "ACU": [
+            "36492",
+            "ETH",
+            "Acurast",
+            "ACU"
+        ],
+        "ACX": [
+            "22620",
+            "ETH",
+            "Across Protocol",
+            "ACX"
+        ],
+        "ADA": [
+            "2010",
+            "ADA",
+            "Cardano",
+            "ADA"
+        ],
+        "ADX": [
+            "1768",
+            "ETH",
+            "heyAura",
+            "ADX"
+        ],
+        "AERGO": [
+            "3637",
+            "AERGO",
+            "Aergo",
+            "AERGO"
+        ],
+        "AERO": [
+            "29270",
+            "-",
+            "Aerodrome Finance",
+            "AERO"
+        ],
+        "AEUR": [
+            "28596",
+            "ETH",
+            "Anchored Coins AEUR",
+            "AEUR"
+        ],
+        "AEVO": [
+            "29676",
+            "ETH",
+            "Aevo",
+            "AEVO"
+        ],
+        "AGLD": [
+            "11568",
+            "ETH",
+            "Adventure Gold",
+            "AGLD"
+        ],
+        "AGT": [
+            "36195",
+            "BNB",
+            "Alaya Governance Token",
+            "AGT"
+        ],
+        "AHT": [
+            "6641",
+            "AHT",
+            "AhaToken",
+            "AHT"
+        ],
+        "AI": [
+            "28846",
+            "BNB",
+            "AI",
+            "AI"
+        ],
+        "AIA": [
+            "38430",
+            "BNB",
+            "DeAgentAI",
+            "AIA"
+        ],
+        "AIGENSYN": [
+            "39883",
+            "",
+            "AIGENSYN",
+            "AIGENSYN"
+        ],
+        "AIN": [
+            "36770",
+            "BNB",
+            "Infinity Ground",
+            "AIN"
+        ],
+        "AIO": [
+            "37562",
+            "BNB",
+            "OLAXBT",
+            "AIO"
+        ],
+        "AIOT": [
+            "36319",
+            "BNB",
+            "OKZOO",
+            "AIOT"
+        ],
+        "AIXBT": [
+            "34103",
+            "ETH",
+            "aixbt",
+            "AIXBT"
+        ],
+        "AKE": [
+            "38127",
+            "BNB",
+            "AKEDO",
+            "AKE"
+        ],
+        "AKT": [
+            "7431",
+            "AKT",
+            "Akash Network",
+            "AKT"
+        ],
+        "ALCH": [
+            "34880",
+            "SOL",
+            "Alchemist AI",
+            "ALCH"
+        ],
+        "ALCX": [
+            "8613",
+            "ETH",
+            "Alchemix",
+            "ALCX"
+        ],
+        "ALGO": [
+            "4030",
+            "ALGO",
+            "Algorand",
+            "ALGO"
+        ],
+        "ALICE": [
+            "8766",
+            "ETH",
+            "MyNeighborAlice",
+            "ALICE"
+        ],
+        "ALLO": [
+            "38908",
+            "ETH",
+            "Allora",
+            "ALLO"
+        ],
+        "ALPINE": [
+            "18112",
+            "BNB",
+            "Alpine F1 Team Fan Token",
+            "ALPINE"
+        ],
+        "ALT": [
+            "29073",
+            "ETH",
+            "Altlayer",
+            "ALT"
+        ],
+        "AMP": [
+            "6945",
+            "ETH",
+            "Amp",
+            "AMP"
+        ],
+        "AMZN": [
+            "39619",
+            "HYPE",
+            "Amazon Tokenized Stock (Hyperliquid)",
+            "AMZN"
+        ],
+        "ANIME": [
+            "35319",
+            "ETH",
+            "Animecoin",
+            "ANIME"
+        ],
+        "ANKR": [
+            "3783",
+            "ETH",
+            "Ankr",
+            "ANKR"
+        ],
+        "APE": [
+            "18876",
+            "ETH",
+            "ApeCoin",
+            "APE"
+        ],
+        "API3": [
+            "7737",
+            "ETH",
+            "API3",
+            "API3"
+        ],
+        "APR": [
+            "38569",
+            "ETH",
+            "aPriori",
+            "APR"
+        ],
+        "APT": [
+            "21794",
+            "APT",
+            "Aptos",
+            "APT"
+        ],
+        "AQT": [
+            "7460",
+            "ETH",
+            "Alpha Quark Token",
+            "AQT"
+        ],
+        "AR": [
+            "5632",
+            "AR",
+            "Arweave",
+            "AR"
+        ],
+        "ARB": [
+            "11841",
+            "ARB",
+            "Arbitrum",
+            "ARB"
+        ],
+        "ARC": [
+            "34926",
+            "SOL",
+            "AI Rig Complex",
+            "ARC"
+        ],
+        "ARDR": [
+            "1320",
+            "ARDR",
+            "Ardor",
+            "ARDR"
+        ],
+        "ARIA": [
+            "38102",
+            "BNB",
+            "AriaAI",
+            "ARIA"
+        ],
+        "ARK": [
+            "1586",
+            "ARK",
+            "Ark",
+            "ARK"
+        ],
+        "ARKM": [
+            "27565",
+            "ETH",
+            "Arkham",
+            "ARKM"
+        ],
+        "ARPA": [
+            "4039",
+            "ETH",
+            "ARPA",
+            "ARPA"
+        ],
+        "ASR": [
+            "5229",
+            "CHZ",
+            "AS Roma Fan Token",
+            "ASR"
+        ],
+        "ASTER": [
+            "36341",
+            "BNB",
+            "Aster",
+            "ASTER"
+        ],
+        "ASTR": [
+            "12885",
+            "ASTR",
+            "Astar",
+            "ASTR"
+        ],
+        "AT": [
+            "38757",
+            "ETH",
+            "APRO",
+            "AT"
+        ],
+        "ATA": [
+            "10188",
+            "ETH",
+            "Automata Network",
+            "ATA"
+        ],
+        "ATH": [
+            "30083",
+            "ETH",
+            "Aethir",
+            "ATH"
+        ],
+        "ATM": [
+            "5227",
+            "CHZ",
+            "Atletico De Madrid Fan Token",
+            "ATM"
+        ],
+        "ATOM": [
+            "3794",
+            "ATOM",
+            "Cosmos",
+            "ATOM"
+        ],
+        "AUCTION": [
+            "8602",
+            "ETH",
+            "Bounce Token",
+            "AUCTION"
+        ],
+        "AUDIO": [
+            "7455",
+            "ETH",
+            "Audius",
+            "AUDIO"
+        ],
+        "AVA": [
+            "2776",
+            "ETH",
+            "AVA (Travala)",
+            "AVA"
+        ],
+        "AVAAI": [
+            "34116",
+            "SOL",
+            "AVAAI",
+            "AVAAI"
+        ],
+        "AVAX": [
+            "5805",
+            "AVAX",
+            "Avalanche",
+            "AVAX"
+        ],
+        "AVGO": [
+            "39871",
+            "AVGO",
+            "Broadcom Inc (Derivatives)",
+            "AVGO"
+        ],
+        "AVNT": [
+            "38299",
+            "-",
+            "Avantis",
+            "AVNT"
+        ],
+        "AWE": [
+            "4006",
+            "-",
+            "AWE",
+            "AWE"
+        ],
+        "AXL": [
+            "17799",
+            "ETH",
+            "Axelar",
+            "AXL"
+        ],
+        "AXS": [
+            "6783",
+            "ETH",
+            "Axie Infinity",
+            "AXS"
+        ],
+        "AZTEC": [
+            "39521",
+            "ETH",
+            "Aztec",
+            "AZTEC"
+        ],
+        "B": [
+            "36532",
+            "BNB",
+            "BUILDon",
+            "B"
+        ],
+        "B2": [
+            "36352",
+            "BNB",
+            "BSquared Network",
+            "B2"
+        ],
+        "BABA": [
+            "39486",
+            "BABA",
+            "Alibaba Group Holding Limited (Derivatives)",
+            "BABA"
+        ],
+        "BABY": [
+            "32198",
+            "BABY",
+            "Babylon",
+            "BABY"
+        ],
+        "BABYDOGE": [
+            "10407",
+            "ETH",
+            "Baby Doge Coin",
+            "BABYDOGE"
+        ],
+        "BAN": [
+            "33881",
+            "SOL",
+            "Comedian",
+            "BAN"
+        ],
+        "BANANA": [
+            "28066",
+            "ETH",
+            "Banana Gun",
+            "BANANA"
+        ],
+        "BANANAS31": [
+            "34118",
+            "BNB",
+            "Banana For Scale",
+            "BANANAS31"
+        ],
+        "BAND": [
+            "4679",
+            "ETH",
+            "Band",
+            "BAND"
+        ],
+        "BANK": [
+            "36296",
+            "BNB",
+            "Lorenzo Protocol",
+            "BANK"
+        ],
+        "BAR": [
+            "5225",
+            "CHZ",
+            "FC Barcelona Fan Token",
+            "BAR"
+        ],
+        "BARD": [
+            "38408",
+            "ETH",
+            "Lombard",
+            "BARD"
+        ],
+        "BAS": [
+            "37387",
+            "BNB",
+            "BNB Attestation Service",
+            "BAS"
+        ],
+        "BASED": [
+            "39812",
+            "ETH",
+            "Based",
+            "BASED"
+        ],
+        "BAT": [
+            "1697",
+            "ETH",
+            "Basic Attention Token",
+            "BAT"
+        ],
+        "BB": [
+            "30746",
+            "BB",
+            "BounceBit",
+            "BB"
+        ],
+        "BCH": [
+            "1831",
+            "BCH",
+            "Bitcoin Cash",
+            "BCH"
+        ],
+        "BEAM": [
+            "28298",
+            "ETH",
+            "Beam",
+            "BEAM"
+        ],
+        "BEAMX": [
+            "28298",
+            "ETH",
+            "BEAMX",
+            "BEAMX"
+        ],
+        "BEAT": [
+            "38837",
+            "BNB",
+            "Audiera",
+            "BEAT"
+        ],
+        "BEL": [
+            "6928",
+            "ETH",
+            "Bella Protocol",
+            "BEL"
+        ],
+        "BERA": [
+            "24647",
+            "BERA",
+            "Berachain",
+            "BERA"
+        ],
+        "BFUSD": [
+            "37760",
+            "BFUSD",
+            "BFUSD",
+            "BFUSD"
+        ],
+        "BICO": [
+            "9543",
+            "ETH",
+            "Biconomy",
+            "BICO"
+        ],
+        "BIGTIME": [
+            "28230",
+            "ETH",
+            "Big Time",
+            "BIGTIME"
+        ],
+        "BIO": [
+            "34812",
+            "ETH",
+            "Bio Protocol",
+            "BIO"
+        ],
+        "BIRB": [
+            "19765",
+            "SOL",
+            "Moonbirds",
+            "BIRB"
+        ],
+        "BLAST": [
+            "28480",
+            "BLAST",
+            "Blast",
+            "BLAST"
+        ],
+        "BLEND": [
+            "39666",
+            "ETH",
+            "Fluent",
+            "BLEND"
+        ],
+        "BLESS": [
+            "38466",
+            "BNB",
+            "Bless",
+            "BLESS"
+        ],
+        "BLUAI": [
+            "38717",
+            "BNB",
+            "Bluwhale",
+            "BLUAI"
+        ],
+        "BLUR": [
+            "23121",
+            "ETH",
+            "Blur",
+            "BLUR"
+        ],
+        "BMT": [
+            "35214",
+            "BNB",
+            "Bubblemaps",
+            "BMT"
+        ],
+        "BNB": [
+            "1839",
+            "BNB",
+            "BNB",
+            "BNB"
+        ],
+        "BNSOL": [
+            "32882",
+            "SOL",
+            "Binance Staked SOL",
+            "BNSOL"
+        ],
+        "BNT": [
+            "1727",
+            "ETH",
+            "Bancor",
+            "BNT"
+        ],
+        "BOB(BNB)": [
+            "34422",
+            "BNB",
+            "Build On BNB",
+            "BOB"
+        ],
+        "BOB(BTC)": [
+            "38970",
+            "BOB"
+        ],
+        "BOME": [
+            "29870",
+            "SOL",
+            "BOOK OF MEME",
+            "BOME"
+        ],
+        "BONK": [
+            "23095",
+            "SOL",
+            "Bonk",
+            "BONK"
+        ],
+        "BORA": [
+            "3801",
+            "KAIA",
+            "BORA",
+            "BORA"
+        ],
+        "BOUNTY": [
+            "2866",
+            "ARB",
+            "Chainbounty",
+            "BOUNTY"
+        ],
+        "BR": [
+            "36063",
+            "BNB",
+            "Bedrock",
+            "BR"
+        ],
+        "BRETT": [
+            "29743",
+            "-",
+            "Brett (Based)",
+            "BRETT"
+        ],
+        "BREV": [
+            "39159",
+            "ETH",
+            "Brevis",
+            "BREV"
+        ],
+        "BROCCOLI714": [
+            "35749",
+            "BNB",
+            "BROCCOLI714",
+            "BROCCOLI714"
+        ],
+        "BROCCOLIF3B": [
+            "35753",
+            "BNB",
+            "BROCCOLIF3B",
+            "BROCCOLIF3B"
+        ],
+        "BSB": [
+            "38889",
+            "BNB",
+            "Block Street",
+            "BSB"
+        ],
+        "BSV": [
+            "3602",
+            "BSV",
+            "Bitcoin SV",
+            "BSV"
+        ],
+        "BTC": [
+            "1",
+            "BTC",
+            "BTC",
+            "BTC"
+        ],
+        "BTR": [
+            "36277",
+            "BTR",
+            "Bitlayer",
+            "BTR"
+        ],
+        "BTT": [
+            "16086",
+            "TRX",
+            "BitTorrent [New]",
+            "BTT"
+        ],
+        "BTTC": [
+            "16086",
+            "TRX",
+            "BTTC",
+            "BTTC"
+        ],
+        "BULLA": [
+            "36769",
+            "BNB",
+            "Bulla",
+            "BULLA"
+        ],
+        "BZ": [
+            "39804",
+            "BZ",
+            "Brent Oil (Derivatives)",
+            "BZ"
+        ],
+        "C": [
+            "37340",
+            "BNB",
+            "Chainbase",
+            "C"
+        ],
+        "C98": [
+            "10903",
+            "ETH",
+            "Coin98",
+            "C98"
+        ],
+        "CAKE": [
+            "7186",
+            "ETH",
+            "PancakeSwap",
+            "CAKE"
+        ],
+        "CARV": [
+            "33372",
+            "ETH",
+            "CARV",
+            "CARV"
+        ],
+        "CAT": [
+            "32724",
+            "BNB",
+            "Simon's Cat",
+            "CAT"
+        ],
+        "CATI": [
+            "32966",
+            "TON",
+            "Catizen",
+            "CATI"
+        ],
+        "CBK": [
+            "8107",
+            "ETH",
+            "Cobak Token",
+            "CBK"
+        ],
+        "CC": [
+            "37263",
+            "CC",
+            "Canton",
+            "CC"
+        ],
+        "CELO": [
+            "5567",
+            "CELO",
+            "Celo",
+            "CELO"
+        ],
+        "CELR": [
+            "3814",
+            "ETH",
+            "Celer Network",
+            "CELR"
+        ],
+        "CETUS": [
+            "25114",
+            "SUI",
+            "Cetus Protocol",
+            "CETUS"
+        ],
+        "CFG": [
+            "6748",
+            "CFG",
+            "Centrifuge",
+            "CFG"
+        ],
+        "CFX": [
+            "7334",
+            "CFX",
+            "Conflux",
+            "CFX"
+        ],
+        "CGPT": [
+            "23756",
+            "ETH",
+            "ChainGPT",
+            "CGPT"
+        ],
+        "CHEEMS": [
+            "33280",
+            "BNB",
+            "Cheems (cheems.pet)",
+            "CHEEMS"
+        ],
+        "CHILLGUY": [
+            "34125",
+            "SOL",
+            "Just a chill guy",
+            "CHILLGUY"
+        ],
+        "CHIP": [
+            "39870",
+            "CHIP",
+            "USD.AI",
+            "CHIP"
+        ],
+        "CHR": [
+            "3978",
+            "ETH",
+            "Chromia",
+            "CHR"
+        ],
+        "CHZ": [
+            "4066",
+            "ETH",
+            "Chiliz",
+            "CHZ"
+        ],
+        "CITY": [
+            "10049",
+            "CHZ",
+            "Manchester City Fan Token",
+            "CITY"
+        ],
+        "CKB": [
+            "4948",
+            "CKB",
+            "Nervos Network",
+            "CKB"
+        ],
+        "CL": [
+            "39487",
+            "CL",
+            "Crude Oil Futures (Derivatives)",
+            "CL"
+        ],
+        "CLANKER": [
+            "34285",
+            "-",
+            "tokenbot",
+            "CLANKER"
+        ],
+        "CLO": [
+            "38634",
+            "BNB",
+            "Yei Finance",
+            "CLO"
+        ],
+        "COAI": [
+            "38489",
+            "BNB",
+            "ChainOpera AI",
+            "COAI"
+        ],
+        "COLLECT": [
+            "39170",
+            "BNB",
+            "Collect on Fanable",
+            "COLLECT"
+        ],
+        "COMP": [
+            "5692",
+            "ETH",
+            "Compound",
+            "COMP"
+        ],
+        "COOKIE": [
+            "31838",
+            "BNB",
+            "Cookie DAO",
+            "COOKIE"
+        ],
+        "COPPER": [
+            "36847",
+            "SOL",
+            "$COPPER",
+            "COPPER"
+        ],
+        "COS": [
+            "4036",
+            "BNB",
+            "Contentos",
+            "COS"
+        ],
+        "COTI": [
+            "3992",
+            "COTI",
+            "COTI",
+            "COTI"
+        ],
+        "COW": [
+            "19269",
+            "ETH",
+            "CoW Protocol",
+            "COW"
+        ],
+        "CPOOL": [
+            "12573",
+            "ETH",
+            "Clearpool",
+            "CPOOL"
+        ],
+        "CRCL": [
+            "36949",
+            "-",
+            "[Fake]Circle (crcl.top)",
+            "CRCL"
+        ],
+        "CRO": [
+            "3635",
+            "CRO",
+            "Cronos",
+            "CRO"
+        ],
+        "CROSS": [
+            "37166",
+            "BNB",
+            "CROSS",
+            "CROSS"
+        ],
+        "CRV": [
+            "6538",
+            "ETH",
+            "Curve DAO Token",
+            "CRV"
+        ],
+        "CTC": [
+            "5198",
+            "CTC",
+            "Creditcoin",
+            "CTC"
+        ],
+        "CTK": [
+            "4807",
+            "CTK",
+            "Shentu",
+            "CTK"
+        ],
+        "CTSI": [
+            "5444",
+            "ETH",
+            "Cartesi",
+            "CTSI"
+        ],
+        "CVC": [
+            "1816",
+            "ETH",
+            "Civic",
+            "CVC"
+        ],
+        "CVX": [
+            "9903",
+            "ETH",
+            "Convex Finance",
+            "CVX"
+        ],
+        "CYBER": [
+            "24781",
+            "ETH",
+            "Cyber",
+            "CYBER"
+        ],
+        "CYS": [
+            "39071",
+            "BNB",
+            "Cysic",
+            "CYS"
+        ],
+        "D": [
+            "11374",
+            "ETH",
+            "DAR Open Network",
+            "D"
+        ],
+        "DASH": [
+            "131",
+            "DASH",
+            "Dash",
+            "DASH"
+        ],
+        "DCR": [
+            "1168",
+            "DCR",
+            "Decred",
+            "DCR"
+        ],
+        "DEEP": [
+            "33391",
+            "SUI",
+            "DeepBook Protocol",
+            "DEEP"
+        ],
+        "DEXE": [
+            "7326",
+            "ETH",
+            "DeXe",
+            "DEXE"
+        ],
+        "DGB": [
+            "109",
+            "DGB",
+            "DigiByte",
+            "DGB"
+        ],
+        "DIA": [
+            "6138",
+            "ETH",
+            "DIA",
+            "DIA"
+        ],
+        "DKA": [
+            "5908",
+            "ETH",
+            "dKargo",
+            "DKA"
+        ],
+        "DODO": [
+            "7224",
+            "ETH",
+            "DODO",
+            "DODO"
+        ],
+        "DODOX": [
+            "7224",
+            "ETH",
+            "DODOX",
+            "DODOX"
+        ],
+        "DOGE": [
+            "74",
+            "DOGE",
+            "Dogecoin",
+            "DOGE"
+        ],
+        "DOGS": [
+            "32698",
+            "TON",
+            "DOGS",
+            "DOGS"
+        ],
+        "DOLO": [
+            "35929",
+            "ETH",
+            "Dolomite",
+            "DOLO"
+        ],
+        "DOOD": [
+            "35747",
+            "SOL",
+            "Doodles",
+            "DOOD"
+        ],
+        "DOT": [
+            "6636",
+            "DOT",
+            "Polkadot",
+            "DOT"
+        ],
+        "DRIFT": [
+            "31278",
+            "SOL",
+            "Drift",
+            "DRIFT"
+        ],
+        "DUSK": [
+            "4092",
+            "ETH",
+            "Dusk",
+            "DUSK"
+        ],
+        "DYDX": [
+            "28324",
+            "OSMO",
+            "dYdX",
+            "DYDX"
+        ],
+        "DYM": [
+            "28932",
+            "DYM",
+            "Dymension",
+            "DYM"
+        ],
+        "EDEN": [
+            "38513",
+            "ETH",
+            "OpenEden",
+            "EDEN"
+        ],
+        "EDGE(Definitive)": [
+            "36288",
+            "BASE",
+            "Definitive",
+            "EDGE"
+        ],
+        "EDGE(edgeX)": [
+            "39720",
+            "ETH",
+            "edgeX",
+            "EDGE"
+        ],
+        "EDU": [
+            "24613",
+            "BNB",
+            "Open Campus",
+            "EDU"
+        ],
+        "EGLD": [
+            "6892",
+            "EGLD",
+            "MultiversX",
+            "EGLD"
+        ],
+        "EIGEN": [
+            "30494",
+            "ETH",
+            "EigenCloud",
+            "EIGEN"
+        ],
+        "ELF": [
+            "2299",
+            "ELF",
+            "aelf",
+            "ELF"
+        ],
+        "ELSA": [
+            "39387",
+            "MNT",
+            "HeyElsa",
+            "ELSA"
+        ],
+        "ENA": [
+            "30171",
+            "ETH",
+            "Ethena",
+            "ENA"
+        ],
+        "ENJ": [
+            "2130",
+            "ENJ",
+            "Enjin Coin",
+            "ENJ"
+        ],
+        "ENS": [
+            "13855",
+            "ETH",
+            "Ethereum Name Service",
+            "ENS"
+        ],
+        "ENSO": [
+            "38668",
+            "ETH",
+            "Enso",
+            "ENSO"
+        ],
+        "EPIC": [
+            "8615",
+            "ETH",
+            "Epic Chain",
+            "EPIC"
+        ],
+        "ERA": [
+            "37374",
+            "ETH",
+            "Caldera",
+            "ERA"
+        ],
+        "ESP": [
+            "39548",
+            "ARB",
+            "Espresso",
+            "ESP"
+        ],
+        "ESPORTS": [
+            "37414",
+            "BNB",
+            "Yooldo",
+            "ESPORTS"
+        ],
+        "ETC": [
+            "1321",
+            "ETC",
+            "Ethereum Classic",
+            "ETC"
+        ],
+        "ETH": [
+            "1027",
+            "ETH",
+            "Ethereum",
+            "ETH"
+        ],
+        "ETHFI": [
+            "29814",
+            "ETH",
+            "ether.fi",
+            "ETHFI"
+        ],
+        "ETHW": [
+            "21296",
+            "ETHW",
+            "EthereumPoW",
+            "ETHW"
+        ],
+        "EUL": [
+            "14280",
+            "ETH",
+            "Euler",
+            "EUL"
+        ],
+        "EUR": [
+            "",
+            "",
+            "EUR",
+            "EUR"
+        ],
+        "EURI": [
+            "32644",
+            "ETH",
+            "Eurite",
+            "EURI"
+        ],
+        "EVAA": [
+            "38376",
+            "BNB",
+            "EVAA Protocol",
+            "EVAA"
+        ],
+        "EWJ": [
+            "39685",
+            "EWJ",
+            "iShares MSCI Japan ETF (Derivatives)",
+            "EWJ"
+        ],
+        "EWY": [
+            "39654",
+            "EWY",
+            "Ishares Msci South Korea ETF (Derivatives)",
+            "EWY"
+        ],
+        "F": [
+            "34297",
+            "ETH",
+            "SynFutures",
+            "F"
+        ],
+        "FARM": [
+            "6859",
+            "ETH",
+            "Harvest Finance",
+            "FARM"
+        ],
+        "FARTCOIN": [
+            "33597",
+            "SOL",
+            "Fartcoin",
+            "FARTCOIN"
+        ],
+        "FCT2": [
+            "4953",
+            "",
+            "FCT2",
+            "FCT2"
+        ],
+        "FDUSD": [
+            "26081",
+            "ETH",
+            "First Digital USD",
+            "FDUSD"
+        ],
+        "FET": [
+            "3773",
+            "FET",
+            "Artificial Superintelligence Alliance",
+            "FET"
+        ],
+        "FF": [
+            "38482",
+            "ETH",
+            "Falcon Finance",
+            "FF"
+        ],
+        "FHE": [
+            "36153",
+            "ETH",
+            "Mind Network",
+            "FHE"
+        ],
+        "FIDA": [
+            "7978",
+            "SOL",
+            "Bonfida",
+            "FIDA"
+        ],
+        "FIGHT": [
+            "38963",
+            "BNB",
+            "FIGHT",
+            "FIGHT"
+        ],
+        "FIL": [
+            "2280",
+            "FIL",
+            "Filecoin",
+            "FIL"
+        ],
+        "FLOCK": [
+            "34987",
+            "SOL",
+            "FLock.io",
+            "FLOCK"
+        ],
+        "FLOKI": [
+            "10804",
+            "ETH",
+            "FLOKI",
+            "FLOKI"
+        ],
+        "FLOW": [
+            "4558",
+            "FLOW",
+            "Flow",
+            "FLOW"
+        ],
+        "FLUID": [
+            "10508",
+            "ETH",
+            "Fluid",
+            "FLUID"
+        ],
+        "FLUX": [
+            "3029",
+            "FLUX",
+            "Flux",
+            "FLUX"
+        ],
+        "FOGO": [
+            "38356",
+            "FOGO",
+            "Fogo",
+            "FOGO"
+        ],
+        "FOLKS": [
+            "38864",
+            "ETH",
+            "Folks Finance",
+            "FOLKS"
+        ],
+        "FORM": [
+            "23635",
+            "BNB",
+            "Four",
+            "FORM"
+        ],
+        "FRAX": [
+            "6952",
+            "ETH",
+            "Legacy Frax Dollar",
+            "FRAX"
+        ],
+        "FTT": [
+            "4195",
+            "BNB",
+            "FTX Token",
+            "FTT"
+        ],
+        "G": [
+            "32120",
+            "G",
+            "Gravity",
+            "G"
+        ],
+        "GALA": [
+            "7080",
+            "ETH",
+            "Gala",
+            "GALA"
+        ],
+        "GAME2": [
+            "31246",
+            "",
+            "GAME2",
+            "GAME2"
+        ],
+        "GAS": [
+            "1785",
+            "NEO",
+            "Gas",
+            "GAS"
+        ],
+        "GENIUS": [
+            "39841",
+            "BNB",
+            "Genius Terminal",
+            "GENIUS"
+        ],
+        "GIGGLE": [
+            "38470",
+            "BNB",
+            "Giggle Fund",
+            "GIGGLE"
+        ],
+        "GLM": [
+            "1455",
+            "ETH",
+            "Golem",
+            "GLM"
+        ],
+        "GLMR": [
+            "6836",
+            "GLMR",
+            "Moonbeam",
+            "GLMR"
+        ],
+        "GMT": [
+            "18069",
+            "ETH",
+            "GMT",
+            "GMT"
+        ],
+        "GMX": [
+            "11857",
+            "SOL",
+            "GMX",
+            "GMX"
+        ],
+        "GNO": [
+            "1659",
+            "ETH",
+            "Gnosis",
+            "GNO"
+        ],
+        "GNS": [
+            "13663",
+            "POL",
+            "Gains Network",
+            "GNS"
+        ],
+        "GOAT": [
+            "33440",
+            "SOL",
+            "Goatseus Maximus",
+            "GOAT"
+        ],
+        "GOOGL": [
+            "39470",
+            "GOOGL",
+            "Alphabet Inc (Derivatives)",
+            "GOOGL"
+        ],
+        "GPS": [
+            "35268",
+            "BNB",
+            "GoPlus Security",
+            "GPS"
+        ],
+        "GRASS": [
+            "32956",
+            "SOL",
+            "Grass",
+            "GRASS"
+        ],
+        "GRIFFAIN": [
+            "34792",
+            "SOL",
+            "GRIFFAIN",
+            "GRIFFAIN"
+        ],
+        "GRT": [
+            "6719",
+            "ETH",
+            "The Graph",
+            "GRT"
+        ],
+        "GTC": [
+            "10052",
+            "ETH",
+            "Gitcoin",
+            "GTC"
+        ],
+        "GUA": [
+            "38984",
+            "BNB",
+            "SUPERFORTUNE",
+            "GUA"
+        ],
+        "GUN": [
+            "36156",
+            "GUN",
+            "GUNZ",
+            "GUN"
+        ],
+        "GWEI": [
+            "39379",
+            "ETH",
+            "ETHGas",
+            "GWEI"
+        ],
+        "H": [
+            "36922",
+            "ETH",
+            "Humanity Protocol",
+            "H"
+        ],
+        "HAEDAL": [
+            "36369",
+            "BNB",
+            "Haedal Protocol",
+            "HAEDAL"
+        ],
+        "HANA": [
+            "38468",
+            "BNB",
+            "Hana Network",
+            "HANA"
+        ],
+        "HBAR": [
+            "4642",
+            "HBAR",
+            "Hedera",
+            "HBAR"
+        ],
+        "HEI": [
+            "35724",
+            "ETH",
+            "Heima",
+            "HEI"
+        ],
+        "HEMI": [
+            "38159",
+            "ETH",
+            "Hemi",
+            "HEMI"
+        ],
+        "HFT": [
+            "22461",
+            "ETH",
+            "Hashflow",
+            "HFT"
+        ],
+        "HIGH": [
+            "11232",
+            "ETH",
+            "Highstreet",
+            "HIGH"
+        ],
+        "HIVE": [
+            "5370",
+            "HIVE",
+            "Hive",
+            "HIVE"
+        ],
+        "HMSTR": [
+            "32195",
+            "HMSTR",
+            "Hamster Kombat",
+            "HMSTR"
+        ],
+        "HOLO": [
+            "38309",
+            "BNB",
+            "Holoworld AI",
+            "HOLO"
+        ],
+        "HOME": [
+            "36133",
+            "BNB",
+            "Defi App",
+            "HOME"
+        ],
+        "HOOD": [
+            "35566",
+            "SOL",
+            "Robinhood",
+            "HOOD"
+        ],
+        "HOT": [
+            "2682",
+            "ETH",
+            "Holo",
+            "HOT"
+        ],
+        "HP": [
+            "36556",
+            "HP",
+            "Hippo Protocol",
+            "HP"
+        ],
+        "HUMA": [
+            "36576",
+            "BNB",
+            "Huma Finance",
+            "HUMA"
+        ],
+        "HUNT": [
+            "5380",
+            "ETH",
+            "Hunt Town",
+            "HUNT"
+        ],
+        "HYPE": [
+            "32196",
+            "HYPE",
+            "Hyperliquid",
+            "HYPE"
+        ],
+        "HYPER": [
+            "36281",
+            "ETH",
+            "Hyperlane",
+            "HYPER"
+        ],
+        "ICNT": [
+            "37070",
+            "ETH",
+            "Impossible Cloud Network",
+            "ICNT"
+        ],
+        "ICP": [
+            "8916",
+            "ICP",
+            "Internet Computer",
+            "ICP"
+        ],
+        "ICX": [
+            "2099",
+            "ICX",
+            "ICON",
+            "ICX"
+        ],
+        "ID": [
+            "21846",
+            "ETH",
+            "SPACE ID",
+            "ID"
+        ],
+        "IDOL": [
+            "36775",
+            "BNB",
+            "MEET48",
+            "IDOL"
+        ],
+        "ILV": [
+            "8719",
+            "ETH",
+            "Illuvium",
+            "ILV"
+        ],
+        "IMX": [
+            "10603",
+            "ETH",
+            "Immutable",
+            "IMX"
+        ],
+        "IN": [
+            "37609",
+            "ETH",
+            "INFINIT",
+            "IN"
+        ],
+        "INIT": [
+            "33120",
+            "INIT",
+            "Initia",
+            "INIT"
+        ],
+        "INJ": [
+            "7226",
+            "ETH",
+            "Injective",
+            "INJ"
+        ],
+        "INTC": [
+            "39472",
+            "INTC",
+            "Intel Corp (Derivatives)",
+            "INTC"
+        ],
+        "INX": [
+            "39461",
+            "ETH",
+            "Infinex",
+            "INX"
+        ],
+        "IO": [
+            "29835",
+            "SOL",
+            "io.net",
+            "IO"
+        ],
+        "IOST": [
+            "2405",
+            "IOST",
+            "IOST",
+            "IOST"
+        ],
+        "IOTA": [
+            "1720",
+            "IOTA",
+            "IOTA",
+            "IOTA"
+        ],
+        "IOTX": [
+            "2777",
+            "IOTX",
+            "IoTeX",
+            "IOTX"
+        ],
+        "IP": [
+            "35626",
+            "IP",
+            "Story",
+            "IP"
+        ],
+        "IQ": [
+            "2930",
+            "ETH",
+            "IQ",
+            "IQ"
+        ],
+        "IRYS": [
+            "38978",
+            "ETH",
+            "Irys",
+            "IRYS"
+        ],
+        "JASMY": [
+            "8425",
+            "ETH",
+            "JasmyCoin",
+            "JASMY"
+        ],
+        "JCT": [
+            "38909",
+            "ETH",
+            "Janction",
+            "JCT"
+        ],
+        "JELLYJELLY": [
+            "35537",
+            "SOL",
+            "Jelly-My-Jelly",
+            "JELLYJELLY"
+        ],
+        "JOE": [
+            "11396",
+            "AVAX",
+            "JOE",
+            "JOE"
+        ],
+        "JST": [
+            "5488",
+            "TRX",
+            "JUST",
+            "JST"
+        ],
+        "JTO": [
+            "28541",
+            "SOL",
+            "Jito",
+            "JTO"
+        ],
+        "JUP": [
+            "29210",
+            "SOL",
+            "Jupiter",
+            "JUP"
+        ],
+        "JUV": [
+            "5224",
+            "CHZ",
+            "Juventus Fan Token",
+            "JUV"
+        ],
+        "KAIA": [
+            "32880",
+            "KAIA",
+            "Kaia",
+            "KAIA"
+        ],
+        "KAITO": [
+            "35763",
+            "-",
+            "KAITO",
+            "KAITO"
+        ],
+        "KAS": [
+            "20396",
+            "KAS",
+            "Kaspa",
+            "KAS"
+        ],
+        "KAT": [
+            "38769",
+            "KAT",
+            "Katana",
+            "KAT"
+        ],
+        "KAVA": [
+            "4846",
+            "ETH",
+            "Kava",
+            "KAVA"
+        ],
+        "KERNEL": [
+            "36180",
+            "ETH",
+            "KernelDAO",
+            "KERNEL"
+        ],
+        "KGEN": [
+            "38554",
+            "BNB",
+            "KGeN",
+            "KGEN"
+        ],
+        "KGST": [
+            "39162",
+            "BNB",
+            "KGST",
+            "KGST"
+        ],
+        "KITE": [
+            "38828",
+            "KITE",
+            "Kite",
+            "KITE"
+        ],
+        "KMNO": [
+            "30986",
+            "SOL",
+            "Kamino",
+            "KMNO"
+        ],
+        "KNC": [
+            "9444",
+            "ETH",
+            "Kyber Network Crystal v2",
+            "KNC"
+        ],
+        "KOMA": [
+            "33405",
+            "BNB",
+            "Koma Inu",
+            "KOMA"
+        ],
+        "KSM": [
+            "5034",
+            "KSM",
+            "Kusama",
+            "KSM"
+        ],
+        "LA": [
+            "36510",
+            "ETH",
+            "Lagrange",
+            "LA"
+        ],
+        "LAB": [
+            "33223",
+            "BNB",
+            "LAB",
+            "LAB"
+        ],
+        "LAYER": [
+            "35429",
+            "SOL",
+            "Solayer",
+            "LAYER"
+        ],
+        "LAZIO": [
+            "12687",
+            "BNB",
+            "S.S. Lazio Fan Token",
+            "LAZIO"
+        ],
+        "LDO": [
+            "8000",
+            "ETH",
+            "Lido DAO",
+            "LDO"
+        ],
+        "LIGHT": [
+            "38506",
+            "BNB",
+            "LIGHT",
+            "LIGHT"
+        ],
+        "LINEA": [
+            "27657",
+            "LINEA",
+            "Linea",
+            "LINEA"
+        ],
+        "LINK": [
+            "1975",
+            "ETH",
+            "Chainlink",
+            "LINK"
+        ],
+        "LISTA": [
+            "21533",
+            "BNB",
+            "Lista DAO",
+            "LISTA"
+        ],
+        "LIT": [
+            "39125",
+            "ETH",
+            "Lighter",
+            "LIT"
+        ],
+        "LPT": [
+            "3640",
+            "ETH",
+            "Livepeer",
+            "LPT"
+        ],
+        "LQTY": [
+            "7429",
+            "ETH",
+            "Liquity",
+            "LQTY"
+        ],
+        "LSK": [
+            "1214",
+            "LSK",
+            "Lisk",
+            "LSK"
+        ],
+        "LTC": [
+            "2",
+            "LTC",
+            "Litecoin",
+            "LTC"
+        ],
+        "LUMIA": [
+            "33439",
+            "BNB",
+            "Lumia",
+            "LUMIA"
+        ],
+        "LUNA": [
+            "20314",
+            "LUNA",
+            "Terra",
+            "LUNA"
+        ],
+        "LUNA2": [
+            "20314",
+            "LUNA",
+            "LUNA2",
+            "LUNA2"
+        ],
+        "LUNC": [
+            "4172",
+            "LUNC",
+            "Terra Classic",
+            "LUNC"
+        ],
+        "LYN": [
+            "38561",
+            "BNB",
+            "Everlyn AI",
+            "LYN"
+        ],
+        "M": [
+            "35491",
+            "M",
+            "MemeCore",
+            "M"
+        ],
+        "MAGIC": [
+            "14783",
+            "ETH",
+            "Treasure",
+            "MAGIC"
+        ],
+        "MAGMA": [
+            "39121",
+            "SUI",
+            "Magma Finance",
+            "MAGMA"
+        ],
+        "MANA": [
+            "1966",
+            "ETH",
+            "Decentraland",
+            "MANA"
+        ],
+        "MANTA": [
+            "13631",
+            "MANTA",
+            "Manta Network",
+            "MANTA"
+        ],
+        "MANTRA": [
+            "39611",
+            "MANTRA",
+            "MANTRA",
+            "MANTRA"
+        ],
+        "MASK": [
+            "8536",
+            "ETH",
+            "Mask Network",
+            "MASK"
+        ],
+        "MAV": [
+            "18037",
+            "ETH",
+            "Maverick Protocol",
+            "MAV"
+        ],
+        "MAVIA": [
+            "28829",
+            "ETH",
+            "Heroes of Mavia",
+            "MAVIA"
+        ],
+        "MBL": [
+            "4038",
+            "ONT",
+            "MovieBloc",
+            "MBL"
+        ],
+        "MBOX": [
+            "9175",
+            "BNB",
+            "MOBOX",
+            "MBOX"
+        ],
+        "ME": [
+            "32197",
+            "SOL",
+            "Magic Eden",
+            "ME"
+        ],
+        "MED": [
+            "2303",
+            "MED",
+            "MediBloc",
+            "MED"
+        ],
+        "MEGA": [
+            "38770",
+            "MEGA",
+            "MegaETH",
+            "MEGA"
+        ],
+        "MELANIA": [
+            "35347",
+            "SOL",
+            "Official Melania Meme",
+            "MELANIA"
+        ],
+        "MEME": [
+            "28301",
+            "ETH",
+            "Memecoin",
+            "MEME"
+        ],
+        "MERL": [
+            "30712",
+            "ETH",
+            "Merlin Chain",
+            "MERL"
+        ],
+        "MET": [
+            "38353",
+            "SOL",
+            "Meteora",
+            "MET"
+        ],
+        "MET2": [
+            "",
+            "SOL",
+            "MET2",
+            "MET2"
+        ],
+        "META": [
+            "3418",
+            "META",
+            "Metadium",
+            "META"
+        ],
+        "METIS": [
+            "9640",
+            "ETH",
+            "Metis",
+            "METIS"
+        ],
+        "MEW": [
+            "30126",
+            "SOL",
+            "cat in a dogs world",
+            "MEW"
+        ],
+        "MINA": [
+            "8646",
+            "MINA",
+            "Mina",
+            "MINA"
+        ],
+        "MIRA": [
+            "38495",
+            "BNB",
+            "Mira",
+            "MIRA"
+        ],
+        "MITO": [
+            "38204",
+            "BNB",
+            "Mitosis",
+            "MITO"
+        ],
+        "MLK": [
+            "5266",
+            "ARB",
+            "MiL.k",
+            "MLK"
+        ],
+        "MLN": [
+            "1552",
+            "ETH",
+            "Enzyme",
+            "MLN"
+        ],
+        "MMT": [
+            "38231",
+            "SUI",
+            "Momentum",
+            "MMT"
+        ],
+        "MNT": [
+            "27075",
+            "ETH",
+            "Mantle",
+            "MNT"
+        ],
+        "MOC": [
+            "2915",
+            "ETH",
+            "Moss Coin",
+            "MOC"
+        ],
+        "MOCA": [
+            "31526",
+            "ETH",
+            "Moca Network",
+            "MOCA"
+        ],
+        "MOG": [
+            "27659",
+            "ETH",
+            "Mog Coin",
+            "MOG"
+        ],
+        "MON": [
+            "30495",
+            "MON",
+            "Monad",
+            "MON"
+        ],
+        "MOODENG": [
+            "33093",
+            "SOL",
+            "Moo Deng (moodengsol.com)",
+            "MOODENG"
+        ],
+        "MORPHO": [
+            "34104",
+            "ETH",
+            "Morpho",
+            "MORPHO"
+        ],
+        "MOVE": [
+            "32452",
+            "APT",
+            "MOVE",
+            "MOVE"
+        ],
+        "MOVR": [
+            "9285",
+            "MOVR",
+            "Moonriver",
+            "MOVR"
+        ],
+        "MSFT": [
+            "39495",
+            "MSFT",
+            "Microsoft Corporation (Derivatives)",
+            "MSFT"
+        ],
+        "MSTR": [
+            "33356",
+            "ETH",
+            "MSTR2100",
+            "MSTR"
+        ],
+        "MTL": [
+            "1788",
+            "MTL",
+            "Metal DAO",
+            "MTL"
+        ],
+        "MU": [
+            "39469",
+            "MU",
+            "Micron Technology Inc (Derivatives)",
+            "MU"
+        ],
+        "MUBARAK": [
+            "36041",
+            "BNB",
+            "Mubarak",
+            "MUBARAK"
+        ],
+        "MVL": [
+            "2982",
+            "ETH",
+            "MVL",
+            "MVL"
+        ],
+        "MYX": [
+            "36410",
+            "BNB",
+            "MYX Finance",
+            "MYX"
+        ],
+        "NAORIS": [
+            "35114",
+            "ETH",
+            "Naoris Protocol",
+            "NAORIS"
+        ],
+        "NATGAS": [
+            "39464",
+            "NATGAS",
+            "Natural Gas (Derivatives)",
+            "NATGAS"
+        ],
+        "NEAR": [
+            "6535",
+            "NEAR",
+            "NEAR Protocol",
+            "NEAR"
+        ],
+        "NEIRO": [
+            "32521",
+            "ETH",
+            "Neiro",
+            "NEIRO"
+        ],
+        "NEO": [
+            "1376",
+            "NEO",
+            "Neo",
+            "NEO"
+        ],
+        "NEWT": [
+            "36861",
+            "ETH",
+            "Newton Protocol",
+            "NEWT"
+        ],
+        "NEXO": [
+            "2694",
+            "ETH",
+            "Nexo",
+            "NEXO"
+        ],
+        "NFP": [
+            "28778",
+            "BNB",
+            "NFPrompt",
+            "NFP"
+        ],
+        "NIGHT": [
+            "39064",
+            "BNB",
+            "Midnight",
+            "NIGHT"
+        ],
+        "NIL": [
+            "35702",
+            "ETH",
+            "Nillion",
+            "NIL"
+        ],
+        "NMR": [
+            "1732",
+            "ETH",
+            "Numeraire",
+            "NMR"
+        ],
+        "NOM": [
+            "38464",
+            "ETH",
+            "Nomina",
+            "NOM"
+        ],
+        "NOT": [
+            "28850",
+            "TON",
+            "Notcoin",
+            "NOT"
+        ],
+        "NVDA": [
+            "38153",
+            "NVDA",
+            "NVIDIA (Derivatives)",
+            "NVDA"
+        ],
+        "NXPC": [
+            "36044",
+            "BNB",
+            "NEXPACE",
+            "NXPC"
+        ],
+        "OG": [
+            "5309",
+            "CHZ",
+            "OG Fan Token",
+            "OG"
+        ],
+        "OGN": [
+            "5117",
+            "ETH",
+            "Origin Protocol",
+            "OGN"
+        ],
+        "ON": [
+            "38750",
+            "ETH",
+            "Orochi Network",
+            "ON"
+        ],
+        "ONDO": [
+            "21159",
+            "ETH",
+            "Ondo",
+            "ONDO"
+        ],
+        "ONE": [
+            "3945",
+            "ONE",
+            "Harmony",
+            "ONE"
+        ],
+        "ONG": [
+            "3217",
+            "BNB",
+            "Ontology Gas",
+            "ONG"
+        ],
+        "ONT": [
+            "2566",
+            "ONT",
+            "Ontology",
+            "ONT"
+        ],
+        "OP": [
+            "11840",
+            "OP",
+            "Optimism",
+            "OP"
+        ],
+        "OPEN": [
+            "37456",
+            "ETH",
+            "OpenLedger",
+            "OPEN"
+        ],
+        "OPG": [
+            "39800",
+            "-",
+            "OpenGradient",
+            "OPG"
+        ],
+        "OPN": [
+            "39564",
+            "ETH",
+            "Opinion",
+            "OPN"
+        ],
+        "ORBS": [
+            "3835",
+            "ETH",
+            "Orbs",
+            "ORBS"
+        ],
+        "ORCA": [
+            "11165",
+            "SOL",
+            "Orca",
+            "ORCA"
+        ],
+        "ORDER": [
+            "32809",
+            "ETH",
+            "Orderly",
+            "ORDER"
+        ],
+        "ORDI": [
+            "25028",
+            "BTC",
+            "ORDI",
+            "ORDI"
+        ],
+        "OSMO": [
+            "12220",
+            "OSMO",
+            "Osmosis",
+            "OSMO"
+        ],
+        "PARTI": [
+            "36102",
+            "BNB",
+            "Particle Network",
+            "PARTI"
+        ],
+        "PAXG": [
+            "4705",
+            "ETH",
+            "PAX Gold",
+            "PAXG"
+        ],
+        "PAYP": [
+            "39725",
+            "PAYP",
+            "PayPay Corp (Derivatives)",
+            "PAYP"
+        ],
+        "PENDLE": [
+            "9481",
+            "ETH",
+            "Pendle",
+            "PENDLE"
+        ],
+        "PENGU": [
+            "34466",
+            "SOL",
+            "Pudgy Penguins",
+            "PENGU"
+        ],
+        "PEOPLE": [
+            "14806",
+            "ETH",
+            "ConstitutionDAO",
+            "PEOPLE"
+        ],
+        "PEPE": [
+            "24478",
+            "ETH",
+            "Pepe",
+            "PEPE"
+        ],
+        "PHA": [
+            "6841",
+            "PHA",
+            "Phala Network",
+            "PHA"
+        ],
+        "PHB": [
+            "13969",
+            "PHB",
+            "Phoenix",
+            "PHB"
+        ],
+        "PIEVERSE": [
+            "38849",
+            "ETH",
+            "Pieverse",
+            "PIEVERSE"
+        ],
+        "PIPPIN": [
+            "35053",
+            "SOL",
+            "pippin",
+            "PIPPIN"
+        ],
+        "PIVX": [
+            "1169",
+            "PIVX",
+            "PIVX",
+            "PIVX"
+        ],
+        "PIXEL": [
+            "29335",
+            "ETH",
+            "Pixels",
+            "PIXEL"
+        ],
+        "PLAY": [
+            "37534",
+            "-",
+            "PlaysOut",
+            "PLAY"
+        ],
+        "PLTR": [
+            "39475",
+            "PLTR",
+            "Palantir Technologies Inc (Derivatives)",
+            "PLTR"
+        ],
+        "PLUME": [
+            "35364",
+            "PLUME",
+            "Plume",
+            "PLUME"
+        ],
+        "PNUT": [
+            "33788",
+            "SOL",
+            "Peanut the Squirrel",
+            "PNUT"
+        ],
+        "POKT": [
+            "11823",
+            "ETH",
+            "Pocket Network",
+            "POKT"
+        ],
+        "POL": [
+            "28321",
+            "ETH",
+            "Polygon (prev. MATIC)",
+            "POL"
+        ],
+        "POLYX": [
+            "20362",
+            "POLYX",
+            "Polymesh",
+            "POLYX"
+        ],
+        "POND": [
+            "7497",
+            "ETH",
+            "Marlin",
+            "POND"
+        ],
+        "POPCAT": [
+            "28782",
+            "SOL",
+            "Popcat (SOL)",
+            "POPCAT"
+        ],
+        "PORTAL": [
+            "29555",
+            "ETH",
+            "Portal",
+            "PORTAL"
+        ],
+        "PORTO": [
+            "14052",
+            "BNB",
+            "FC Porto Fan Token",
+            "PORTO"
+        ],
+        "POWER": [
+            "39042",
+            "ETH",
+            "Power Protocol",
+            "POWER"
+        ],
+        "POWR": [
+            "2132",
+            "ETH",
+            "Powerledger",
+            "POWR"
+        ],
+        "PRL": [
+            "39797",
+            "BNB",
+            "Perle",
+            "PRL"
+        ],
+        "PROM": [
+            "4120",
+            "ETH",
+            "Prom",
+            "PROM"
+        ],
+        "PROMPT": [
+            "36223",
+            "ETH",
+            "Wayfinder",
+            "PROMPT"
+        ],
+        "PROVE": [
+            "37593",
+            "ETH",
+            "Succinct",
+            "PROVE"
+        ],
+        "PSG": [
+            "5226",
+            "CHZ",
+            "Paris Saint-Germain Fan Token",
+            "PSG"
+        ],
+        "PTB": [
+            "37372",
+            "ETH",
+            "Portal To Bitcoin",
+            "PTB"
+        ],
+        "PUMP": [
+            "36507",
+            "SOL",
+            "Pump.fun",
+            "PUMP"
+        ],
+        "PUMPBTC": [
+            "36166",
+            "BNB",
+            "PUMPBTC",
+            "PUMPBTC"
+        ],
+        "PUNDIX": [
+            "9040",
+            "ETH",
+            "Pundi X (New)",
+            "PUNDIX"
+        ],
+        "PYR": [
+            "9308",
+            "ETH",
+            "Vulcan Forged (PYR)",
+            "PYR"
+        ],
+        "PYTH": [
+            "28177",
+            "SOL",
+            "Pyth Network",
+            "PYTH"
+        ],
+        "Q": [
+            "38236",
+            "ETH",
+            "Quack AI",
+            "Q"
+        ],
+        "QI": [
+            "9288",
+            "AVAX",
+            "BENQI",
+            "QI"
+        ],
+        "QKC": [
+            "2840",
+            "ETH",
+            "QuarkChain",
+            "QKC"
+        ],
+        "QNT": [
+            "3155",
+            "ETH",
+            "Quant",
+            "QNT"
+        ],
+        "QQQ": [
+            "39517",
+            "QQQ",
+            "QQQ (Derivatives)",
+            "QQQ"
+        ],
+        "QTUM": [
+            "1684",
+            "QTUM",
+            "Qtum",
+            "QTUM"
+        ],
+        "QUICK": [
+            "19966",
+            "ETH",
+            "QUICK",
+            "QUICK"
+        ],
+        "RAD": [
+            "6843",
+            "RAD",
+            "Radworks",
+            "RAD"
+        ],
+        "RARE": [
+            "11294",
+            "ETH",
+            "SuperRare",
+            "RARE"
+        ],
+        "RATS": [
+            "33659",
+            "BNB",
+            "GoldenRat",
+            "RATS"
+        ],
+        "RAVE": [
+            "38967",
+            "ETH",
+            "RaveDAO",
+            "RAVE"
+        ],
+        "RAY": [
+            "8526",
+            "SOL",
+            "Raydium",
+            "RAY"
+        ],
+        "RAYSOL": [
+            "8526",
+            "SOL",
+            "RAYSOL",
+            "RAYSOL"
+        ],
+        "RECALL": [
+            "38669",
+            "-",
+            "Recall",
+            "RECALL"
+        ],
+        "RED": [
+            "21707",
+            "ETH",
+            "RedStone",
+            "RED"
+        ],
+        "RENDER": [
+            "5690",
+            "ETH",
+            "Render",
+            "RENDER"
+        ],
+        "REQ": [
+            "2071",
+            "ETH",
+            "Request",
+            "REQ"
+        ],
+        "RESOLV": [
+            "36713",
+            "ETH",
+            "Resolv",
+            "RESOLV"
+        ],
+        "REZ": [
+            "30843",
+            "ETH",
+            "Renzo",
+            "REZ"
+        ],
+        "RIF": [
+            "3701",
+            "ETH",
+            "Rootstock Infrastructure Framework",
+            "RIF"
+        ],
+        "RIVER": [
+            "38417",
+            "ETH",
+            "River",
+            "RIVER"
+        ],
+        "RLC": [
+            "1637",
+            "ETH",
+            "iExec RLC",
+            "RLC"
+        ],
+        "RLUSD": [
+            "34387",
+            "XRP",
+            "Ripple USD",
+            "RLUSD"
+        ],
+        "ROBO": [
+            "39595",
+            "ETH",
+            "Fabric Protocol",
+            "ROBO"
+        ],
+        "RONIN": [
+            "14101",
+            "RON",
+            "RONIN",
+            "RONIN"
+        ],
+        "ROSE": [
+            "7653",
+            "BNB",
+            "Oasis",
+            "ROSE"
+        ],
+        "RPL": [
+            "2943",
+            "ETH",
+            "Rocket Pool",
+            "RPL"
+        ],
+        "RSR": [
+            "3964",
+            "ETH",
+            "Reserve Rights",
+            "RSR"
+        ],
+        "RUNE": [
+            "4157",
+            "RUNE",
+            "THORChain",
+            "RUNE"
+        ],
+        "RVN": [
+            "2577",
+            "RVN",
+            "Ravencoin",
+            "RVN"
+        ],
+        "S": [
+            "32684",
+            "S",
+            "Sonic",
+            "S"
+        ],
+        "SAFE": [
+            "21585",
+            "ETH",
+            "Safe",
+            "SAFE"
+        ],
+        "SAGA": [
+            "30372",
+            "ETH",
+            "Saga",
+            "SAGA"
+        ],
+        "SAHARA": [
+            "36671",
+            "SAHARA",
+            "Sahara AI",
+            "SAHARA"
+        ],
+        "SAND": [
+            "6210",
+            "ETH",
+            "The Sandbox",
+            "SAND"
+        ],
+        "SANTOS": [
+            "15248",
+            "BNB",
+            "Santos FC Fan Token",
+            "SANTOS"
+        ],
+        "SAPIEN": [
+            "38117",
+            "-",
+            "Sapien",
+            "SAPIEN"
+        ],
+        "SATS": [
+            "28194",
+            "BTC",
+            "SATS (Ordinals)",
+            "SATS"
+        ],
+        "SC": [
+            "1042",
+            "SC",
+            "Siacoin",
+            "SC"
+        ],
+        "SCR": [
+            "26998",
+            "SCR",
+            "Scroll",
+            "SCR"
+        ],
+        "SCRT": [
+            "5604",
+            "SCRT",
+            "Secret",
+            "SCRT"
+        ],
+        "SEI": [
+            "23149",
+            "SEI",
+            "Sei",
+            "SEI"
+        ],
+        "SENT": [
+            "38868",
+            "ETH",
+            "Sentient",
+            "SENT"
+        ],
+        "SFP": [
+            "8119",
+            "BNB",
+            "SafePal",
+            "SFP"
+        ],
+        "SHELL": [
+            "35710",
+            "ETH",
+            "MyShell",
+            "SHELL"
+        ],
+        "SHIB": [
+            "5994",
+            "ETH",
+            "Shiba Inu",
+            "SHIB"
+        ],
+        "SIGN": [
+            "35600",
+            "ETH",
+            "Sign",
+            "SIGN"
+        ],
+        "SIREN": [
+            "35766",
+            "BNB",
+            "siren",
+            "SIREN"
+        ],
+        "SKL": [
+            "5691",
+            "ETH",
+            "SKALE",
+            "SKL"
+        ],
+        "SKR": [
+            "39377",
+            "SOL",
+            "Seeker",
+            "SKR"
+        ],
+        "SKY": [
+            "33038",
+            "ETH",
+            "Sky",
+            "SKY"
+        ],
+        "SKYAI": [
+            "36300",
+            "BNB",
+            "SKYAI",
+            "SKYAI"
+        ],
+        "SLP": [
+            "5824",
+            "ETH",
+            "Smooth Love Potion",
+            "SLP"
+        ],
+        "SNDK": [
+            "39507",
+            "SNDK",
+            "SanDisk Corporation (Derivatives)",
+            "SNDK"
+        ],
+        "SNT": [
+            "1759",
+            "ETH",
+            "Status",
+            "SNT"
+        ],
+        "SNX": [
+            "2586",
+            "ETH",
+            "Synthetix",
+            "SNX"
+        ],
+        "SOL": [
+            "5426",
+            "Solana",
+            "Solana",
+            "SOL"
+        ],
+        "SOLV": [
+            "12165",
+            "BNB",
+            "Solv Protocol",
+            "SOLV"
+        ],
+        "SOMI": [
+            "37637",
+            "SOMI",
+            "Somnia",
+            "SOMI"
+        ],
+        "SONIC": [
+            "35051",
+            "SOL",
+            "Sonic SVM",
+            "SONIC"
+        ],
+        "SOON": [
+            "36542",
+            "BNB",
+            "SOON",
+            "SOON"
+        ],
+        "SOPH": [
+            "32087",
+            "ETH",
+            "Sophon",
+            "SOPH"
+        ],
+        "SPACE": [
+            "38136",
+            "ETH",
+            "Spacecoin",
+            "SPACE"
+        ],
+        "SPELL": [
+            "11289",
+            "ETH",
+            "Spell Token",
+            "SPELL"
+        ],
+        "SPK": [
+            "36569",
+            "ETH",
+            "Spark",
+            "SPK"
+        ],
+        "SPORTFUN": [
+            "38647",
+            "SOL",
+            "SPORTFUN",
+            "SPORTFUN"
+        ],
+        "SPX": [
+            "28081",
+            "ETH",
+            "SPX6900",
+            "SPX"
+        ],
+        "SPY": [
+            "39621",
+            "HYPE",
+            "SPDR S&P 500 ETF Trust Tokenized ETF (Hyperliquid)",
+            "SPY"
+        ],
+        "SQD": [
+            "12894",
+            "ARB",
+            "Subsquid",
+            "SQD"
+        ],
+        "SSV": [
+            "12999",
+            "ETH",
+            "ssv.network",
+            "SSV"
+        ],
+        "STABLE": [
+            "38892",
+            "STABLE",
+            "Stable",
+            "STABLE"
+        ],
+        "STBL": [
+            "38359",
+            "BNB",
+            "STBL",
+            "STBL"
+        ],
+        "STEEM": [
+            "1230",
+            "STEEM",
+            "Steem",
+            "STEEM"
+        ],
+        "STG": [
+            "18934",
+            "ETH",
+            "Stargate Finance",
+            "STG"
+        ],
+        "STO": [
+            "32194",
+            "ETH",
+            "StakeStone",
+            "STO"
+        ],
+        "STORJ": [
+            "1772",
+            "ETH",
+            "Storj",
+            "STORJ"
+        ],
+        "STRAX": [
+            "30168",
+            "STRAX",
+            "Xertra",
+            "STRAX"
+        ],
+        "STRK": [
+            "22691",
+            "ETH",
+            "Starknet",
+            "STRK"
+        ],
+        "STX": [
+            "4847",
+            "STX",
+            "Stacks",
+            "STX"
+        ],
+        "SUI": [
+            "20947",
+            "SUI",
+            "Sui",
+            "SUI"
+        ],
+        "SUN": [
+            "10529",
+            "TRX",
+            "Sun [New]",
+            "SUN"
+        ],
+        "SUPER": [
+            "8290",
+            "ETH",
+            "SuperVerse",
+            "SUPER"
+        ],
+        "SUSHI": [
+            "6758",
+            "ETH",
+            "SushiSwap",
+            "SUSHI"
+        ],
+        "SWARMS": [
+            "34993",
+            "SOL",
+            "Swarms",
+            "SWARMS"
+        ],
+        "SXT": [
+            "36405",
+            "ETH",
+            "Space and Time",
+            "SXT"
+        ],
+        "SYN": [
+            "12147",
+            "ETH",
+            "Synapse",
+            "SYN"
+        ],
+        "SYRUP": [
+            "33824",
+            "ETH",
+            "Maple Finance",
+            "SYRUP"
+        ],
+        "SYS": [
+            "541",
+            "SYS",
+            "Syscoin",
+            "SYS"
+        ],
+        "T": [
+            "17751",
+            "ETH",
+            "Threshold",
+            "T"
+        ],
+        "TA": [
+            "37430",
+            "BNB",
+            "Trusta.AI",
+            "TA"
+        ],
+        "TAC": [
+            "37338",
+            "ETH",
+            "TAC Protocol",
+            "TAC"
+        ],
+        "TAG": [
+            "34958",
+            "BNB",
+            "Tagger",
+            "TAG"
+        ],
+        "TAIKO": [
+            "31525",
+            "TAIKO",
+            "Taiko",
+            "TAIKO"
+        ],
+        "TAKE": [
+            "38175",
+            "BNB",
+            "OVERTAKE",
+            "TAKE"
+        ],
+        "TAO": [
+            "22974",
+            "TAO",
+            "Bittensor",
+            "TAO"
+        ],
+        "TFUEL": [
+            "3822",
+            "TFUEL",
+            "Theta Fuel",
+            "TFUEL"
+        ],
+        "THE": [
+            "23335",
+            "BNB",
+            "THENA",
+            "THE"
+        ],
+        "THETA": [
+            "2416",
+            "THETA",
+            "Theta Network",
+            "THETA"
+        ],
+        "TIA": [
+            "22861",
+            "OSMO",
+            "Celestia",
+            "TIA"
+        ],
+        "TKO": [
+            "9020",
+            "BNB",
+            "Toko Token",
+            "TKO"
+        ],
+        "TLM": [
+            "9119",
+            "ETH",
+            "Alien Worlds",
+            "TLM"
+        ],
+        "TNSR": [
+            "30449",
+            "SOL",
+            "Tensor",
+            "TNSR"
+        ],
+        "TOKAMAK": [
+            "6731",
+            "ETH",
+            "Tokamak Network",
+            "TOKAMAK"
+        ],
+        "TON": [
+            "11419",
+            "TON",
+            "Toncoin",
+            "TON"
+        ],
+        "TOSHI": [
+            "27750",
+            "BNB",
+            "Toshi",
+            "TOSHI"
+        ],
+        "TOWNS": [
+            "37571",
+            "ETH",
+            "Towns",
+            "TOWNS"
+        ],
+        "TRADOOR": [
+            "36737",
+            "BNB",
+            "Tradoor",
+            "TRADOOR"
+        ],
+        "TRB": [
+            "4944",
+            "ETH",
+            "Tellor",
+            "TRB"
+        ],
+        "TREE": [
+            "37495",
+            "ETH",
+            "Treehouse",
+            "TREE"
+        ],
+        "TRIA": [
+            "39382",
+            "ETH",
+            "Tria",
+            "TRIA"
+        ],
+        "TRUMP": [
+            "35336",
+            "SOL",
+            "OFFICIAL TRUMP",
+            "TRUMP"
+        ],
+        "TRUST": [
+            "38863",
+            "-",
+            "Intuition",
+            "TRUST"
+        ],
+        "TRUTH": [
+            "38178",
+            "SUI",
+            "Swarm Network",
+            "TRUTH"
+        ],
+        "TRX": [
+            "1958",
+            "TRX",
+            "TRON",
+            "TRX"
+        ],
+        "TSLA": [
+            "39618",
+            "HYPE",
+            "Tesla Tokenized Stock (Hyperliquid)",
+            "TSLA"
+        ],
+        "TSM": [
+            "39490",
+            "TSM",
+            "Taiwan Semiconductor Manufacturing (Derivatives)",
+            "TSM"
+        ],
+        "TST": [
+            "35647",
+            "BNB",
+            "Test",
+            "TST"
+        ],
+        "TT": [
+            "3930",
+            "TT",
+            "ThunderCore",
+            "TT"
+        ],
+        "TURBO": [
+            "24911",
+            "ETH",
+            "Turbo",
+            "TURBO"
+        ],
+        "TURTLE": [
+            "38671",
+            "ETH",
+            "Turtle",
+            "TURTLE"
+        ],
+        "TUSD": [
+            "2563",
+            "ETH",
+            "TrueUSD",
+            "TUSD"
+        ],
+        "TUT": [
+            "35892",
+            "BNB",
+            "Tutorial",
+            "TUT"
+        ],
+        "TWT": [
+            "5964",
+            "BNB",
+            "Trust Wallet Token",
+            "TWT"
+        ],
+        "U": [
+            "39120",
+            "BNB",
+            "United Stables",
+            "U"
+        ],
+        "UAI": [
+            "38841",
+            "BNB",
+            "UnifAI Network",
+            "UAI"
+        ],
+        "UB": [
+            "38339",
+            "ETH",
+            "Unibase",
+            "UB"
+        ],
+        "UMA": [
+            "5617",
+            "ETH",
+            "UMA",
+            "UMA"
+        ],
+        "UNI": [
+            "7083",
+            "ETH",
+            "Uniswap",
+            "UNI"
+        ],
+        "US": [
+            "38869",
+            "SUI",
+            "Talus",
+            "US"
+        ],
+        "USD1": [
+            "36148",
+            "ETH",
+            "World Liberty Financial USD",
+            "USD1"
+        ],
+        "USDC": [
+            "3408",
+            "ETH",
+            "USDC",
+            "USDC"
+        ],
+        "USDE": [
+            "29470",
+            "ETH",
+            "Ethena USDe",
+            "USDE"
+        ],
+        "USDP": [
+            "3330",
+            "ETH",
+            "Pax Dollar",
+            "USDP"
+        ],
+        "USDS": [
+            "33039",
+            "ETH",
+            "USDS",
+            "USDS"
+        ],
+        "USDT": [
+            "825",
+            "ETH",
+            "USDT",
+            "USDT"
+        ],
+        "USELESS": [
+            "36828",
+            "SOL",
+            "Useless Coin",
+            "USELESS"
+        ],
+        "USTC": [
+            "7129",
+            "USTC",
+            "TerraClassicUSD",
+            "USTC"
+        ],
+        "USUAL": [
+            "33979",
+            "ETH",
+            "Usual",
+            "USUAL"
+        ],
+        "VANA": [
+            "34619",
+            "ETH",
+            "Vana",
+            "VANA"
+        ],
+        "VANRY": [
+            "8037",
+            "ETH",
+            "Vanar Chain",
+            "VANRY"
+        ],
+        "VELODROME": [
+            "20435",
+            "OP",
+            "VELODROME",
+            "VELODROME"
+        ],
+        "VELVET": [
+            "37298",
+            "BNB",
+            "Velvet",
+            "VELVET"
+        ],
+        "VET": [
+            "3077",
+            "VET",
+            "VeChain",
+            "VET"
+        ],
+        "VIC": [
+            "2570",
+            "VIC",
+            "Viction",
+            "VIC"
+        ],
+        "VIRTUAL": [
+            "29420",
+            "ETH",
+            "Virtuals Protocol",
+            "VIRTUAL"
+        ],
+        "VTHO": [
+            "3012",
+            "VET",
+            "VeThor Token",
+            "VTHO"
+        ],
+        "VVV": [
+            "35509",
+            "-",
+            "Venice Token",
+            "VVV"
+        ],
+        "W": [
+            "29587",
+            "ETH",
+            "Wormhole",
+            "W"
+        ],
+        "WAL": [
+            "36119",
+            "SUI",
+            "Walrus",
+            "WAL"
+        ],
+        "WAVES": [
+            "1274",
+            "WAVES",
+            "Waves",
+            "WAVES"
+        ],
+        "WAXP": [
+            "2300",
+            "WAXP",
+            "WAX",
+            "WAXP"
+        ],
+        "WBETH": [
+            "24760",
+            "ETH",
+            "WBETH",
+            "WBETH"
+        ],
+        "WCT": [
+            "33152",
+            "ETH",
+            "WalletConnect Token",
+            "WCT"
+        ],
+        "WET": [
+            "39049",
+            "SOL",
+            "Humidifi",
+            "WET"
+        ],
+        "WIF": [
+            "28752",
+            "SOL",
+            "dogwifhat",
+            "WIF"
+        ],
+        "WIN": [
+            "4206",
+            "BNB",
+            "WINkLink",
+            "WIN"
+        ],
+        "WLD": [
+            "13502",
+            "ETH",
+            "Worldcoin",
+            "WLD"
+        ],
+        "WLFI": [
+            "33251",
+            "ETH",
+            "World Liberty Financial",
+            "WLFI"
+        ],
+        "WOO": [
+            "7501",
+            "ETH",
+            "WOO",
+            "WOO"
+        ],
+        "XAG": [
+            "39343",
+            "XAG",
+            "Silver (Derivatives)",
+            "XAG"
+        ],
+        "XAI": [
+            "28933",
+            "ARB",
+            "Xai",
+            "XAI"
+        ],
+        "XAN": [
+            "38481",
+            "ETH",
+            "Anoma",
+            "XAN"
+        ],
+        "XAU": [
+            "37470",
+            "ETH",
+            "XAU9999 Meme",
+            "XAU"
+        ],
+        "XAUT": [
+            "5176",
+            "ETH",
+            "Tether Gold",
+            "XAUT"
+        ],
+        "XCN": [
+            "18679",
+            "ETH",
+            "Onyxcoin",
+            "XCN"
+        ],
+        "XEC": [
+            "10791",
+            "XEC",
+            "eCash",
+            "XEC"
+        ],
+        "XLM": [
+            "512",
+            "XLM",
+            "Stellar",
+            "XLM"
+        ],
+        "XMR": [
+            "328",
+            "XMR",
+            "Monero",
+            "XMR"
+        ],
+        "XNO": [
+            "1567",
+            "XNO",
+            "Nano",
+            "XNO"
+        ],
+        "XNY": [
+            "36933",
+            "BNB",
+            "Codatta",
+            "XNY"
+        ],
+        "XPD": [
+            "260",
+            "XPD",
+            "PetroDollar",
+            "XPD"
+        ],
+        "XPIN": [
+            "36238",
+            "BNB",
+            "XPIN Network",
+            "XPIN"
+        ],
+        "XPL": [
+            "36645",
+            "XPL",
+            "Plasma",
+            "XPL"
+        ],
+        "XPT": [
+            "39460",
+            "XPT",
+            "Platinum (Derivatives)",
+            "XPT"
+        ],
+        "XRP": [
+            "52",
+            "XRP",
+            "XRP",
+            "XRP"
+        ],
+        "XTZ": [
+            "2011",
+            "XTZ",
+            "Tezos",
+            "XTZ"
+        ],
+        "XUSD": [
+            "32372",
+            "ETH",
+            "StraitsX USD",
+            "XUSD"
+        ],
+        "XVG": [
+            "693",
+            "XVG",
+            "Verge",
+            "XVG"
+        ],
+        "XVS": [
+            "7288",
+            "ETH",
+            "Venus",
+            "XVS"
+        ],
+        "YB": [
+            "38651",
+            "ETH",
+            "YieldBasis",
+            "YB"
+        ],
+        "YFI": [
+            "5864",
+            "ETH",
+            "yearn.finance",
+            "YFI"
+        ],
+        "YGG": [
+            "10688",
+            "ETH",
+            "Yield Guild Games",
+            "YGG"
+        ],
+        "ZAMA": [
+            "39332",
+            "ETH",
+            "Zama",
+            "ZAMA"
+        ],
+        "ZBT": [
+            "38427",
+            "ETH",
+            "ZEROBASE",
+            "ZBT"
+        ],
+        "ZEC": [
+            "1437",
+            "ZEC",
+            "Zcash",
+            "ZEC"
+        ],
+        "ZEN": [
+            "1698",
+            "ZEN",
+            "Horizen",
+            "ZEN"
+        ],
+        "ZEREBRO": [
+            "34083",
+            "SOL",
+            "Zerebro",
+            "ZEREBRO"
+        ],
+        "ZETA": [
+            "21259",
+            "ETH",
+            "ZetaChain",
+            "ZETA"
+        ],
+        "ZIL": [
+            "2469",
+            "ZIL",
+            "Zilliqa",
+            "ZIL"
+        ],
+        "ZK": [
+            "24091",
+            "ZK",
+            "ZKsync",
+            "ZK"
+        ],
+        "ZKC": [
+            "38371",
+            "ETH",
+            "Boundless",
+            "ZKC"
+        ],
+        "ZKP": [
+            "39035",
+            "ETH",
+            "zkPass",
+            "ZKP"
+        ],
+        "ZORA": [
+            "35931",
+            "-",
+            "ZORA",
+            "ZORA"
+        ],
+        "ZRO": [
+            "26997",
+            "ETH",
+            "LayerZero",
+            "ZRO"
+        ],
+        "ZRX": [
+            "1896",
+            "ETH",
+            "0x Protocol",
+            "ZRX"
+        ],
+        "币安人生": [
+            "38590",
+            "BNB"
+        ],
+        "我踏马来了": [
+            "39322",
+            "BNB"
+        ],
+        "龙虾": [
+            "39671",
+            "BNB"
+        ]
+    }
 }

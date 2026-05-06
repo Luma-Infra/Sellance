@@ -26,15 +26,24 @@ function updateLegend(d) {
   if (!leg || !d) return;
 
   // 🚀 p값 안전장치 (currentAsset이나 데이터가 없을 때 대비)
-  const coin = typeof currentTableData !== 'undefined' ? currentTableData.find(c => c.Symbol === currentAsset) : null;
+  const coin =
+    typeof currentTableData !== "undefined"
+      ? currentTableData.find((c) => c.Symbol === currentAsset)
+      : null;
   const p = coin?.precision ?? 2;
 
   // 🚀 0일 때를 위한 삼항 연산자 (보합색 추가)
-  const cls = d.close > d.open ? "text-theme-up" : d.close < d.open ? "text-theme-down" : "text-theme-text opacity-70";
+  const cls =
+    d.close > d.open
+      ? "text-theme-up"
+      : d.close < d.open
+        ? "text-theme-down"
+        : "text-theme-text opacity-70";
   const chg = d.close - d.open;
 
   // 🚀 분모 0 방지 및 chg가 0일 때 직접 처리
-  const chgPercent = (d.open && d.open !== 0) ? ((chg / d.open) * 100).toFixed(2) : "0.00";
+  const chgPercent =
+    d.open && d.open !== 0 ? ((chg / d.open) * 100).toFixed(2) : "0.00";
   const sign = chg > 0 ? "+" : "";
 
   // 🚀 formatSmartPrice에 0이 들어가도 안 죽게 안전하게 호출
@@ -120,10 +129,13 @@ function calculateTimeRemaining(tf, serverMs) {
     const date = now.getUTCDate();
 
     switch (tf) {
-      case "1d": nextClose = Date.UTC(year, month, date + 1); break;
+      case "1d":
+        nextClose = Date.UTC(year, month, date + 1);
+        break;
       case "3d":
         // 상장일 기준이 아니라 UTC 0시 기준 3일씩 끊기 (바이낸스 방식)
-        const dayDiff = Math.ceil((serverMs + 1) / (86400000 * 3)) * (86400000 * 3);
+        const dayDiff =
+          Math.ceil((serverMs + 1) / (86400000 * 3)) * (86400000 * 3);
         nextClose = dayDiff;
         break;
       case "1w":
@@ -132,9 +144,14 @@ function calculateTimeRemaining(tf, serverMs) {
         const diffToMon = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
         nextClose = Date.UTC(year, month, date + diffToMon);
         break;
-      case "1M": nextClose = Date.UTC(year, month + 1, 1); break;
-      case "1y": nextClose = Date.UTC(year + 1, 0, 1); break;
-      default: return "";
+      case "1M":
+        nextClose = Date.UTC(year, month + 1, 1);
+        break;
+      case "1y":
+        nextClose = Date.UTC(year + 1, 0, 1);
+        break;
+      default:
+        return "";
     }
   }
 
@@ -153,6 +170,6 @@ function calculateTimeRemaining(tf, serverMs) {
   const mm = String(m).padStart(2, "0");
   const ss = String(s).padStart(2, "0");
 
-  if (d > 0) return `${dd}${hh}h`
+  if (d > 0) return `${dd}${hh}h`;
   return h > 0 ? `${hh}:${mm}:${ss}` : `${mm}:${ss}`;
 }

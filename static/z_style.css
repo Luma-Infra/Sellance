@@ -164,19 +164,17 @@ body.theme-binance {
 }
 
 /* 🚨 전역 CSS 오염으로부터 차트 내부 테이블 보호 */
-.tv-lightweight-charts table {
+/* .tv-lightweight-charts table {
   table-layout: auto !important;
-  /* fixed 금지 */
   margin: 0 !important;
   padding: 0 !important;
-}
+} */
 
-.tv-lightweight-charts td,
+/* .tv-lightweight-charts td,
 .tv-lightweight-charts th {
   padding: 0 !important;
-  /* 유령 패딩 제거 */
   border: none !important;
-}
+} */
 
 .flash-up {
   color: color-mix(in srgb, var(--up), transparent 50%) !important;
@@ -233,11 +231,10 @@ body.theme-binance {
 }
 
 /* 드래그 중일 때만 모든 부드러운 효과를 강제로 끕니다 */
-.resizing-active,
-.resizing-active * {
+.resizing-active #left-panel,
+.resizing-active #right-panel {
   transition: none !important;
   user-select: none;
-  /* 텍스트 드래그 방지 */
 }
 
 /* 테이블 행 경주마 애니메이션용 */
@@ -322,8 +319,11 @@ body.theme-binance {
   }
 
   /* 2. [잔상박멸] 평소 우측 패널은 안드로메다 유배 */
-  #right-panel,
-  #right-panel *,
+  #right-panel {
+    display: none; /* !important 제거하고 JS에서 제어하게 두세요 */
+  }
+
+  /* 
   #chart-container canvas,
   .tv-lightweight-charts {
     display: none !important;
@@ -331,7 +331,7 @@ body.theme-binance {
     left: -9999px !important;
     visibility: hidden !important;
     opacity: 0 !important;
-  }
+  } */
 
   /* 3. [부활] 팝업 활성화 시에만 정중하게 재소환 */
   #mobile-chart-overlay.active #right-panel,
@@ -366,7 +366,8 @@ body.theme-binance {
     font-size: 11px !important;
   }
 
-  #chart-container {
+  /* #chart-container { */
+  #chart-wrapper {
     height: 100% !important;
     width: 100% !important;
     margin: 0 !important;

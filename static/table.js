@@ -443,7 +443,6 @@ function updateRowInnerHTML(tr, row) {
       <span class="text-[11px] opacity-50">M.Cap: ${row.MarketCap_Formatted}</span>
       <div class="flex items-center gap-1 mt-1 opacity-80">${listedExchangesHtml}</div>
       <div class="flex items-center gap-1 mt-1 opacity-80">${tagsHtml}</div>
-
     </div>
   </td>
 `;
@@ -599,7 +598,8 @@ document.addEventListener("mousemove", (e) => {
 
     // 2. 차트 리사이즈 (가장 무거운 작업)
     if (window.chart) {
-      const container = document.getElementById("chart-container");
+      // const container = document.getElementById("chart-container");
+      const container = document.getElementById("chart-wrapper");
       window.chart.resize(container.clientWidth, container.clientHeight);
     }
   });

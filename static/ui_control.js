@@ -23,7 +23,7 @@ function toggleTheme() {
   }
   setTimeout(() => {
     initChart();
-    if (typeof updateRealtimeCountdown === 'function') {
+    if (typeof updateRealtimeCountdown === "function") {
       updateRealtimeCountdown(Date.now());
     }
   }, 50);
@@ -51,7 +51,8 @@ function toggleSidebar() {
   // UI 변경 후 차트 크기 강제 재계산
   setTimeout(() => {
     if (window.chartResizeObserver && chart) {
-      const container = document.getElementById("chart-container");
+      // const container = document.getElementById("chart-container");
+      const container = document.getElementById("chart-wrapper");
       chart.resize(container.clientWidth, container.clientHeight);
     }
   }, 50);
@@ -77,7 +78,7 @@ function switchMobileView(view) {
 
     // 🚀 [추가] 모바일 리스트 모드일 때 높이 제한과 스크롤 주입
     leftPanel.classList.add("overflow-y-auto", "h-[calc(100vh-64px)]", "pb-20");
-    leftPanel.style.height = 'calc(100vh - 64px)';
+    leftPanel.style.height = "calc(100vh - 64px)";
   } else {
     leftPanel.classList.remove("flex");
     leftPanel.classList.add("hidden");
@@ -91,7 +92,8 @@ function switchMobileView(view) {
 
     // 차트 화면 렌더링 최적화
     setTimeout(() => {
-      const container = document.getElementById("chart-container");
+      // const container = document.getElementById("chart-container");
+      const container = document.getElementById("chart-wrapper");
       if (chart && container.clientWidth > 0) {
         chart.resize(container.clientWidth, container.clientHeight);
       }
@@ -131,7 +133,8 @@ function showMobileChart() {
       window.chart.resize(newWidth, newHeight);
       window.chart.timeScale().fitContent();
 
-      const container = document.getElementById("chart-container");
+      // const container = document.getElementById("chart-container");
+      const container = document.getElementById("chart-wrapper");
       if (container) container.focus();
     }
   }, 50);
@@ -206,7 +209,7 @@ function executeTabSwitch(mode) {
     controls.style.display = "flex";
 
     // 🚀 [수정] 바이낸스와 업비트 차트 소켓 둘 다 확실히 처단!
-    [binanceChartWs, upbitChartWs].forEach(ws => {
+    [binanceChartWs, upbitChartWs].forEach((ws) => {
       if (ws) {
         ws.onmessage = null;
         ws.close();
@@ -220,10 +223,10 @@ function executeTabSwitch(mode) {
   }
   if (window.chart) {
     setTimeout(() => {
-      const container = document.getElementById("chart-container");
+      // const container = document.getElementById("chart-container");
+      const container = document.getElementById("chart-wrapper");
       if (container.clientWidth > 0 && container.clientHeight > 0)
         window.chart.resize(container.clientWidth, container.clientHeight);
     }, 50);
   }
 }
-

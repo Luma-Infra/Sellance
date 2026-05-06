@@ -1,4 +1,4 @@
-// app.js
+// api.js
 // --- 📡 API Fetch 로직 ---
 async function loadSymbols() {
   try {
@@ -51,23 +51,26 @@ function searchSymbols(v) {
     return;
   }
 
-  resDiv.innerHTML = filtered.map((s) => {
-    const isUpbit = marketDataMap.upbit.includes(s);
-    const isBinanceSpot = marketDataMap.spot.includes(s);
-    const isBinanceFutures = marketDataMap.futures.includes(s);
+  resDiv.innerHTML = filtered
+    .map((s) => {
+      const isUpbit = marketDataMap.upbit.includes(s);
+      const isBinanceSpot = marketDataMap.spot.includes(s);
+      const isBinanceFutures = marketDataMap.futures.includes(s);
 
-    // 거래소 버튼 (분기 유지)
-    let upbitBtn = isUpbit
-      ? `<button class="bg-[#093687] text-white text-[9px] px-2 py-1 rounded font-bold mr-1 hover:brightness-125" 
+      // 거래소 버튼 (분기 유지)
+      let upbitBtn = isUpbit
+        ? `<button class="bg-[#093687] text-white text-[9px] px-2 py-1 rounded font-bold mr-1 hover:brightness-125" 
                  onclick="event.stopPropagation(); selectSymbol('${s}', 'UPBIT')">UPBIT</button>`
-      : "";
-    let binanceBtn = isBinanceFutures
-      ? `<button class="bg-[#f0b90b] text-black text-[9px] px-2 py-1 rounded font-bold hover:brightness-110" 
+        : "";
+      let binanceBtn = isBinanceFutures
+        ? `<button class="bg-[#f0b90b] text-black text-[9px] px-2 py-1 rounded font-bold hover:brightness-110" 
                  onclick="event.stopPropagation(); selectSymbol('${s}', 'FUTURES')">B-FUT</button>`
-      : (isBinanceSpot ? `<button class="bg-[#333] text-white text-[9px] px-2 py-1 rounded font-bold border border-[#555]" 
-                                   onclick="event.stopPropagation(); selectSymbol('${s}', 'SPOT')">B-SPOT</button>` : "");
+        : isBinanceSpot
+          ? `<button class="bg-[#333] text-white text-[9px] px-2 py-1 rounded font-bold border border-[#555]" 
+                                   onclick="event.stopPropagation(); selectSymbol('${s}', 'SPOT')">B-SPOT</button>`
+          : "";
 
-    return `
+      return `
       <div class="flex items-center justify-between p-2 cursor-pointer border-b border-theme-border text-[13px] hover:bg-white/5" 
            onclick="selectSymbol('${s}')">
         <div class="flex items-center gap-2">
@@ -75,7 +78,8 @@ function searchSymbols(v) {
           <div class="flex gap-1">${upbitBtn}${binanceBtn}</div>
         </div>
       </div>`;
-  }).join("");
+    })
+    .join("");
 
   resDiv.style.display = "block";
 }
@@ -123,17 +127,20 @@ async function selectSymbol(s, forceMarket = null) {
   }
 
   // 차트 호출
-  const isFutures = (currentMarket === "FUTURES");
-  const isSpot = (currentMarket === "SPOT");
+  const isFutures = currentMarket === "FUTURES";
+  const isSpot = currentMarket === "SPOT";
   fetchHistory(s, isFutures, isSpot);
 }
 
 // 배지 UI 업데이트 헬퍼
 function updateExchangeBadges(s) {
   let badges = "";
-  if (marketDataMap.upbit?.includes(s)) badges += `<span class="bg-[#093687] text-white text-[10px] px-1.5 py-0.5 rounded">UPBIT</span>`;
-  if (marketDataMap.futures?.includes(s)) badges += `<span class="bg-[#f0b90b] text-black text-[10px] px-1.5 py-0.5 rounded ml-1">B-FUTURES</span>`;
-  if (marketDataMap.spot?.includes(s)) badges += `<span class="bg-[#444] text-white text-[10px] px-1.5 py-0.5 rounded ml-1">B-SPOT</span>`;
+  if (marketDataMap.upbit?.includes(s))
+    badges += `<span class="bg-[#093687] text-white text-[10px] px-1.5 py-0.5 rounded">UPBIT</span>`;
+  if (marketDataMap.futures?.includes(s))
+    badges += `<span class="bg-[#f0b90b] text-black text-[10px] px-1.5 py-0.5 rounded ml-1">B-FUTURES</span>`;
+  if (marketDataMap.spot?.includes(s))
+    badges += `<span class="bg-[#444] text-white text-[10px] px-1.5 py-0.5 rounded ml-1">B-SPOT</span>`;
 
   const badgeContainer = document.getElementById("exchange-badges");
   if (badgeContainer) badgeContainer.innerHTML = badges;
@@ -148,7 +155,7 @@ function clearChartData() {
   // if (candleSeries) candleSeries.setData([]);
   // if (previewSeries) previewSeries.setData([]);
 
-  // 🚀 [추가] 캔들은 남겨두되, 가격축은 미리 '오토'로 풀어서 
+  // 🚀 [추가] 캔들은 남겨두되, 가격축은 미리 '오토'로 풀어서
   // 새 데이터가 올 때 부드럽게 적응할 준비를 시킵니다.
   if (chart) {
     chart.priceScale("right").applyOptions({ autoScale: true });
@@ -173,24 +180,34 @@ async function fetchHistory(symbol) {
   clearChartData();
 
   const displayName = symbol || currentAsset;
-  const rawSymbol = displayName.split('(')[0].trim().toUpperCase();
+  const rawSymbol = displayName.split("(")[0].trim().toUpperCase();
 
   currentAsset = displayName;
 
-  const isFutures = (currentMarket === "FUTURES");
-  const isSpot = (currentMarket === "SPOT");
-  const isUpbit = (currentMarket === "UPBIT");
+  const isFutures = currentMarket === "FUTURES";
+  const isSpot = currentMarket === "SPOT";
+  const isUpbit = currentMarket === "UPBIT";
 
   // 🚀 [세련된 방법] 현재 클릭한 코인의 전체 데이터(장부)를 찾습니다.
-  const rowInfo = window.currentTableData.find(c => c.Symbol === rawSymbol);
+  const rowInfo = window.currentTableData.find((c) => c.Symbol === rawSymbol);
 
   // 🚀 장부에 Upbit_Symbol이 적혀있으면 그거 쓰고, 없으면 그냥 원본(rawSymbol) 씁니다.
   const bTicker = rawSymbol;
-  const uTicker = (rowInfo && rowInfo.Upbit_Symbol) ? rowInfo.Upbit_Symbol : rawSymbol;
+  const uTicker =
+    rowInfo && rowInfo.Upbit_Symbol ? rowInfo.Upbit_Symbol : rawSymbol;
 
   // 티커 규격 맞추기 (알아서 BTTC와 BTT로 나뉘어 들어감)
   const binanceTicker = `${bTicker}USDT`;
   const upbitTicker = `KRW-${uTicker}`;
+
+  // 🚀 [백엔드 장부 200% 활용] 김프를 계산할 수 있는 자격증명
+  const hasUpbit = marketDataMap.upbit?.includes(uTicker);
+  const hasBinanceSpot = marketDataMap.spot?.includes(bTicker);
+  const hasBinanceFutures = marketDataMap.futures?.includes(bTicker);
+  const canCalcKimchi = hasUpbit && (hasBinanceSpot || hasBinanceFutures);
+
+  // 🚀 임시 환율 (백엔드 장부에 krw_usd_rate를 담아주면 더 좋습니다!)
+  const exchangeRate = marketDataMap.krw_usd_rate || 1480.0;
 
   const loadingModal = document.getElementById("chart-loading-modal");
   if (loadingModal) loadingModal.classList.remove("hidden");
@@ -198,109 +215,236 @@ async function fetchHistory(symbol) {
   try {
     mainData = [];
     let raw = [];
+    let volumeData = []; // 볼륨 배열
+    let kimchiData = []; // 김프 배열
 
     // 🚀 [구조화] 바이낸스 vs 업비트 분기
     if (isFutures || isSpot) {
       const exchange = isFutures ? "binance_futures" : "binance_spot";
-      const res = await fetch(`/api/candles?exchange=${exchange}&symbol=${binanceTicker}&interval=${currentTF}&limit=500`);
+      const res = await fetch(
+        `/api/candles?exchange=${exchange}&symbol=${binanceTicker}&interval=${currentTF}&limit=500`,
+      );
       raw = await res.json();
 
       if (Array.isArray(raw) && !raw.error) {
-        mainData = raw.map(d => ({
-          time: Number(d[0]) / 1000,
-          open: Number(d[1]), high: Number(d[2]), low: Number(d[3]), close: Number(d[4])
-        }));
+        // 🚀 d를 받아서 한 놈씩 가공 시작!
+        mainData = raw.map((d) => {
+          // 1. 재료 준비 (이 블록 안에서만 쓰는 변수들)
+          const time = Number(d[0]) / 1000;
+          const open = Number(d[1]);
+          const high = Number(d[2]);
+          const low = Number(d[3]);
+          const close = Number(d[4]);
+          const vol = Number(d[5]);
+
+          // 2. [추가] 볼륨 장부에 기록 (매 바퀴마다 실행)
+          volumeData.push({
+            time: time,
+            value: vol,
+            color:
+              close >= open
+                ? "rgba(38, 166, 154, 0.5)"
+                : "rgba(239, 83, 80, 0.5)",
+          });
+
+          // 3. 메인 캔들 데이터 반환 (이게 모여서 mainData 배열이 됨)
+          return { time, open, high, low, close };
+        });
       }
     } else {
       // [개선] 재료 고르기 (업비트 지원 목록)
       const supportedMin = [1, 3, 5, 10, 15, 30, 60, 240];
       const v = parseInt(currentTF);
-      const u = currentTF.replace(/[0-9]/g, '');
+      const u = currentTF.replace(/[0-9]/g, "");
       const totalSec = tfSec[currentTF] || 60;
 
-      let fetchInterval, step = 1;
+      let fetchInterval,
+        step = 1;
 
-      if (u === 'd' || u === 'w' || u === 'M') {
-        // 일/주/월 단위: 3d면 'days' 가져와서 3개 합치기
-        fetchInterval = (u === 'w') ? 'weeks' : (u === 'M') ? 'months' : 'days';
-        step = (currentTF === '3d') ? 3 : 1;
+      if (u === "d" || u === "w" || u === "M") {
+        fetchInterval = u === "w" ? "weeks" : u === "M" ? "months" : "days";
+        step = currentTF === "3d" ? 3 : 1;
       } else {
-        // 분/시간 단위: 120분(2h)이면 60분봉 가져와서 2개 합치기
         const targetMin = totalSec / 60;
-        // 나눌 수 있는 가장 큰 지원 분봉 찾기
-        const baseMin = supportedMin.reverse().find(m => targetMin % m === 0) || 1;
+        const baseMin =
+          supportedMin.reverse().find((m) => targetMin % m === 0) || 1;
         fetchInterval = `minutes/${baseMin}`;
         step = targetMin / baseMin;
       }
 
-      // 2. 데이터 가져오기 (압축을 위해 limit 넉넉히)
       const fetchLimit = Math.min(200 * step, 600);
-      const res = await fetch(`/api/candles?exchange=upbit&symbol=${upbitTicker}&interval=${fetchInterval}&limit=${fetchLimit}`);
+      const res = await fetch(
+        `/api/candles?exchange=upbit&symbol=${upbitTicker}&interval=${fetchInterval}&limit=${fetchLimit}`,
+      );
       raw = await res.json();
 
       if (Array.isArray(raw) && !raw.error) {
-        let baseData = raw.reverse().map(d => ({
+        // 🚀 [수정됨 1] 업비트 원본 데이터에서 거래량(vol) 파싱!
+        let baseData = raw.reverse().map((d) => ({
           time: Math.floor(Date.parse(d.candle_date_time_utc + "Z") / 1000),
-          open: d.opening_price, high: d.high_price, low: d.low_price, close: d.trade_price
+          open: d.opening_price,
+          high: d.high_price,
+          low: d.low_price,
+          close: d.trade_price,
+          vol: d.candle_acc_trade_volume, // 💡 업비트 전용 거래량 필드
         }));
 
-        // 🚀 3. 무지성 합치기 (step이 1이면 그냥 통과, 아니면 압축)
         mainData = [];
+        // 🚀 [수정됨 2] 캔들을 압축(chunk)할 때, 거래량도 같이 다 더해버립니다!
         for (let i = 0; i < baseData.length; i += step) {
           const chunk = baseData.slice(i, i + step);
           if (chunk.length > 0) {
-            mainData.push({
-              time: chunk[0].time,
-              open: chunk[0].open,
-              high: Math.max(...chunk.map(c => c.high)),
-              low: Math.min(...chunk.map(c => c.low)),
-              close: chunk[chunk.length - 1].close
+            const time = chunk[0].time;
+            const open = chunk[0].open;
+            const close = chunk[chunk.length - 1].close;
+            const high = Math.max(...chunk.map((c) => c.high));
+            const low = Math.min(...chunk.map((c) => c.low));
+
+            // 💡 15분봉 4개를 1시간봉으로 합치면, 거래량 4개도 싹 다 더해야 합니다 (reduce 사용)
+            const totalVol = chunk.reduce((sum, c) => sum + (c.vol || 0), 0);
+
+            // 1. 메인 캔들 장부 기록
+            mainData.push({ time, open, high, low, close });
+
+            // 2. 캔들과 완벽하게 똑같은 시간(time)으로 볼륨 장부 기록 (1:1 매칭 철벽 방어!)
+            volumeData.push({
+              time: time,
+              value: totalVol,
+              color:
+                close >= open
+                  ? "rgba(38, 166, 154, 0.5)"
+                  : "rgba(239, 83, 80, 0.5)",
             });
           }
         }
       }
     }
 
-    // 3. 차트 렌더링
-    if (mainData.length > 0 && candleSeries) {
-      if (candleSeries) {
-        // 🚀 [해결] 새로운 코인에 맞게 가격 포맷(precision) 즉시 갱신
-        const row = currentTableData.find(c => c.Symbol === rawSymbol);
-        const p = row ? Number(row.precision) : 2;
+    // (이전 업비트 압축 로직 끝나는 부분...)
+    // 🚀 [여기서부터 추가!]
+    // 2.5 [김프 엔진] 두 거래소에 모두 상장된 경우 상대방 데이터 훔쳐오기
+    // 🚀 [수정됨] 2.5 [김프 엔진] 두 거래소에 모두 상장된 경우 크로스 비교 (확장성 고려)
+    // 🚀 [해결됨] 2.5 [김프 엔진] 시간차 어긋남 및 API 에러 완벽 방어
+    // kimchiData = []; // 전역 접근을 위해 초기화 보장
 
-        candleSeries.applyOptions({
-          priceFormat: {
-            type: "price", // 0.0 방지를 위해 'custom' 대신 'price' + formatter 조합 추천
-            precision: p,
-            minMove: p > 0 ? Number((1 / Math.pow(10, p)).toFixed(p)) : 1,
-            formatter: (price) => formatSmartPrice(price, p)
+    if (canCalcKimchi && mainData.length > 0) {
+      const isKoreanMarket = ["UPBIT", "BITHUMB"].includes(currentMarket);
+      const subExchange = isKoreanMarket ? "binance_futures" : "upbit";
+      const subSymbol = isKoreanMarket ? binanceTicker : upbitTicker;
+
+      let fetchUrl = `/api/candles?exchange=${subExchange}&symbol=${subSymbol}&interval=${currentTF}&limit=500`;
+
+      // 🚨 [핵심 1] 서브 차트가 업비트라면, 업비트가 알아듣는 시간표로 번역해서 가져옵니다! (에러 방지)
+      if (subExchange === "upbit") {
+        const u = currentTF.replace(/[0-9]/g, "");
+        const totalSec = tfSec[currentTF] || 60;
+        let subInterval = "minutes/1"; // 기본 고해상도 베이스
+
+        if (u === "d" || u === "w" || u === "M") {
+          subInterval = u === "w" ? "weeks" : u === "M" ? "months" : "days";
+        } else {
+          const targetMin = totalSec / 60;
+          const supportedMin = [1, 3, 5, 10, 15, 30, 60, 240];
+          const baseMin =
+            supportedMin.reverse().find((m) => targetMin % m === 0) || 1;
+          subInterval = `minutes/${baseMin}`;
+        }
+        // 베이스 분봉으로 넉넉히 가져와서 나중에 시간만 뽑아 먹습니다.
+        fetchUrl = `/api/candles?exchange=upbit&symbol=${subSymbol}&interval=${subInterval}&limit=1000`;
+      }
+
+      const subRes = await fetch(fetchUrl);
+      let subRaw = await subRes.json();
+
+      if (Array.isArray(subRaw) && !subRaw.error) {
+        subRaw.sort((a, b) => {
+          const timeA =
+            subExchange === "upbit"
+              ? Math.floor(Date.parse(a.candle_date_time_utc + "Z") / 1000)
+              : Number(a[0]) / 1000;
+          const timeB =
+            subExchange === "upbit"
+              ? Math.floor(Date.parse(b.candle_date_time_utc + "Z") / 1000)
+              : Number(b[0]) / 1000;
+          return timeA - timeB;
+        });
+
+        let subIndex = 0;
+        let lastKnownSubClose = null;
+
+        // 🚨 [핵심 2] 메인 캔들 시간에 맞춰서 서브 가격을 동기화합니다.
+        mainData.forEach((candle) => {
+          while (subIndex < subRaw.length) {
+            const subItem = subRaw[subIndex];
+            const subTime =
+              subExchange === "upbit"
+                ? Math.floor(
+                    Date.parse(subItem.candle_date_time_utc + "Z") / 1000,
+                  )
+                : Number(subItem[0]) / 1000;
+
+            if (subTime <= candle.time) {
+              lastKnownSubClose =
+                subExchange === "upbit"
+                  ? subItem.trade_price
+                  : Number(subItem[4]);
+              subIndex++;
+            } else {
+              break;
+            }
+          }
+
+          if (lastKnownSubClose) {
+            const korPrice = isKoreanMarket ? candle.close : lastKnownSubClose;
+            const glbPrice = isKoreanMarket ? lastKnownSubClose : candle.close;
+            const kimchiPct = (korPrice / (glbPrice * exchangeRate) - 1) * 100;
+
+            let kColor =
+              kimchiPct < 0 ? "#2E8B57" : kimchiPct < 4 ? "#57a4fc" : "#FF4500";
+            kimchiData.push({
+              time: candle.time,
+              value: kimchiPct,
+              color: kColor,
+            });
           }
         });
-
-        // 🚀 데이터를 넣기 직전에만 '잠깐' 축 잡아두는 로직 제거
-        // chart.priceScale("right").applyOptions({ autoScale: false });
-        candleSeries.setData(mainData);
-
-        // 🚀 [이동] 실시간 소켓은 미리 시동을 걸어둡니다.
-        if (typeof startRealtimeCandle === "function") {
-          const targetSymbol = isUpbit ? uTicker : bTicker;
-          startRealtimeCandle(rawSymbol, currentTF, isFutures, isSpot);
-        }
-
-        // 🚀 [핵심] 브라우저가 다음 화면을 그릴 때(딱 0.01초 뒤) 축을 풉니다.
-        requestAnimationFrame(() => {
-          chart.priceScale("right").applyOptions({ autoScale: true }); // 다시 축 가동
-          chart.timeScale().fitContent();
-          updateStatus();
-          if (typeof autoFit === "function") autoFit();
-
-          // 🚀 [셔터 올림] 차트 세팅 끝! 이제 소켓 데이터 받아도 됨!
-          setTimeout(() => {
-            window.isFetchingChart = false;
-            console.log("🔓 [셔터 개방] 모든 준비가 끝났습니다. 이제 틱을 받습니다.");
-          }, 50);
-        });
       }
+    }
+
+    // 3. 차트 렌더링 (fetchHistory 마지막 부분)
+    if (mainData.length > 0 && candleSeries) {
+      const row = currentTableData.find((c) => c.Symbol === rawSymbol);
+      const p = row ? Number(row.precision) : 2;
+
+      candleSeries.applyOptions({
+        priceFormat: {
+          type: "price",
+          precision: p,
+          minMove: p > 0 ? Number((1 / Math.pow(10, p)).toFixed(p)) : 1,
+          formatter: (price) => formatSmartPrice(price, p),
+        },
+      });
+
+      // 3개 차트에 각각 데이터 발사!
+      candleSeries.setData(mainData);
+      if (volumeSeries && volumeData.length > 0)
+        volumeSeries.setData(volumeData);
+      if (kimchiSeries) kimchiSeries.setData(kimchiData);
+
+      // 🚀 데이터가 꽂혔으니, 김프 유무에 따라 창 크기 분배!
+      applyChartLayout();
+
+      if (typeof startRealtimeCandle === "function") {
+        const targetSymbol = isUpbit ? uTicker : bTicker;
+        startRealtimeCandle(rawSymbol, currentTF, isFutures, isSpot);
+      }
+
+      requestAnimationFrame(() => {
+        chart.timeScale().fitContent(); // X축 줌 맞추기
+        updateStatus();
+        if (typeof autoFit === "function") autoFit();
+        window.isFetchingChart = false;
+      });
     }
   } catch (e) {
     console.error("차트 로드 실패:", e);
