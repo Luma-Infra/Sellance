@@ -1,11 +1,16 @@
 // ui_control.js
 // --- 📱 UI/UX 컨트롤 로직 ---
-import { store, CONFIG } from './store.js';
+import { store, CONFIG } from "./store.js";
+import { initChart, updateChartTheme } from "./chart.js";
+import { fetchHistory } from "./api.js";
 
 function toggleTheme() {
   const body = document.body;
   const btn = document.getElementById("theme-toggle-btn");
   const isCurrentlyDark = body.classList.contains("theme-binance");
+  const faviconLink = document.getElementById("favicon-link");
+  const mainLogoImg = document.getElementById("main-logo-img");
+  const staticPath = "../static/";
 
   // 다크 라이트 모드
   if (isCurrentlyDark) {
@@ -13,20 +18,22 @@ function toggleTheme() {
     body.classList.add("theme-upbit");
 
     store.currentTheme = "upbit";
-
     if (btn) btn.innerHTML = "🌙";
+    if (faviconLink) faviconLink.href = staticPath + "gemini-svg-light.svg";
+    if (mainLogoImg) mainLogoImg.src = staticPath + "gemini-svg-light.svg";
   } else {
     body.classList.remove("theme-upbit");
     body.classList.add("theme-binance");
 
     store.currentTheme = "binance";
     if (btn) btn.innerHTML = "☀️";
+    if (faviconLink) faviconLink.href = staticPath + "gemini-svg-dark.svg";
+    if (mainLogoImg) mainLogoImg.src = staticPath + "gemini-svg-dark.svg";
   }
   setTimeout(() => {
-    initChart();
-    if (typeof updateRealtimeCountdown === "function") {
-      updateRealtimeCountdown(Date.now());
-    }
+    // 🚀 차트를 부수고 다시 데이터를 불러오는 무거운 작업 대신,
+    // 색상 옵션만 살짝 갈아끼워서 0.01초만에 즉시 반영합니다!
+    updateChartTheme();
   }, 50);
 }
 
@@ -48,15 +55,6 @@ function toggleSidebar() {
     leftPanel.classList.add("md:hidden");
     openBtn.classList.remove("hidden");
   }
-
-  // UI 변경 후 차트 크기 강제 재계산
-  setTimeout(() => {
-    if (window.chartResizeObserver && chart) {
-      // const container = document.getElementById("chart-container");
-      const container = document.getElementById("chart-wrapper");
-      chart.resize(container.clientWidth, container.clientHeight);
-    }
-  }, 50);
 }
 
 // 모바일: 리스트/차트 화면 전환
@@ -90,15 +88,6 @@ function switchMobileView(view) {
     btnChart.classList.replace("opacity-50", "text-theme-accent");
     btnList.classList.replace("border-theme-accent", "border-transparent");
     btnList.classList.replace("text-theme-accent", "opacity-50");
-
-    // 차트 화면 렌더링 최적화
-    setTimeout(() => {
-      // const container = document.getElementById("chart-container");
-      const container = document.getElementById("chart-wrapper");
-      if (chart && container.clientWidth > 0) {
-        chart.resize(container.clientWidth, container.clientHeight);
-      }
-    }, 50);
   }
 }
 
@@ -129,14 +118,7 @@ function showMobileChart() {
     panel.style.opacity = "1"; // 🚀 이거 빠지면 안 보여요!
 
     if (store.chart) {
-      const newWidth = content.clientWidth;
-      const newHeight = content.clientHeight - 60; // 헤더 빼고
-      store.chart.resize(newWidth, newHeight);
-      store.chart.timeScale().fitContent();
-
-      // const container = document.getElementById("chart-container");
-      const container = document.getElementById("chart-wrapper");
-      if (container) container.focus();
+      store.chart.timeScale().fitContent(); // v5 autoSize:true 이므로 resize는 필요없음
     }
   }, 50);
 }
@@ -210,24 +192,25 @@ function executeTabSwitch(mode) {
     controls.style.display = "flex";
 
     // 🚀 [수정] 바이낸스와 업비트 차트 소켓 둘 다 확실히 처단!
-    [binanceChartWs, upbitChartWs].forEach((ws) => {
+    [store.binanceChartWs, store.upbitChartWs].forEach((ws) => {
       if (ws) {
         ws.onmessage = null;
         ws.close();
       }
     });
-    binanceChartWs = null;
-    upbitChartWs = null;
+    store.binanceChartWs = null;
+    store.upbitChartWs = null;
 
     document.getElementById("status-dot").style.background = "gray";
     document.getElementById("status-text").innerText = "SIMULATION";
   }
-  if (window.chart) {
-    setTimeout(() => {
-      // const container = document.getElementById("chart-container");
-      const container = document.getElementById("chart-wrapper");
-      if (container.clientWidth > 0 && container.clientHeight > 0)
-        window.chart.resize(container.clientWidth, container.clientHeight);
-    }, 50);
-  }
 }
+
+// 🚀 전역 스코프 노출 (HTML 인라인 onclick 이벤트용)
+window.toggleTheme = toggleTheme;
+window.toggleSidebar = toggleSidebar;
+window.switchMobileView = switchMobileView;
+window.showMobileChart = showMobileChart;
+window.closeMobileChart = closeMobileChart;
+window.switchChartTab = switchChartTab;
+window.executeTabSwitch = executeTabSwitch;

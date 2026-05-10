@@ -1,0 +1,57 @@
+# 1. 초기화 (기존 파일 삭제)
+if (Test-Path context_for_ai.txt) { Remove-Item context_for_ai.txt }
+
+# 2. [섹션 1] 프로젝트 구조 (시각적 트리)
+"=== [1] PROJECT STRUCTURE ===" | Out-File -FilePath context_for_ai.txt -Encoding UTF8
+Get-ChildItem -Path "." -Depth 0 | Where-Object { !$_.PSIsContainer } | Select-Object -ExpandProperty Name | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+
+@("modules", "static", "templates", "public") | ForEach-Object {
+    if (Test-Path $_) {
+        "`n+---$_" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+        Get-ChildItem -Path "./$_" -Depth 0 | ForEach-Object { "|   $($_.Name)" } | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+    }
+}
+
+# 3. [섹션 2] BACKEND CORE (Python & Go 확실히!)
+"`n=== [2] BACKEND CORE LOGIC (PY/GO) ===" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+# Python 요약
+Get-ChildItem -Path ".", "./modules" -Filter *.py -Recurse -Depth 1 | 
+    Where-Object { $_.Name -notmatch "env|venv" } | ForEach-Object {
+    "`n--- File: $($_.Name) ---" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+    Get-Content $_.FullName -Encoding UTF8 | Select-String "def ","class ","async def ","# " | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+}
+# Go 요약 (루트 및 하위 폴더 포함하여 func/type/interface 추출)
+Get-ChildItem -Path "." -Filter *.go -Recurse -Depth 1 | ForEach-Object {
+    "`n--- File: $($_.Name) ---" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+    Get-Content $_.FullName -Encoding UTF8 | Select-String "func ","type ","interface ","package ","// " | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+}
+
+# 4. [섹션 3] FRONTEND STATIC (JS & CSS)
+"`n=== [3] FRONTEND STATIC (JS/CSS/SVG) ===" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+# JS 요약
+Get-ChildItem -Path "./static" -Filter *.js -Depth 0 | ForEach-Object {
+    "`n--- File: $($_.Name) ---" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+    Get-Content $_.FullName -Encoding UTF8 | Select-String "function ","const ","async ","window\.","// " | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+}
+# CSS 요약 (.min.css 제외)
+Get-ChildItem -Path "./static" -Filter *.css -Depth 0 | Where-Object { $_.Name -notmatch "\.min\.css$" } | ForEach-Object {
+    "`n--- File: $($_.Name) ---" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+    Get-Content $_.FullName -Encoding UTF8 | Select-String ":root","--","@media",".theme-" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+}
+# SVG 요약 (상단 3줄만)
+Get-ChildItem -Path "./public", "./static" -Filter *.svg -Recurse | ForEach-Object {
+    "`n--- File: $($_.Name) ---" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+    Get-Content $_.FullName -TotalCount 3 | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+}
+
+# 5. [섹션 4] HTML 초간단 요약
+"`n=== [4] HTML TEMPLATES (MINIMAL) ===" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+if (Test-Path "./templates") {
+    Get-ChildItem -Path "./templates" -Filter *.html -Depth 0 | ForEach-Object {
+        "`n--- File: $($_.Name) ---" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+        # ID, 주요 스크립트 연결, 주석만 남기고 싹 다 쳐냄
+        Get-Content $_.FullName -Encoding UTF8 | Select-String "id=","<script","<!--" | ForEach-Object { $_.ToString().Trim() } | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+    }
+}
+
+Write-Host "✅ 모든 필터링 완료! context_for_ai.txt 가 생성되었습니다." -ForegroundColor Green

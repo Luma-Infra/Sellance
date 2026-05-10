@@ -5,13 +5,14 @@
         "SOL": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png",
         "SUI": "https://s2.coinmarketcap.com/static/img/coins/64x64/20947.png"
     },
-    "__MEMO_1": "BTC ETH 파생형 너무 많아서 고정 + 중국어 포함 모든 언어 티커 대응",
-    "__MEMO_2": "-------------------------------------------------------------",
+    "__MEMO__1": "BTC ETH 파생형 너무 많아서 고정 + 중국어 포함 모든 언어 티커 대응",
+    "__MEMO__2": "----------------------------------------------------------",
     "EXCLUSION_LIST": [
         "BTCDOM",
         "WBTC",
         "ALL",
-        "COIN"
+        "COIN",
+        "EUR"
     ],
     "HARDCODE_VERIFY_SKIP_LIST": [
         "币安人生",
@@ -106,13 +107,19 @@
             "MET",
             "upbit"
         ],
-        "EDGE(edgeX)": [
+        "EDGE(edgeX)_binance": [
             "39720",
             "",
             "EDGE",
             "binance"
         ],
-        "EDGE(Definitive)": [
+        "EDGE(edgeX)_bithumb": [
+            "39720",
+            "",
+            "EDGEX",
+            "bithumb"
+        ],
+        "EDGE(Definitive)_upbit": [
             "36288",
             "",
             "EDGE",
@@ -373,9 +380,9 @@
             "AMP"
         ],
         "AMZN": [
-            "39619",
-            "HYPE",
-            "Amazon Tokenized Stock (Hyperliquid)",
+            "39471",
+            "AMZN",
+            "Amazon.com Inc (Derivatives)",
             "AMZN"
         ],
         "ANIME": [
@@ -650,7 +657,7 @@
         ],
         "BAR": [
             "5225",
-            "CHZ",
+            "SOL",
             "FC Barcelona Fan Token",
             "BAR"
         ],
@@ -794,7 +801,7 @@
         ],
         "BNB": [
             "1839",
-            "BNB",
+            "https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png",
             "BNB",
             "BNB"
         ],
@@ -852,7 +859,7 @@
         ],
         "BRETT": [
             "29743",
-            "-",
+            "BNB",
             "Brett (Based)",
             "BRETT"
         ],
@@ -1038,7 +1045,7 @@
         ],
         "CITY": [
             "10049",
-            "CHZ",
+            "SOL",
             "Manchester City Fan Token",
             "CITY"
         ],
@@ -1308,7 +1315,7 @@
         ],
         "EDGE(Definitive)": [
             "36288",
-            "BASE",
+            "-",
             "Definitive",
             "EDGE"
         ],
@@ -1425,12 +1432,6 @@
             "ETH",
             "Euler",
             "EUL"
-        ],
-        "EUR": [
-            "",
-            "",
-            "EUR",
-            "EUR"
         ],
         "EURI": [
             "32644",
@@ -1661,9 +1662,9 @@
             "GOAT"
         ],
         "GOOGL": [
-            "39470",
-            "GOOGL",
-            "Alphabet Inc (Derivatives)",
+            "39622",
+            "HYPE",
+            "Alphabet Tokenized Stock (Hyperliquid)",
             "GOOGL"
         ],
         "GPS": [
@@ -1717,7 +1718,7 @@
         "H": [
             "36922",
             "ETH",
-            "Humanity Protocol",
+            "Humanity",
             "H"
         ],
         "HAEDAL": [
@@ -1986,7 +1987,7 @@
         ],
         "JUV": [
             "5224",
-            "CHZ",
+            "SOL",
             "Juventus Fan Token",
             "JUV"
         ],
@@ -2814,7 +2815,7 @@
         ],
         "PSG": [
             "5226",
-            "CHZ",
+            "SOL",
             "Paris Saint-Germain Fan Token",
             "PSG"
         ],
@@ -3949,7 +3950,7 @@
         "YFI": [
             "5864",
             "ETH",
-            "yearn.finance",
+            "Yearn",
             "YFI"
         ],
         "YGG": [

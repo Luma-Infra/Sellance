@@ -1,5 +1,5 @@
 // streamEach.js
-import { store, CONFIG } from './store.js';
+import { store, CONFIG } from "./store.js";
 
 // 🎯 개별 스트림 스나이퍼 소켓 초기화
 function initSniperSocket() {
@@ -24,7 +24,9 @@ function initSniperSocket() {
   };
 
   store.sniperWs.onclose = () => {
-    console.log(`🎯 스나이퍼 엔진 중단... ${CONFIG.UI_UPDATE_INTERVAL / 1000}초 후 재연결`);
+    console.log(
+      `🎯 스나이퍼 엔진 중단... ${CONFIG.UI_UPDATE_INTERVAL / 1000}초 후 재연결`,
+    );
     setTimeout(initSniperSocket, CONFIG.UI_UPDATE_INTERVAL);
   };
 }
@@ -47,13 +49,23 @@ function syncSniperSubscriptions() {
 
   const toSub = currentVisible.filter((s) => !store.activeSubs.has(s));
   if (toSub.length > 0) {
-    store.sniperWs.send(JSON.stringify({ method: "SUBSCRIBE", params: toSub, id: getNextId() }));
+    store.sniperWs.send(
+      JSON.stringify({ method: "SUBSCRIBE", params: toSub, id: getNextId() }),
+    );
     toSub.forEach((s) => store.activeSubs.add(s));
   }
 
-  const toUnsub = Array.from(store.activeSubs).filter((s) => !currentVisible.includes(s));
+  const toUnsub = Array.from(store.activeSubs).filter(
+    (s) => !currentVisible.includes(s),
+  );
   if (toUnsub.length > 0) {
-    store.sniperWs.send(JSON.stringify({ method: "UNSUBSCRIBE", params: toUnsub, id: getNextId() }));
+    store.sniperWs.send(
+      JSON.stringify({
+        method: "UNSUBSCRIBE",
+        params: toUnsub,
+        id: getNextId(),
+      }),
+    );
     toUnsub.forEach((s) => store.activeSubs.delete(s));
   }
 }
@@ -94,39 +106,56 @@ function syncSniperSubscriptions() {
 
 // ⚡ 정밀 렌더링 시작하기
 function renderSniperPrice(data) {
-  const symbol = data.s.replace("USDT", "");
-  const priceCell = document.getElementById(`price-${symbol}`);
+  const tId = data.s; // 🚀 완벽한 고유 식별자 (예: EDGEUSDT)
+
+  const row = store.currentTableData.find((r) => r.Ticker === tId);
+  if (!row) return;
+
+  const priceCell = document.getElementById(`price-${tId}`);
   if (!priceCell) return;
 
-  // 🚀 족보(p)와 시가(open) 한 번에 찾기 (최적화)
-  const row = store.currentTableData.find(r => r.Symbol === symbol);
-  if (!row) return;
   const p = row.precision || 2;
-
   const newPrice = parseFloat(data.c);
-  // 🚀 에러 방어: 텍스트가 없어도 뻗지 않게!
-  const oldPrice = parseFloat((priceCell.innerText || "").replace(/[^0-9.-]+/g, "")) || 0;
+  const oldPrice =
+    parseFloat((priceCell.innerText || "").replace(/[^0-9.-]+/g, "")) || 0;
 
   if (newPrice !== oldPrice) {
     priceCell.innerText = `${formatSmartPrice(newPrice, p)}`;
-    // 🚀 공용 함수 호출로 통일!
     applyPriceFlash(priceCell, newPrice, oldPrice);
   }
 
-  // 24시간 등락률 (기존 동일)
-  const changeCell = document.getElementById(`change-${symbol}`);
+  // 24시간 등락률
+  const changeCell = document.getElementById(`change-${tId}`);
   if (changeCell) {
     const change24h = parseFloat(data.P);
-    const themeClass = change24h > 0 ? "text-theme-up" : change24h < 0 ? "text-theme-down" : "text-theme-text opacity-50";
+    const themeClass =
+      change24h > 0
+        ? "text-theme-up"
+        : change24h < 0
+          ? "text-theme-down"
+          : "text-theme-text opacity-50";
     changeCell.innerHTML = `<span class="${themeClass} font-bold">${change24h > 0 ? "+" : ""}${change24h.toFixed(2)}%</span>`;
   }
 
-  // 당일 등락률 (row.utc0_open_Raw 활용)
-  const todayCell = document.getElementById(`today-${symbol}`);
+  // 거래량 업데이트
+  const binanceVolCell = document.getElementById(`vol-binance-${tId}`);
+  if (binanceVolCell && data.q) {
+    const vol = parseFloat(data.q);
+    row.Binance_Vol_Futures = vol; // 정렬 데이터 갱신
+    binanceVolCell.innerText = `B: ${window.formatVolumeDollar(vol)}`;
+  }
+
+  // 당일 등락률
+  const todayCell = document.getElementById(`today-${tId}`);
   if (todayCell && row.utc0_open_Raw) {
     const openPrice = parseFloat(row.utc0_open_Raw);
     const todayChange = ((newPrice - openPrice) / openPrice) * 100;
-    const tThemeClass = todayChange > 0 ? "text-theme-up" : todayChange < 0 ? "text-theme-down" : "text-theme-text opacity-50";
+    const tThemeClass =
+      todayChange > 0
+        ? "text-theme-up"
+        : todayChange < 0
+          ? "text-theme-down"
+          : "text-theme-text opacity-50";
     todayCell.innerHTML = `<span class="${tThemeClass} font-bold">${todayChange > 0 ? "+" : ""}${todayChange.toFixed(2)}%</span>`;
   }
 }

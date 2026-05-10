@@ -48,7 +48,7 @@ def build_cmc_lookup_lists(binance_base_set, upbit_krw_set, MAPPING_DATA):
             cmc_id = str(SYMBOL_TO_ID_MAP[a])
 
         # 2순위: 원본에 없을 때만 '숫자(배율)' 제거를 시도
-        # PUMPBTC 같은 건 여기서 BTC가 안 잘리도록 누님이 고친 get_pure_base_asset이 작동함
+        # PUMPBTC 같은 건 여기서 BTC가 안 잘리도록 고친 get_pure_base_asset이 작동함
         base = utils.get_pure_base_asset(a).upper()
         
         # [귀빈 예외] 원본과 배율 제거본이 다를 때(즉, 숫자만 붙었을 때) 하드코딩 맵 재조회
@@ -59,7 +59,7 @@ def build_cmc_lookup_lists(binance_base_set, upbit_krw_set, MAPPING_DATA):
         # 유효성 검사 (숫자 6자리 등 쓰레기 필터링)
         if not base or "_" in base or re.search(r'\d{6}$', base): return
 
-        # 이름표 및 별칭 확정 (누님의 요청대로 BTC/ETH 자르기는 패스하므로 a를 우선 사용)
+        # 이름표 및 별칭 확정 (요청대로 BTC/ETH 자르기는 패스하므로 a를 우선 사용)
         lookup_name = f"{a.upper()}_{exchange_tag}"
         alias_name = REVERSE_LOOKUP.get(lookup_name, a.upper()) 
 

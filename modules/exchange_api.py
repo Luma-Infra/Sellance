@@ -98,7 +98,7 @@ def fetch_binance_open(task):
     """(보조) 선물/현물 구분해서 9시 시가 수집 (task: (symbol, is_futures))"""
     symbol, is_futures = task
     
-    # 🚀 누님의 설계대로 분기점 생성
+    # 🚀 설계대로 분기점 생성
     if is_futures:
         # 선물 전용 주소
         url = f"https://fapi.binance.com/fapi/v1/klines?symbol={symbol}USDT&interval=1d&limit=1"

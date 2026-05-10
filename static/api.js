@@ -1,5 +1,5 @@
 // api.js
-import { store, tfSec } from './store.js';
+import { store, tfSec } from "./store.js";
 
 // --- 📡 API Fetch 로직 ---
 export async function loadSymbols() {
@@ -24,6 +24,23 @@ export async function loadSymbols() {
   }
 }
 
+// 🚀 [추가] 백엔드 정규식 이식: 1000XEC, 1MBABYDOGE 등 단위 배수 추출기
+function getMultiplier(sym) {
+  if (!sym) return 1;
+  const match = sym.match(/^(10+|1[MB])(?=[A-Z])/i);
+  if (!match) return 1;
+  const p = match[1].toUpperCase();
+  if (p === "1M") return 1000000;
+  if (p === "1B") return 1000000000;
+  return parseInt(p, 10);
+}
+
+// 🚀 [추가] 순수 코인명(Base Asset) 추출기 (1000XEC -> XEC)
+function getPureBase(sym) {
+  if (!sym) return "";
+  return sym.replace(/^(10+|1[MB])(?=[A-Z])/i, "").toUpperCase();
+}
+
 // 검색창 비우기 (X 버튼용)
 export function clearSearch() {
   const input = document.getElementById("symbol-input");
@@ -44,9 +61,14 @@ export function searchSymbols(v) {
 
   // 🚀 [핵심] 검색어가 있든 없든, 필터링해서 보여줌
   const query = v.toUpperCase();
-  const filtered = query
-    ? store.allSymbols.filter((s) => s.includes(query)).slice(0, 15)
-    : store.allSymbols.slice(0, 15); // 빈 값이면 상위 15개 그냥 노출
+  const filtered = store.currentTableData
+    .filter(
+      (r) =>
+        r.DisplayTicker.toUpperCase().includes(query) ||
+        r.Name.toUpperCase().includes(query) ||
+        r.Symbol.toUpperCase().includes(query),
+    )
+    .slice(0, 20);
 
   if (filtered.length === 0) {
     resDiv.style.display = "none";
@@ -54,15 +76,21 @@ export function searchSymbols(v) {
   }
 
   resDiv.innerHTML = filtered
-    .map((s) => {
-      const isUpbit = store.marketDataMap.upbit?.includes(s);
-      const isBinanceSpot = store.marketDataMap.spot?.includes(s);
-      const isBinanceFutures = store.marketDataMap.futures?.includes(s);
+    .map((r) => {
+      const s = r.DisplayTicker;
+      const isUpbit = r.Upbit === "O";
+      const isBinanceSpot = r.Listed_Exchanges?.includes("BINANCE");
+      const isBinanceFutures = r.Listed_Exchanges?.includes("BINANCE_FUTURES");
+      const isBithumb = r.Listed_Exchanges?.includes("BITHUMB");
 
       // 거래소 버튼 (분기 유지)
       let upbitBtn = isUpbit
         ? `<button class="bg-[#093687] text-white text-[9px] px-2 py-1 rounded font-bold mr-1 hover:brightness-125" 
                  onclick="event.stopPropagation(); selectSymbol('${s}', 'UPBIT')">UPBIT</button>`
+        : "";
+      let bithumbBtn = isBithumb
+        ? `<button class="bg-[#ff8b00] text-white text-[9px] px-2 py-1 rounded font-bold mr-1 hover:brightness-125" 
+                 onclick="event.stopPropagation(); selectSymbol('${s}', 'BITHUMB')">BITHUMB</button>`
         : "";
       let binanceBtn = isBinanceFutures
         ? `<button class="bg-[#f0b90b] text-black text-[9px] px-2 py-1 rounded font-bold hover:brightness-110" 
@@ -76,9 +104,13 @@ export function searchSymbols(v) {
       <div class="flex items-center justify-between p-2 cursor-pointer border-b border-theme-border text-[13px] hover:bg-white/5" 
            onclick="selectSymbol('${s}')">
         <div class="flex items-center gap-2">
-          <b class="w-[50px]">${s}</b>
-          <div class="flex gap-1">${upbitBtn}${binanceBtn}</div>
+          ${r.Logo || ""}
+          <div class="flex flex-col">
+            <b class="w-auto text-theme-text">${s}</b>
+            <span class="text-[10px] text-theme-text opacity-60">${r.Name || ""}</span>
+          </div>
         </div>
+          <div class="flex gap-1">${upbitBtn}${bithumbBtn}${binanceBtn}</div>
       </div>`;
     })
     .join("");
@@ -98,22 +130,45 @@ export async function selectSymbol(s, forceMarket = null) {
   const searchRes = document.getElementById("search-results");
   if (searchRes) searchRes.style.display = "none";
 
+  const rowInfo = store.currentTableData.find((c) => c.DisplayTicker === s);
+
   // 마켓 우선순위 결정 (기본: 선물 > 현물 > 업비트)
   if (forceMarket) {
     store.currentMarket = forceMarket;
   } else {
     // 🚀 [수정] 중괄호로 감싸고 "문자열"임을 명확히 선언!
-    if (store.marketDataMap.futures && store.marketDataMap.futures.includes(s)) {
-      store.currentMarket = "FUTURES";
-    } else if (store.marketDataMap.spot && store.marketDataMap.spot.includes(s)) {
-      store.currentMarket = "SPOT";
-    } else if (store.marketDataMap.upbit && store.marketDataMap.upbit.includes(s)) {
-      store.currentMarket = "UPBIT";
+    if (rowInfo && rowInfo.Listed_Exchanges) {
+      if (rowInfo.Listed_Exchanges.includes("BINANCE_FUTURES")) {
+        store.currentMarket = "FUTURES";
+      } else if (rowInfo.Listed_Exchanges.includes("BINANCE")) {
+        store.currentMarket = "SPOT";
+      } else if (rowInfo.Listed_Exchanges.includes("UPBIT")) {
+        store.currentMarket = "UPBIT";
+      } else if (rowInfo.Listed_Exchanges.includes("BITHUMB")) {
+        store.currentMarket = "BITHUMB";
+      }
     }
   }
-  // 헤더 텍스트 초기화
+  // 🚀 [수정] 헤더 텍스트 초기화 및 이름(Name) 즉시 덮어쓰기 (예: ZRO (LayerZero))
   const headAssetName = document.getElementById("head-asset-name");
-  if (headAssetName) headAssetName.innerText = s;
+  if (headAssetName) {
+    if (rowInfo && rowInfo.Name) {
+      headAssetName.innerText = `${rowInfo.Symbol} (${rowInfo.Name})`;
+    } else {
+      headAssetName.innerText = s;
+    }
+  }
+
+  // 🚀 헤더 정보 업데이트 (M.Cap, 볼륨 등)
+  if (rowInfo) {
+    const headMcap = document.getElementById("head-mcap");
+    const headVolB = document.getElementById("head-vol-binance");
+    const headVolU = document.getElementById("head-vol-upbit");
+
+    if (headMcap) headMcap.innerText = rowInfo.MarketCap_Formatted || "-";
+    if (headVolB) headVolB.innerText = rowInfo.Binance_Vol_Formatted || "-";
+    if (headVolU) headVolU.innerText = rowInfo.Upbit_Vol_Formatted || "-";
+  }
 
   // 배지 업데이트
   updateExchangeBadges(s);
@@ -129,24 +184,20 @@ export async function selectSymbol(s, forceMarket = null) {
     console.error("이름 로드 실패", e);
   }
 
-  // 차트 호출
-  const isFutures = store.currentMarket === "FUTURES";
-  const isSpot = store.currentMarket === "SPOT";
-  fetchHistory(s, isFutures, isSpot);
-
   // 🚀 [추가] 검색해서 선택했으면 왼쪽 테이블도 해당 코인 위치로 멱살 잡고 끌고 옴
   setTimeout(() => {
     store.currentSelectedSymbol = s; // 선택자 동기화
     const targetRow = document.querySelector(`#table-body tr[data-sym="${s}"]`);
     if (targetRow) {
       targetRow.scrollIntoView({ block: "center", behavior: "smooth" });
-      if (typeof applySelectedHighlight === "function") applySelectedHighlight();
+      if (typeof applySelectedHighlight === "function")
+        applySelectedHighlight();
     }
   }, 100); // 렌더링 대기 후 이동
 
   // 🚀 [추가] 검색한 코인이 현재 테이블 렌더링 범위(50개) 밖에 있을 경우 대응
   const sortedList = store.currentTableData;
-  const targetIdx = sortedList.findIndex(item => item.Symbol === s);
+  const targetIdx = sortedList.findIndex((item) => item.DisplayTicker === s);
 
   if (targetIdx !== -1) {
     // 1. 만약 현재 렌더링 한도보다 뒤에 있다면 한도를 늘리고 재렌더링
@@ -157,62 +208,82 @@ export async function selectSymbol(s, forceMarket = null) {
 
     // 2. 해당 행으로 스크롤 이동 및 하이라이트
     setTimeout(() => {
-      const targetRow = document.querySelector(`#table-body tr[data-sym="${s}"]`);
+      const targetRow = document.querySelector(
+        `#table-body tr[data-sym="${s}"]`,
+      );
       if (targetRow) {
         targetRow.scrollIntoView({ block: "center", behavior: "smooth" });
-        if (typeof applySelectedHighlight === "function") applySelectedHighlight();
+        if (typeof applySelectedHighlight === "function")
+          applySelectedHighlight();
       }
     }, 100);
   }
 
-  // 차트 호출
-  fetchHistory(s, store.currentMarket === "FUTURES", store.currentMarket === "SPOT");
+  // 🚀 [버그 픽스] 중복 호출 제거 및 파라미터(isTfChange) 오류 수정
+  fetchHistory(s);
 }
 
 // 배지 UI 업데이트 헬퍼
 export function updateExchangeBadges(s) {
+  const rowInfo = store.currentTableData.find((c) => c.DisplayTicker === s);
   let badges = "";
-  if (store.marketDataMap.upbit?.includes(s))
-    badges += `<span class="bg-[#093687] text-white text-[10px] px-1.5 py-0.5 rounded">UPBIT</span>`;
-  if (store.marketDataMap.futures?.includes(s))
-    badges += `<span class="bg-[#f0b90b] text-black text-[10px] px-1.5 py-0.5 rounded ml-1">B-FUTURES</span>`;
-  if (store.marketDataMap.spot?.includes(s))
-    badges += `<span class="bg-[#444] text-white text-[10px] px-1.5 py-0.5 rounded ml-1">B-SPOT</span>`;
+  if (rowInfo && rowInfo.Listed_Exchanges) {
+    if (rowInfo.Listed_Exchanges.includes("UPBIT"))
+      badges += `<span class="bg-[#093687] text-white text-[10px] px-1.5 py-0.5 rounded">UPBIT</span>`;
+    if (rowInfo.Listed_Exchanges.includes("BINANCE_FUTURES"))
+      badges += `<span class="bg-[#f0b90b] text-black text-[10px] px-1.5 py-0.5 rounded ml-1">B-FUT</span>`;
+    if (rowInfo.Listed_Exchanges.includes("BINANCE"))
+      badges += `<span class="bg-[#444] text-white text-[10px] px-1.5 py-0.5 rounded ml-1">B-SPOT</span>`;
+    if (rowInfo.Listed_Exchanges.includes("BITHUMB"))
+      badges += `<span class="bg-[#ff8b00] text-white text-[10px] px-1.5 py-0.5 rounded ml-1">BITHUMB</span>`;
+  }
 
   const badgeContainer = document.getElementById("exchange-badges");
   if (badgeContainer) badgeContainer.innerHTML = badges;
 }
 
 // executeSetTF나 코인 클릭 함수(selectSymbol) 등 마켓이 바뀌는 모든 시점에 이 '세척기'를 돌려야 합니다.
-export function clearChartData() {
-  // 🚀 전역 데이터 장부 완전 소각
-  store.mainData = [];
+export function clearChartData(isTfChange = false) {
+  if (isTfChange) {
+    // 🚀 타임프레임 변경: 기존 캔들과 김프 데이터를 모두 유지하여 눈의 피로(깜빡임)를 제거합니다.
+    // (새로운 데이터를 받아오는 순간 한 방에 덮어씌움)
+    if (store.countdownPriceLine && store.candleSeries) {
+      store.candleSeries.removePriceLine(store.countdownPriceLine);
+      store.countdownPriceLine = null;
+    }
+    console.log("🧹 타임프레임 변경: 기존 차트 잔상 유지 (깜빡임 방지)");
+  } else {
+    // 🚀 전역 데이터 장부 완전 소각
+    store.mainData = [];
+    store.volumeData = [];
+    store.kimchiData = [];
 
-  // 🚀 차트 시리즈 데이터 즉시 비우기
-  // if (store.candleSeries) store.candleSeries.setData([]);
-  // if (store.previewSeries) store.previewSeries.setData([]);
+    // 🚨 [핵심] 차트 시리즈 데이터 즉시 비우기
+    if (store.candleSeries) store.candleSeries.setData([]);
+    if (store.previewSeries) store.previewSeries.setData([]);
+    if (store.volumeSeries) store.volumeSeries.setData([]);
+    if (store.kimchiSeries) store.kimchiSeries.setData([]);
 
-  // 🚀 [추가] 캔들은 남겨두되, 가격축은 미리 '오토'로 풀어서
-  // 새 데이터가 올 때 부드럽게 적응할 준비를 시킵니다.
-  if (store.chart) {
-    store.chart.priceScale("right").applyOptions({ autoScale: true });
+    if (store.chart) {
+      store.chart.priceScale("right").applyOptions({ autoScale: true });
+    }
+
+    if (store.countdownPriceLine && store.candleSeries) {
+      store.candleSeries.removePriceLine(store.countdownPriceLine);
+      store.countdownPriceLine = null;
+    }
+    console.log("🧹 차트 찌꺼기 청소 및 잔상 제거 준비 완료! (장대봉 방지)");
   }
-
-  // 🚀 카운트다운 라벨도 유령 방지를 위해 삭제
-  if (store.countdownPriceLine && store.candleSeries) {
-    store.candleSeries.removePriceLine(store.countdownPriceLine);
-    store.countdownPriceLine = null;
-  }
-  console.log("🧹 차트 찌꺼기 청소 및 잔상 제거 준비 완료! (장대봉 방지)");
 }
 
-export async function fetchHistory(symbol) {
+export async function fetchHistory(symbol, isTfChange = false) {
   const now = Date.now();
   if (now - store.lastFetchTime < 10) return;
   store.lastFetchTime = now;
 
   store.isFetchingChart = true;
-  clearChartData();
+  window.isFetchingChart = true; // 🚨 웹소켓 차단 동기화
+  clearChartData(isTfChange);
 
   const displayName = symbol || store.currentAsset;
   const rawSymbol = displayName.split("(")[0].trim().toUpperCase();
@@ -222,315 +293,716 @@ export async function fetchHistory(symbol) {
   const isFutures = store.currentMarket === "FUTURES";
   const isSpot = store.currentMarket === "SPOT";
   const isUpbit = store.currentMarket === "UPBIT";
+  const isBithumb = store.currentMarket === "BITHUMB";
 
-  // 🚀 [세련된 방법] 현재 클릭한 코인의 전체 데이터(장부)를 찾습니다.
-  const rowInfo = store.currentTableData.find((c) => c.Symbol === rawSymbol);
+  // 🚀 [UID 기반 핀포인트 방어] EDGE처럼 이름이 겹쳐도, 현재 선택된 마켓에 맞는 진짜 장부만 가져옵니다!
+  let rowInfo = store.currentTableData.find((c) => {
+    if (c.DisplayTicker !== displayName) return false; // 🚀 [수정] 완벽한 고유 명찰로 검색
+    if (store.currentMarket === "UPBIT" && c.Upbit === "O") return true;
+    if (
+      store.currentMarket === "FUTURES" &&
+      c.Listed_Exchanges?.includes("BINANCE_FUTURES")
+    )
+      return true;
+    if (
+      store.currentMarket === "SPOT" &&
+      c.Listed_Exchanges?.includes("BINANCE")
+    )
+      return true;
+    if (
+      store.currentMarket === "BITHUMB" &&
+      c.Listed_Exchanges?.includes("BITHUMB")
+    )
+      return true;
+    return false;
+  });
+  if (!rowInfo)
+    rowInfo = store.currentTableData.find(
+      (c) => c.DisplayTicker === displayName,
+    ); // 🚀 [수정]
 
-  // 🚀 장부에 Upbit_Symbol이 적혀있으면 그거 쓰고, 없으면 그냥 원본(rawSymbol) 씁니다.
-  const bTicker = rawSymbol;
-  const uTicker =
+  // 🚀 [핵심] 백엔드가 장부에 심어준 "정확한 티커명(1000XEC 등)"을 100% 신뢰하여 즉시 추출!
+  const exactSpot =
+    rowInfo && rowInfo.Exact_Spot ? rowInfo.Exact_Spot : rawSymbol;
+  const exactFutures =
+    rowInfo && rowInfo.Exact_Futures ? rowInfo.Exact_Futures : rawSymbol;
+  const exactUpbit =
     rowInfo && rowInfo.Upbit_Symbol ? rowInfo.Upbit_Symbol : rawSymbol;
+  const exactBithumb = rawSymbol; // 빗썸은 99% pureBase와 일치하므로 안전
 
-  // 티커 규격 맞추기 (알아서 BTTC와 BTT로 나뉘어 들어감)
-  const binanceTicker = `${bTicker}USDT`;
-  const upbitTicker = `KRW-${uTicker}`;
+  // 현재 마켓의 정확한 심볼 지정
+  let mainTickerStr = rawSymbol;
+  if (isFutures) mainTickerStr = exactFutures;
+  else if (isSpot) mainTickerStr = exactSpot;
+  else if (isUpbit) mainTickerStr = exactUpbit;
+  else if (isBithumb) mainTickerStr = exactBithumb;
 
-  // 🚀 [백엔드 장부 200% 활용] 김프를 계산할 수 있는 자격증명
-  const hasUpbit = store.marketDataMap.upbit?.includes(uTicker);
-  const hasBinanceSpot = store.marketDataMap.spot?.includes(bTicker);
-  const hasBinanceFutures = store.marketDataMap.futures?.includes(bTicker);
-  const canCalcKimchi = hasUpbit && (hasBinanceSpot || hasBinanceFutures);
+  const mainMulti = getMultiplier(mainTickerStr);
+
+  // API 호출용 Ticker 규격 맞추기
+  const binanceTicker = isFutures ? `${exactFutures}USDT` : `${exactSpot}USDT`;
+  const krwTicker =
+    store.currentMarket === "BITHUMB"
+      ? `${exactBithumb}_KRW`
+      : `KRW-${exactUpbit}`;
 
   // 🚀 임시 환율 (백엔드 장부에 krw_usd_rate를 담아주면 더 좋습니다!)
   const exchangeRate = store.marketDataMap.krw_usd_rate || 1480.0;
 
   const loadingModal = document.getElementById("chart-loading-modal");
-  if (loadingModal) loadingModal.classList.remove("hidden");
+  if (loadingModal && !isTfChange) loadingModal.classList.remove("hidden");
 
   // 🚀 [추가] 차트 영역에 로딩 클래스 부여 (어둡고 축소 시작)
   const wrapper = document.getElementById("chart-wrapper");
-  if (wrapper) wrapper.classList.add("chart-loading");
+  if (wrapper && !isTfChange) wrapper.classList.add("chart-loading");
 
   try {
-    store.mainData = [];
-    let raw = [];
-    let volumeData = []; // 볼륨 배열
-    let kimchiData = []; // 김프 배열
+    const snapshotAsset = store.currentAsset;
+    const snapshotTF = store.currentTF;
 
-    // 🚀 [구조화] 바이낸스 vs 업비트 분기
+    let newMainData = [];
+    let newVolumeData = [];
+
+    const style = getComputedStyle(document.body);
+    const upColorVol =
+      (style.getPropertyValue("--up").trim() || "#26a69a") + "80";
+    const downColorVol =
+      (style.getPropertyValue("--down").trim() || "#ef5350") + "80";
+
+    // ==========================================
+    // 1️⃣ 메인 차트 최우선 수집 및 즉시 조립
+    // ==========================================
+    let rawMain = [];
+    let mainStep = 1;
+
     if (isFutures || isSpot) {
       const exchange = isFutures ? "binance_futures" : "binance_spot";
       const res = await fetch(
         `/api/candles?exchange=${exchange}&symbol=${binanceTicker}&interval=${store.currentTF}&limit=500`,
       );
-      raw = await res.json();
-
+      const raw = await res.json();
       if (Array.isArray(raw) && !raw.error) {
-        store.mainData = raw.map((d) => {
-          const time = Number(d[0]) / 1000;
-          const open = Number(d[1]);
-          const high = Number(d[2]);
-          const low = Number(d[3]);
-          const close = Number(d[4]);
-          const vol = Number(d[5]);
-
-          volumeData.push({
-            time: time,
-            value: vol,
-            color: close >= open ? "rgba(38, 166, 154, 0.5)" : "rgba(239, 83, 80, 0.5)",
-          });
-          return { time, open, high, low, close };
-        });
+        rawMain = raw
+          .map((d) => ({
+            time: Number(d[0]) / 1000 || 0,
+            open: Number(d[1]) || 0,
+            high: Number(d[2]) || 0,
+            low: Number(d[3]) || 0,
+            close: Number(d[4]) || 0,
+            vol: Number(d[5]) || 0,
+          }))
+          .filter((d) => d.time > 0 && d.open > 0);
       }
     } else {
-      // 업비트/빗썸 등 원화 거래소
       const supportedMin = [1, 3, 5, 10, 15, 30, 60, 240];
       const totalSec = tfSec[store.currentTF] || 60;
-      let fetchInterval, step = 1;
+      let fetchInterval;
 
       const u = store.currentTF.replace(/[0-9]/g, "");
       if (u === "d" || u === "w" || u === "M") {
         fetchInterval = u === "w" ? "weeks" : u === "M" ? "months" : "days";
-        step = store.currentTF === "3d" ? 3 : 1;
+        mainStep = store.currentTF === "3d" ? 3 : 1;
       } else {
         const targetMin = totalSec / 60;
-        const baseMin = supportedMin.reverse().find((m) => targetMin % m === 0) || 1;
+        const baseMin =
+          supportedMin.reverse().find((m) => targetMin % m === 0) || 1;
         fetchInterval = `minutes/${baseMin}`;
-        step = targetMin / baseMin;
+        mainStep = targetMin / baseMin;
       }
 
-      // 🚀 무한 펌프기 투입! 바이낸스랑 똑같이 500개 꽉꽉 채워서 가져옴!
-      const fetchLimit = 500 * step;
-      raw = await fetchUpbitPaginated(upbitTicker, fetchInterval, fetchLimit);
+      const krwExchange =
+        store.currentMarket === "BITHUMB" ? "bithumb" : "upbit";
 
-      if (Array.isArray(raw) && !raw.error) {
-        let baseData = raw.reverse().map((d) => ({
-          time: Math.floor(Date.parse(d.candle_date_time_utc + "Z") / 1000),
-          open: d.opening_price,
-          high: d.high_price,
-          low: d.low_price,
-          close: d.trade_price,
-          vol: d.candle_acc_trade_volume,
-        }));
+      if (krwExchange === "bithumb") {
+        const bMap = {
+          "1m": "1m",
+          "3m": "3m",
+          "5m": "5m",
+          "15m": "10m",
+          "30m": "30m",
+          "1h": "1h",
+          "2h": "1h",
+          "4h": "1h",
+          "12h": "12h",
+          "1d": "24h",
+          "3d": "24h",
+          "1w": "24h",
+          "1M": "24h",
+        };
+        let bFetchInt = bMap[store.currentTF] || "24h";
 
-        for (let i = 0; i < baseData.length; i += step) {
-          const chunk = baseData.slice(i, i + step);
-          if (chunk.length > 0) {
-            const time = chunk[0].time;
-            const open = chunk[0].open;
-            const close = chunk[chunk.length - 1].close;
-            const high = Math.max(...chunk.map((c) => c.high));
-            const low = Math.min(...chunk.map((c) => c.low));
-            const totalVol = chunk.reduce((sum, c) => sum + (c.vol || 0), 0);
-
-            store.mainData.push({ time, open, high, low, close });
-            volumeData.push({
-              time: time,
-              value: totalVol,
-              color: close >= open ? "rgba(38, 166, 154, 0.5)" : "rgba(239, 83, 80, 0.5)",
-            });
+        if (["15m", "2h", "4h", "3d", "1w", "1M"].includes(store.currentTF)) {
+          if (store.currentTF === "15m") {
+            bFetchInt = "1m";
+            mainStep = 15;
           }
+          if (store.currentTF === "2h") {
+            bFetchInt = "1h";
+            mainStep = 2;
+          }
+          if (store.currentTF === "4h") {
+            bFetchInt = "1h";
+            mainStep = 4;
+          }
+          if (store.currentTF === "3d") {
+            bFetchInt = "24h";
+            mainStep = 3;
+          }
+          if (store.currentTF === "1w") {
+            bFetchInt = "24h";
+            mainStep = 7;
+          }
+          if (store.currentTF === "1M") {
+            bFetchInt = "24h";
+            mainStep = 30;
+          }
+        } else {
+          mainStep = 1;
         }
-      }
-    }
 
-    // 🚀 [수정됨] 2.5 [김프 엔진 및 BTC 합성 환율 계산기]
-    kimchiData = [];
-
-    // 1. 김프 비교 대상 (Fallback logic) 결정
-    let subExchange = null;
-    let subSymbol = null;
-
-    if (store.currentMarket === "UPBIT" || store.currentMarket === "BITHUMB") {
-      // 업비트/빗썸 기준: 바낸 선물 -> 바이비트 현물
-      if (store.marketDataMap.futures?.includes(bTicker)) {
-        subExchange = "binance_futures";
-        subSymbol = `${bTicker}USDT`;
-      } else if (store.marketDataMap.bybit_spot?.includes(bTicker)) {
-        subExchange = "bybit_spot";
-        subSymbol = `${bTicker}USDT`;
-      }
-    } else {
-      // 바낸 기준: 업비트 -> 빗썸
-      if (store.marketDataMap.upbit?.includes(uTicker)) {
-        subExchange = "upbit";
-        subSymbol = `KRW-${uTicker}`;
-      } else if (store.marketDataMap.bithumb?.includes(uTicker)) {
-        subExchange = "bithumb";
-        subSymbol = `${uTicker}_KRW`;
-      }
-    }
-
-    // 🚀 [핵심] 비교 대상 유무에 따른 UI 처리
-    const noDataMsg = document.getElementById("kimchi-no-data");
-    if (!subExchange) {
-      store.paneConfig.kimchi = false; // 김프 영역 닫기
-      if (noDataMsg) noDataMsg.classList.remove("hidden"); // 문구 보여주기
-      console.log("ℹ️ 비교군 없음: 김프 차트를 비활성화합니다.");
-    } else {
-      store.paneConfig.kimchi = true;  // 김프 영역 열기
-      if (noDataMsg) noDataMsg.classList.add("hidden");    // 문구 숨기기
-    }
-
-    // 레이아웃 즉시 반영 (영역 닫힘 효과)
-    if (typeof applyChartLayout === "function") applyChartLayout();
-
-    if (subExchange && store.mainData.length > 0) {
-      // BTC 합성 환율을 위한 준비
-      const u = store.currentTF.replace(/[0-9]/g, "");
-      const totalSec = tfSec[store.currentTF] || 60;
-      let upbitInterval = "minutes/1";
-      if (u === "d" || u === "w" || u === "M") {
-        upbitInterval = u === "w" ? "weeks" : u === "M" ? "months" : "days";
+        const res = await fetch(
+          `/api/candles?exchange=bithumb&symbol=${krwTicker}&interval=${bFetchInt}&limit=2000`,
+        );
+        const bData = await res.json();
+        if (bData && bData.data && Array.isArray(bData.data)) {
+          rawMain = bData.data
+            .map((d) => ({
+              time: Number(d[0]) / 1000,
+              open: Number(d[1]),
+              close: Number(d[2]),
+              high: Number(d[3]),
+              low: Number(d[4]),
+              vol: Number(d[5]),
+            }))
+            .filter((d) => d.time > 0 && d.open > 0);
+        }
       } else {
-        const baseMin = [1, 3, 5, 10, 15, 30, 60, 240].reverse().find((m) => (totalSec / 60) % m === 0) || 1;
-        upbitInterval = `minutes/${baseMin}`;
-      }
-
-      let subFetchUrl = `/api/candles?exchange=${subExchange}&symbol=${subSymbol}&interval=${store.currentTF}&limit=500`;
-      if (subExchange === "upbit" || subExchange === "bithumb") {
-        subFetchUrl = `/api/candles?exchange=${subExchange}&symbol=${subSymbol}&interval=${upbitInterval}&limit=1000`;
-      }
-
-      const uBtcUrl = `/api/candles?exchange=upbit&symbol=KRW-BTC&interval=${upbitInterval}&limit=1000`;
-      const bBtcUrl = `/api/candles?exchange=binance_spot&symbol=BTCUSDT&interval=${store.currentTF}&limit=500`;
-
-      // 업비트는 펌프기로 500개 꽉꽉 채워오고, 바낸은 그냥 한 방에 500개 가져옴
-      const results = await Promise.allSettled([
-        (subExchange === "upbit" || subExchange === "bithumb")
-          ? fetchUpbitPaginated(subSymbol, upbitInterval, 500)
-          : fetch(subFetchUrl).then(res => res.json()),
-        fetchUpbitPaginated("KRW-BTC", upbitInterval, 500), // 업비트 BTC도 500개!
-        fetch(bBtcUrl).then(res => res.json())
-      ]);
-      const subRaw = results[0].status === 'fulfilled' ? results[0].value : [];
-      const uBtcRaw = results[1].status === 'fulfilled' ? results[1].value : [];
-      const bBtcRaw = results[2].status === 'fulfilled' ? results[2].value : [];
-
-      if (Array.isArray(subRaw) && !subRaw.error) {
-        // BTC 합성 환율 맵 생성
-        const bBtcMap = {};
-        if (Array.isArray(bBtcRaw) && !bBtcRaw.error) {
-          bBtcRaw.forEach(d => { bBtcMap[Number(d[0]) / 1000] = Number(d[4]); });
+        const fetchLimit = 500 * mainStep;
+        const raw = await fetchPaginated(
+          krwExchange,
+          krwTicker,
+          fetchInterval,
+          fetchLimit,
+        );
+        if (Array.isArray(raw) && !raw.error) {
+          rawMain = raw
+            .reverse()
+            .map((d) => ({
+              time:
+                Math.floor(Date.parse(d.candle_date_time_utc + "Z") / 1000) ||
+                0,
+              open: Number(d.opening_price) || 0,
+              high: Number(d.high_price) || 0,
+              low: Number(d.low_price) || 0,
+              close: Number(d.trade_price) || 0,
+              vol: Number(d.candle_acc_trade_volume) || 0,
+            }))
+            .filter((d) => d.time > 0 && d.open > 0);
         }
+      }
+    }
 
-        const syntheticRateMap = {};
-        if (Array.isArray(uBtcRaw) && !uBtcRaw.error) {
-          uBtcRaw.forEach(d => {
-            const uTime = Math.floor(Date.parse(d.candle_date_time_utc + "Z") / 1000);
-            const bPrice = bBtcMap[uTime] || Object.values(bBtcMap)[0];
-            if (bPrice) syntheticRateMap[uTime] = d.trade_price / bPrice;
+    if (isFutures || isSpot) {
+      rawMain.forEach((d) => {
+        newVolumeData.push({
+          time: d.time,
+          value: d.vol,
+          color: d.close >= d.open ? upColorVol : downColorVol,
+        });
+        newMainData.push({
+          time: d.time,
+          open: d.open,
+          high: d.high,
+          low: d.low,
+          close: d.close,
+        });
+      });
+    } else {
+      for (let i = 0; i < rawMain.length; i += mainStep) {
+        const chunk = rawMain.slice(i, i + mainStep);
+        if (chunk.length > 0) {
+          const time = chunk[0].time;
+          const open = chunk[0].open;
+          const close = chunk[chunk.length - 1].close;
+          const high = Math.max(...chunk.map((c) => c.high));
+          const low = Math.min(...chunk.map((c) => c.low));
+          const totalVol = chunk.reduce((sum, c) => sum + (c.vol || 0), 0);
+          newMainData.push({ time, open, high, low, close });
+          newVolumeData.push({
+            time,
+            value: totalVol,
+            color: close >= open ? upColorVol : downColorVol,
           });
         }
-
-        // 서브 코인 정렬
-        subRaw.sort((a, b) => {
-          const timeA = (subExchange === "upbit" || subExchange === "bithumb") ? Math.floor(Date.parse(a.candle_date_time_utc + "Z") / 1000) : Number(a[0]) / 1000;
-          const timeB = (subExchange === "upbit" || subExchange === "bithumb") ? Math.floor(Date.parse(b.candle_date_time_utc + "Z") / 1000) : Number(b[0]) / 1000;
-          return timeA - timeB;
-        });
-
-        let subIndex = 0;
-        let lastKnownSubClose = null;
-        let lastKnownRate = exchangeRate;
-
-        store.mainData.forEach((candle) => {
-          if (syntheticRateMap[candle.time]) lastKnownRate = syntheticRateMap[candle.time];
-
-          while (subIndex < subRaw.length) {
-            const subItem = subRaw[subIndex];
-            const subTime = (subExchange === "upbit" || subExchange === "bithumb")
-              ? Math.floor(Date.parse(subItem.candle_date_time_utc + "Z") / 1000)
-              : Number(subItem[0]) / 1000;
-
-            if (subTime <= candle.time) {
-              lastKnownSubClose = (subExchange === "upbit" || subExchange === "bithumb") ? subItem.trade_price : Number(subItem[4]);
-              subIndex++;
-            } else break;
-          }
-
-          // 🚀 [해결] lastKnownSubClose가 null이 아닐 때만(즉, 두 거래소 데이터가 만나는 시점부터만) 김프를 그림!
-          if (lastKnownSubClose !== null) {
-            const isKor = ["UPBIT", "BITHUMB"].includes(store.currentMarket);
-            const korPrice = isKor ? candle.close : lastKnownSubClose;
-            const glbPrice = isKor ? lastKnownSubClose : candle.close;
-            const kimchiPct = (korPrice / (glbPrice * lastKnownRate) - 1) * 100;
-
-            if (!isNaN(kimchiPct)) {
-              kimchiData.push({ time: candle.time, value: kimchiPct });
-            }
-          }
-        });
       }
     }
 
-    // api.js 수정 부분
-    // 3. 차트 렌더링
+    // ==========================================
+    // 2️⃣ 메인 차트 초고속 즉시 렌더링 & 로딩 해제 (Lazy의 시작)
+    // ==========================================
+    if (store.currentAsset !== snapshotAsset || store.currentTF !== snapshotTF)
+      return;
+
+    store.mainData = newMainData;
+    store.volumeData = newVolumeData;
+
+    const isDayUnit = !(store.currentTF || "1h").match(/[hm]/);
+    const mapTime = (d) => {
+      if (!isDayUnit) return d;
+      const dt = new Date(d.time * 1000);
+      return {
+        ...d,
+        time: `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}-${String(dt.getUTCDate()).padStart(2, "0")}`,
+      };
+    };
+
     if (store.mainData.length > 0 && store.candleSeries) {
-      const row = store.currentTableData.find((c) => c.Symbol === rawSymbol);
-      const p = row ? Number(row.precision) : 2;
+      const row = store.currentTableData.find(
+        (c) => c.DisplayTicker === displayName,
+      );
+      const p = row && row.precision !== undefined ? Number(row.precision) : 2;
 
       store.candleSeries.applyOptions({
         priceFormat: {
-          type: "price",
+          type: "custom",
           precision: p,
           minMove: p > 0 ? Number((1 / Math.pow(10, p)).toFixed(p)) : 1,
           formatter: (price) => formatSmartPrice(price, p),
         },
       });
 
-      // 🚀 데이터 3개 발사! (하나의 차트에 꽂힘)
-      store.candleSeries.setData(store.mainData);
-      if (store.volumeSeries && volumeData.length > 0) store.volumeSeries.setData(volumeData);
+      // 메인 시리즈 세팅 및 자동 스케일 (Lazy를 위해 김프는 아직 빈칸!)
+      store.candleSeries.setData(store.mainData.map(mapTime));
+      if (store.volumeSeries && store.volumeData.length > 0)
+        store.volumeSeries.setData(store.volumeData.map(mapTime));
+      else if (store.volumeSeries) store.volumeSeries.setData([]);
 
-      // 🚨 차트가 하나로 통합됐으므로 김프 워터마크 로직(chartKimchi.applyOptions)은 삭제해야 에러가 안 납니다!
-      if (store.kimchiSeries && kimchiData.length > 0) {
-        store.kimchiSeries.setData(kimchiData);
-      }
+      if (store.kimchiSeries) store.kimchiSeries.setData([]); // 🚀 과거 김프 잔재 초기화
+      store.kimchiData = [];
 
-      applyChartLayout();
+      if (typeof applyChartLayout === "function") applyChartLayout();
+      if (typeof autoFit === "function") autoFit();
+      if (typeof updateStatus === "function") updateStatus();
 
       if (typeof startRealtimeCandle === "function") {
-        // 🚀 업비트 여부(isUpbit)와 업비트 전용 티커(uTicker)를 명시적으로 넘겨줌!
-        const isUpbit = store.currentMarket === "UPBIT";
-        startRealtimeCandle(isUpbit ? uTicker : rawSymbol, store.currentTF, isFutures, isSpot, isUpbit);
+        startRealtimeCandle(
+          mainTickerStr,
+          store.currentTF,
+          isFutures,
+          isSpot,
+          isUpbit,
+          isBithumb,
+        );
       }
-
-      requestAnimationFrame(() => {
-        store.chart.timeScale().fitContent();
-        if (typeof updateStatus === "function") updateStatus();
-        if (typeof autoFit === "function") autoFit();
-        store.isFetchingChart = false;
-      });
     }
+
+    // 🚀 [로딩 해제] 이제 사용자는 기다림 없이 차트를 바로 조작 가능합니다.
+    if (loadingModal) loadingModal.classList.add("hidden");
+    if (wrapper) wrapper.classList.remove("chart-loading");
+    window.isFetchingChart = false;
+    store.isFetchingChart = false;
+
+    // ==========================================
+    // 3️⃣ 김프 데이터 Lazy 렌더링 (백그라운드 비동기)
+    // ==========================================
+    (async () => {
+      try {
+        let subExchange = null;
+        let subSymbol = null;
+        let subMulti = 1;
+        let missingTarget = "";
+        let availableSubs = [];
+
+        const listedEx = rowInfo ? rowInfo.Listed_Exchanges || [] : [];
+
+        if (
+          store.currentMarket === "UPBIT" ||
+          store.currentMarket === "BITHUMB"
+        ) {
+          if (listedEx.includes("BINANCE"))
+            availableSubs.push({
+              id: "binance_spot",
+              name: "B-SPOT",
+              bg: "#444",
+              text: "#fff",
+              sym: `${exactSpot}USDT`,
+              pureSym: exactSpot,
+            });
+          if (listedEx.includes("BINANCE_FUTURES"))
+            availableSubs.push({
+              id: "binance_futures",
+              name: "B-FUT",
+              bg: "#f0b90b",
+              text: "#000",
+              sym: `${exactFutures}USDT`,
+              pureSym: exactFutures,
+            });
+          if (listedEx.includes("BYBIT"))
+            availableSubs.push({
+              id: "bybit_spot",
+              name: "BYBIT",
+              bg: "#f7a600",
+              text: "#fff",
+              sym: `${exactSpot}USDT`,
+              pureSym: exactSpot,
+            });
+          if (availableSubs.length === 0)
+            missingTarget = "글로벌 거래소(바이낸스/바이비트)";
+        } else {
+          if (listedEx.includes("UPBIT"))
+            availableSubs.push({
+              id: "upbit",
+              name: "UPBIT",
+              bg: "#093687",
+              text: "#fff",
+              sym: `KRW-${exactUpbit}`,
+              pureSym: exactUpbit,
+            });
+          if (listedEx.includes("BITHUMB"))
+            availableSubs.push({
+              id: "bithumb",
+              name: "BITHUMB",
+              bg: "#ff8b00",
+              text: "#fff",
+              sym: `${exactBithumb}_KRW`,
+              pureSym: exactBithumb,
+            });
+          if (availableSubs.length === 0)
+            missingTarget = "국내 원화 거래소(업비트/빗썸)";
+        }
+
+        if (availableSubs.length > 0) {
+          const preferred = availableSubs.find(
+            (s) => s.id === store.preferredKimchiSub,
+          );
+          const selected = preferred || availableSubs[0];
+          subExchange = selected.id;
+          subSymbol = selected.sym;
+          subMulti = getMultiplier(selected.pureSym);
+          store.preferredKimchiSub = subExchange;
+
+          // 🚀 [추가] 김프 로딩 메시지 UI 동적 렌더링
+          let loadingMessageContainer = document.getElementById(
+            "kimchi-loading-message",
+          );
+          if (!loadingMessageContainer) {
+            loadingMessageContainer = document.createElement("div");
+            loadingMessageContainer.id = "kimchi-loading-message";
+            loadingMessageContainer.className =
+              "absolute right-3 z-[110] flex gap-1.5 transition-all duration-300 pointer-events-none";
+            if (wrapper) wrapper.appendChild(loadingMessageContainer);
+          }
+          loadingMessageContainer.innerHTML = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded opacity-60 bg-theme-panel text-theme-text">불러오는중...</span>`;
+          loadingMessageContainer.style.display = "flex"; // Show loading message
+
+          let switcherContainer = document.getElementById("kimchi-switcher");
+          if (!switcherContainer) {
+            switcherContainer = document.createElement("div");
+            switcherContainer.id = "kimchi-switcher";
+            switcherContainer.className =
+              "absolute right-3 z-[110] flex gap-1.5 transition-all duration-300 pointer-events-auto";
+            if (wrapper) wrapper.appendChild(switcherContainer);
+          }
+
+          if (availableSubs.length > 1) {
+            switcherContainer.innerHTML = availableSubs
+              .map((s) => {
+                const isActive = s.id === subExchange;
+                const opacity = isActive
+                  ? "opacity-100 ring-2 ring-white/50 scale-105"
+                  : "opacity-40 hover:opacity-80";
+                return `<button class="text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm transition-all ${opacity}" style="background-color: ${s.bg}; color: ${s.text};" onclick="switchKimchiSub('${s.id}')">${s.name}</button>`;
+              })
+              .join("");
+            switcherContainer.style.display = "flex";
+          } else {
+            const s = availableSubs[0];
+            switcherContainer.innerHTML = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded opacity-60 pointer-events-none" style="background-color: ${s.bg}; color: ${s.text};">vs ${s.name}</span>`;
+            switcherContainer.style.display = "flex";
+          }
+
+          store.paneConfig.kimchi = true;
+          const noDataMsg = document.getElementById("kimchi-no-data");
+          if (noDataMsg) noDataMsg.classList.add("hidden");
+          if (typeof applyChartLayout === "function") applyChartLayout();
+
+          // 🚀 김프 데이터 Fetch (Lazy Load)
+          const u = store.currentTF.replace(/[0-9]/g, "");
+          const totalSec = tfSec[store.currentTF] || 60;
+          let upbitInterval = "minutes/1";
+          if (u === "d" || u === "w" || u === "M") {
+            upbitInterval = u === "w" ? "weeks" : u === "M" ? "months" : "days";
+          } else {
+            const baseMin =
+              [1, 3, 5, 10, 15, 30, 60, 240]
+                .reverse()
+                .find((m) => (totalSec / 60) % m === 0) || 1;
+            upbitInterval = `minutes/${baseMin}`;
+          }
+
+          let subRaw = [];
+          if (subExchange === "upbit") {
+            subRaw = await fetchPaginated(
+              subExchange,
+              subSymbol,
+              upbitInterval,
+              500,
+            );
+          } else if (subExchange === "bithumb") {
+            const bMap = {
+              "1m": "1m",
+              "3m": "3m",
+              "5m": "5m",
+              "15m": "10m",
+              "30m": "30m",
+              "1h": "1h",
+              "2h": "1h",
+              "4h": "1h",
+              "12h": "12h",
+              "1d": "24h",
+              "3d": "24h",
+              "1w": "24h",
+              "1M": "24h",
+            };
+            const res = await fetch(
+              `/api/candles?exchange=bithumb&symbol=${subSymbol}&interval=${bMap[store.currentTF] || "24h"}&limit=1000`,
+            );
+            const r = await res.json();
+            subRaw = r.data || [];
+          } else {
+            const res = await fetch(
+              `/api/candles?exchange=${subExchange}&symbol=${subSymbol}&interval=${store.currentTF}&limit=500`,
+            );
+            subRaw = await res.json();
+          }
+
+          // 🚀 30초 무한 캐시 엔진이 만들어둔 환율맵 꺼내 쓰기 (없으면 1회 수집)
+          const cacheKey = `${store.currentTF}_${upbitInterval}`;
+          const nowMs = Date.now();
+          let syntheticRateMap = {};
+
+          if (!store.btcRateCache) store.btcRateCache = {};
+          if (
+            !store.btcRateCache[cacheKey] ||
+            nowMs - store.btcRateCache[cacheKey].timestamp > 60000
+          ) {
+            const bBtcUrl = `/api/candles?exchange=binance_spot&symbol=BTCUSDT&interval=${store.currentTF}&limit=500`;
+            const btcResults = await Promise.allSettled([
+              fetchPaginated("upbit", "KRW-BTC", upbitInterval, 500),
+              fetch(bBtcUrl).then((res) => res.json()),
+            ]);
+            const uBtcRaw =
+              btcResults[0].status === "fulfilled" ? btcResults[0].value : [];
+            const bBtcRaw =
+              btcResults[1].status === "fulfilled" ? btcResults[1].value : [];
+
+            let bBtcSorted = [];
+            if (Array.isArray(bBtcRaw) && !bBtcRaw.error) {
+              bBtcRaw.forEach((d) =>
+                bBtcSorted.push({
+                  time: Number(d[0]) / 1000,
+                  price: Number(d[4]),
+                }),
+              );
+              bBtcSorted.sort((a, b) => a.time - b.time);
+            }
+            if (
+              Array.isArray(uBtcRaw) &&
+              !uBtcRaw.error &&
+              bBtcSorted.length > 0
+            ) {
+              let uBtcSorted = [];
+              uBtcRaw.forEach((d) => {
+                uBtcSorted.push({
+                  time: Math.floor(
+                    Date.parse(d.candle_date_time_utc + "Z") / 1000,
+                  ),
+                  price: Number(d.trade_price),
+                });
+              });
+              uBtcSorted.sort((a, b) => a.time - b.time);
+              let bIndex = 0;
+              let lastBtcPrice = bBtcSorted[0].price;
+              uBtcSorted.forEach((u) => {
+                while (
+                  bIndex < bBtcSorted.length &&
+                  bBtcSorted[bIndex].time <= u.time
+                ) {
+                  lastBtcPrice = bBtcSorted[bIndex].price;
+                  bIndex++;
+                }
+                if (lastBtcPrice > 0)
+                  syntheticRateMap[u.time] = u.price / lastBtcPrice;
+              });
+            }
+            store.btcRateCache[cacheKey] = {
+              timestamp: nowMs,
+              syntheticRateMap: syntheticRateMap,
+            };
+          } else {
+            syntheticRateMap = store.btcRateCache[cacheKey].syntheticRateMap;
+          }
+
+          // 🚀 JS 고속 김프 연산
+          let newKimchiData = [];
+          if (Array.isArray(subRaw) && !subRaw.error) {
+            subRaw.sort((a, b) => {
+              const timeA =
+                subExchange === "upbit"
+                  ? Math.floor(Date.parse(a.candle_date_time_utc + "Z") / 1000)
+                  : Number(a[0]) / 1000;
+              const timeB =
+                subExchange === "upbit"
+                  ? Math.floor(Date.parse(b.candle_date_time_utc + "Z") / 1000)
+                  : Number(b[0]) / 1000;
+              return timeA - timeB;
+            });
+
+            let subIndex = 0;
+            let lastKnownSubClose = null;
+            let lastKnownRate = exchangeRate;
+
+            store.mainData.forEach((candle) => {
+              if (syntheticRateMap[candle.time])
+                lastKnownRate = syntheticRateMap[candle.time];
+              while (subIndex < subRaw.length) {
+                const subItem = subRaw[subIndex];
+                const subTime =
+                  subExchange === "upbit"
+                    ? Math.floor(
+                        Date.parse(subItem.candle_date_time_utc + "Z") / 1000,
+                      )
+                    : Number(subItem[0]) / 1000;
+                if (subTime <= candle.time) {
+                  lastKnownSubClose =
+                    subExchange === "upbit"
+                      ? subItem.trade_price
+                      : subExchange === "bithumb"
+                        ? Number(subItem[2])
+                        : Number(subItem[4]);
+                  subIndex++;
+                } else break;
+              }
+
+              if (lastKnownSubClose !== null) {
+                const isKor = ["UPBIT", "BITHUMB"].includes(
+                  store.currentMarket,
+                );
+                const rawKorPrice = isKor ? candle.close : lastKnownSubClose;
+                const rawGlbPrice = isKor ? lastKnownSubClose : candle.close;
+                const unitKorPrice =
+                  rawKorPrice / (isKor ? mainMulti : subMulti);
+                const unitGlbPrice =
+                  rawGlbPrice / (isKor ? subMulti : mainMulti);
+
+                if (unitGlbPrice > 0 && lastKnownRate > 0) {
+                  const kimchiPct =
+                    (unitKorPrice / (unitGlbPrice * lastKnownRate) - 1) * 100;
+                  if (
+                    isFinite(kimchiPct) &&
+                    kimchiPct >= -50 &&
+                    kimchiPct <= 100
+                  ) {
+                    newKimchiData.push({
+                      time: candle.time,
+                      value: kimchiPct,
+                      color:
+                        typeof window.getKimchiColor === "function"
+                          ? window.getKimchiColor(kimchiPct)
+                          : "#57a4fc",
+                    });
+                  }
+                }
+              }
+            });
+          }
+
+          if (
+            store.currentAsset !== snapshotAsset ||
+            store.currentTF !== snapshotTF
+          )
+            return;
+
+          // 🚀 [무반동 방어막] 김프를 그리기 전 현재 X축(시간) 스케일을 캡처하고, 덮어쓰자마자 동기적으로 복구!
+          store.kimchiData = newKimchiData;
+          if (store.kimchiSeries && newKimchiData.length > 0) {
+            const currentRange = store.chart
+              .timeScale()
+              .getVisibleLogicalRange(); // 1. 현재 화면 캡처
+            store.kimchiSeries.setData(store.kimchiData.map(mapTime)); // 2. 김프 데이터 꽂기
+            if (currentRange)
+              store.chart.timeScale().setVisibleLogicalRange(currentRange); // 3. 미동 없이 복구!
+          }
+          if (typeof applyChartLayout === "function") applyChartLayout(); // 패널 크기 부드럽게 조정
+        } else {
+          // No available subs, so hide loading message if it was shown
+          store.paneConfig.kimchi = false;
+          const noDataMsg = document.getElementById("kimchi-no-data");
+          if (noDataMsg) {
+            noDataMsg.classList.remove("hidden");
+            const pTag = noDataMsg.querySelector("p");
+            if (pTag)
+              pTag.innerHTML = `⚠️ 해당하는 ${missingTarget} 데이터가 없어 김프 차트를 표시할 수 없습니다.`;
+          }
+          let loadingMessageContainer = document.getElementById(
+            "kimchi-loading-message",
+          );
+          if (loadingMessageContainer)
+            loadingMessageContainer.style.display = "none";
+          if (typeof applyChartLayout === "function") applyChartLayout();
+        }
+      } catch (err) {
+        console.error("김프 백그라운드 렌더링 실패:", err);
+        // Hide loading message on error
+        let loadingMessageContainer = document.getElementById(
+          "kimchi-loading-message",
+        );
+        if (loadingMessageContainer)
+          loadingMessageContainer.style.display = "none";
+      }
+    })();
   } catch (e) {
     console.error("차트 로드 실패:", e);
-    // if (wrapper) wrapper.classList.remove("chart-loading");
   } finally {
-    // 🚀 [추가] 모달 숨기기 + 차트 어두워짐(로딩) 효과 무조건 강제 해제!
     if (loadingModal) loadingModal.classList.add("hidden");
-
-    const wrapper = document.getElementById("chart-wrapper");
     if (wrapper) wrapper.classList.remove("chart-loading");
-
-    // 🚀 [핵심] 이거 안 풀어주면 다음 코인 클릭할 때 무시당함!
     window.isFetchingChart = false;
+    store.isFetchingChart = false;
   }
 }
 
-// 🚀 업비트 200개 제한 돌파용 무한 펌프기 (중복 및 포맷 에러 방어)
-async function fetchUpbitPaginated(symbol, interval, totalLimit) {
+// 🚀 거래소(업비트/빗썸) 제한 돌파용 무한 펌프기 (중복 및 포맷 에러 방어)
+async function fetchPaginated(exchange, symbol, interval, totalLimit) {
   let result = [];
   let lastTo = "";
   let remaining = totalLimit;
+  let retryCount = 0; // 🚀 429 에러 재시도 카운트
 
   while (remaining > 0) {
     const count = Math.min(remaining, 200);
-    let url = `/api/candles?exchange=upbit&symbol=${symbol}&interval=${interval}&limit=${count}`;
+    let url = `/api/candles?exchange=${exchange}&symbol=${symbol}&interval=${interval}&limit=${count}`;
     if (lastTo) url += `&to=${encodeURIComponent(lastTo.replace("T", " "))}`;
 
     const res = await fetch(url);
-    if (res.status === 429) break;
+
+    // 🚨 [429 철벽 방어막] 너무 많이 찔러서 혼났다면, 반성하고 기다렸다가 다시 찌르기!
+    if (res.status === 429) {
+      if (retryCount < 3) {
+        retryCount++;
+        console.warn(
+          `🚨 [429 API 제한] ${symbol} 과호출 감지! ${retryCount * 0.5}초 대기 후 재시도...`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, 500 * retryCount)); // 0.5초, 1.0초, 1.5초 늘려가며 대기
+        continue;
+      } else {
+        console.error(
+          `❌ [429 API 제한] ${symbol} 재시도 횟수 초과. 가져오기 중단.`,
+        );
+        break;
+      }
+    }
+
+    retryCount = 0; // 성공하면 재시도 카운트 리셋!
 
     const data = await res.json();
     if (!Array.isArray(data) || data.length === 0) break;
@@ -539,12 +1011,96 @@ async function fetchUpbitPaginated(symbol, interval, totalLimit) {
     remaining -= data.length;
     lastTo = data[data.length - 1].candle_date_time_utc;
 
-    // 🚀 [추론 반영 로직] 
-    // 첫 200개는 바로 가져오고, 그 이후(과거 데이터)부터는 
-    // 누님 말씀대로 천천히 가져오기
     if (remaining > 0) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100)); // 🚀 429 예방을 위해 30ms -> 100ms로 안전거리 확보
     }
   }
   return result;
 }
+
+// 🚀 [추가] 합성 환율 30초 백그라운드 무한 갱신 엔진 (버벅임 종결자)
+setInterval(async () => {
+  // 차트 보는 중이거나 탭을 내렸을 때는 API 아낌
+  if (!store.currentTF || store.isFetchingChart || document.hidden) return;
+
+  const u = store.currentTF.replace(/[0-9]/g, "");
+  const totalSec = tfSec[store.currentTF] || 60;
+  let upbitInterval = "minutes/1";
+  if (u === "d" || u === "w" || u === "M") {
+    upbitInterval = u === "w" ? "weeks" : u === "M" ? "months" : "days";
+  } else {
+    const baseMin =
+      [1, 3, 5, 10, 15, 30, 60, 240]
+        .reverse()
+        .find((m) => (totalSec / 60) % m === 0) || 1;
+    upbitInterval = `minutes/${baseMin}`;
+  }
+
+  const cacheKey = `${store.currentTF}_${upbitInterval}`;
+  const bBtcUrl = `/api/candles?exchange=binance_spot&symbol=BTCUSDT&interval=${store.currentTF}&limit=500`;
+
+  try {
+    const btcResults = await Promise.allSettled([
+      fetchPaginated("upbit", "KRW-BTC", upbitInterval, 200), // 배경 갱신은 200개면 충분
+      fetch(bBtcUrl).then((res) => res.json()),
+    ]);
+
+    const uBtcRaw =
+      btcResults[0].status === "fulfilled" ? btcResults[0].value : [];
+    const bBtcRaw =
+      btcResults[1].status === "fulfilled" ? btcResults[1].value : [];
+
+    let bBtcSorted = [];
+    if (Array.isArray(bBtcRaw) && !bBtcRaw.error) {
+      bBtcRaw.forEach((d) =>
+        bBtcSorted.push({ time: Number(d[0]) / 1000, price: Number(d[4]) }),
+      );
+      bBtcSorted.sort((a, b) => a.time - b.time);
+    }
+
+    let syntheticRateMap = {};
+    if (Array.isArray(uBtcRaw) && !uBtcRaw.error && bBtcSorted.length > 0) {
+      let uBtcSorted = [];
+      uBtcRaw.forEach((d) => {
+        uBtcSorted.push({
+          time: Math.floor(Date.parse(d.candle_date_time_utc + "Z") / 1000),
+          price: Number(d.trade_price),
+        });
+      });
+      uBtcSorted.sort((a, b) => a.time - b.time);
+
+      let bIndex = 0;
+      let lastBtcPrice = bBtcSorted[0].price;
+
+      uBtcSorted.forEach((u) => {
+        while (
+          bIndex < bBtcSorted.length &&
+          bBtcSorted[bIndex].time <= u.time
+        ) {
+          lastBtcPrice = bBtcSorted[bIndex].price;
+          bIndex++;
+        }
+        if (lastBtcPrice > 0) {
+          syntheticRateMap[u.time] = u.price / lastBtcPrice;
+        }
+      });
+    }
+
+    if (Object.keys(syntheticRateMap).length > 0) {
+      if (!store.btcRateCache) store.btcRateCache = {};
+      store.btcRateCache[cacheKey] = {
+        timestamp: Date.now(),
+        syntheticRateMap: syntheticRateMap,
+      };
+      console.log(`♻️ [백그라운드] 환율 맵 30초 자동 갱신 완료 (${cacheKey})`);
+    }
+  } catch (e) {}
+}, 30000);
+
+// 🚀 김프 비교군 스위칭 전역 함수 노출
+window.switchKimchiSub = function (newSubId) {
+  store.preferredKimchiSub = newSubId;
+  if (typeof fetchHistory === "function") {
+    fetchHistory(store.currentAsset);
+  }
+};

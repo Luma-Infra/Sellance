@@ -6,6 +6,7 @@ import traceback
 import pytz
 import sys
 import os
+import re
 
 # ✅ 수정 (옆방 부하들 호출하는 정석)
 from modules import builder, cmc_api, exchange_api, config_manager, utils
@@ -18,8 +19,8 @@ mapping = config_manager.load_mapping_data()
     binance_data, 
     upbit_data, 
     upbit_krw_set, 
-    bithumb_krw_set, 
-    upbit_only_assets
+    upbit_only_assets,
+    bithumb_krw_set
 ) = exchange_api.fetch_exchange_market_data(mapping)
 
 # 3. CMC 데이터 수집
@@ -65,7 +66,7 @@ def _fetch_and_process_data():
     ) = config_manager.get_mapping_parts(MAPPING_DATA)
         
     # 1. 시세 수집
-    binance_data, upbit_data, upbit_krw_set, upbit_only_assets, bithumb_krw_set, = exchange_api.fetch_exchange_market_data(MAPPING_DATA)
+    binance_data, upbit_data, upbit_krw_set, upbit_only_assets, bithumb_krw_set = exchange_api.fetch_exchange_market_data(MAPPING_DATA)
     # 2. 정보 수집 (CMC)
     market_data_map, asset_to_lookup_key = cmc_api.fetch_cmc_market_data(binance_data, upbit_only_assets, MAPPING_DATA)
     # 3. 조립 및 계산
@@ -93,9 +94,11 @@ def _fetch_and_process_data():
     
     # DUPLICATED_LIST의 키값(별명)들을 세트로 미리 준비 (속도 향상)
     dup_names = set(MAPPING_DATA.get("DUPLICATED_LIST", {}).keys())
+    # 🚀 '_거래소명' 꼬리표를 떼어낸 순수 별명들도 준비 (TICKER_DATA와 비교용)
+    dup_names_clean = {re.sub(r'_(binance|upbit|bithumb)$', '', k, flags=re.IGNORECASE) for k in dup_names}
 
     for saved_name in list(MAPPING_DATA["TICKER_DATA"].keys()):
-        # 🚀 누님의 철벽 조건:
+        # 🚀 철벽 조건:
         # 1. 라이브 목록(live_bases)에 없고
         # 2. 특별 맵핑(SPECIAL_SYMBOL_MAP)에도 없고
         # 3. 고정 UID 맵(SYMBOL_TO_ID_MAP)에도 없고
@@ -103,7 +106,7 @@ def _fetch_and_process_data():
         if (saved_name not in live_bases and 
             saved_name not in SPECIAL_SYMBOL_MAP and 
             saved_name not in SYMBOL_TO_ID_MAP and
-            saved_name not in dup_names):
+            saved_name not in dup_names_clean):
             
             keys_to_delete.append(saved_name)
             

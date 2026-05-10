@@ -1,5 +1,5 @@
 // table.js
-import { store, CONFIG } from './store.js';
+import { store, CONFIG } from "./store.js";
 
 // 1. 데이터 로드 함수
 async function loadTableData(force = false) {
@@ -47,7 +47,7 @@ function sortTable(colKey) {
   store.currentRenderLimit = 50;
 
   // 🚀 [추가] 2단 정렬 타겟인지 확인
-  const isTwoStep = colKey.includes("Change") || colKey === "Volume"
+  const isTwoStep = colKey.includes("Change") || colKey === "Volume";
 
   // 1. 클릭할 때마다 2 ~ 3단계 사이클 돌리기
   if (store.currentSortCol === colKey) {
@@ -56,7 +56,12 @@ function sortTable(colKey) {
       store.sortState = store.sortState === "desc" ? "asc" : "desc";
     } else {
       // 3단: 내림차순 -> 오름차순 -> 초기화
-      store.sortState = store.sortState === "" ? "desc" : store.sortState === "desc" ? "asc" : "";
+      store.sortState =
+        store.sortState === ""
+          ? "desc"
+          : store.sortState === "desc"
+            ? "asc"
+            : "";
     }
   } else {
     store.currentSortCol = colKey;
@@ -89,11 +94,11 @@ function sortTable(colKey) {
   }
 }
 
-// 🚀 [추가] 표 그리기 행(TR) 생성 헬퍼 (초기 렌더링 & 신규 진입 시 사용)
+//  [추가] 표 그리기 행(TR) 생성 헬퍼 (초기 렌더링 & 신규 진입 시 사용)
 function createRowElement(row) {
   const tr = document.createElement("tr");
-  const pureSymbol = row.Symbol;
-  tr.dataset.sym = pureSymbol;
+  const displayTicker = row.DisplayTicker;
+  tr.dataset.sym = displayTicker; // 🚀 화면 노출용 고유 식별자 사용
 
   // 껍데기 만들고 알맹이 채우는 함수 재활용
   updateRowInnerHTML(tr, row);
@@ -140,7 +145,7 @@ function renderTable() {
   applySelectedHighlight(); // 🚀 [추가] 정렬 끝나고 내 코인 다시 찾아!
 }
 
-// 💡 애니메이션 없이 정렬만 하는 깔끔한 함수
+//  애니메이션 없이 정렬만 하는 깔끔한 함수
 function simpleSortData() {
   // 🚀 [핵심] 백엔드(api_manager.py)에서 보내주는 필드명과 1:1로 맞춥니다!
   const sortKeyMap = {
@@ -157,15 +162,10 @@ function simpleSortData() {
   const isAsc = store.sortState === "asc";
 
   store.currentTableData.sort((a, b) => {
-    // 🚀 [수정] 실시간 버퍼(tickerBuffer)에 최신값이 있다면 그걸 우선 사용!
-    let valA =
-      store.tickerBuffer[a.Symbol] && key.includes("Change")
-        ? store.tickerBuffer[a.Symbol].P
-        : a[key];
-    let valB =
-      store.tickerBuffer[b.Symbol] && key.includes("Change")
-        ? store.tickerBuffer[b.Symbol].P
-        : b[key];
+    // 🚨 [잔상 방지 핵심] 미래 버퍼값을 당겨 쓰면 화면 텍스트(현재)와 순서가 어긋납니다.
+    // 무조건 현재 화면에 보이는 값(장부 원본)으로만 정렬하여 잔상을 완벽히 차단합니다.
+    let valA = a[key];
+    let valB = b[key];
 
     // 1. 둘 다 숫자인 경우 (MarketCap, Price, Change 등)
     if (typeof valA === "number" && typeof valB === "number") {
@@ -179,21 +179,18 @@ function simpleSortData() {
   });
 }
 
-let isSortLocked = true; // 정렬 잠금 상태 (기본은 해제)
+const flipToggleEl = document.getElementById("flip-toggle");
+// 🚀 HTML 스위치의 실제 상태(checked)를 읽어와 완벽하게 동기화! (기본값 true)
+let isFlipEnabled = flipToggleEl ? flipToggleEl.checked : true;
 
-// 아까 만든 토글 버튼을 '정렬 잠금' 용으로 쓰시면 됩니다!
-document.getElementById("flip-toggle")?.addEventListener("change", (e) => {
-  isSortLocked = e.target.checked; // 체크하면 정렬 잠금!
-});
+if (flipToggleEl) {
+  flipToggleEl.addEventListener("change", (e) => {
+    isFlipEnabled = e.target.checked; // 토글 시 부드러운 애니메이션 활성/비활성
+  });
+}
 
 // ⭐️ 실시간 재정렬 & 경주마 애니메이션 함수
 function applyRealtimeSort() {
-  if (!isSortLocked) {
-    // 정렬은 안 하지만, 가격/변동률 "글자"는 업데이트하고 싶다면?
-    renderTable(); // 순서 변경 없이 데이터(글자)만 새로고침
-    return;
-  }
-
   if (!store.currentSortCol || store.sortState === "") return;
 
   // 🚀 정렬용 맵핑 (클릭한 컬럼 -> 미리 계산된 숫자 필드)
@@ -210,15 +207,9 @@ function applyRealtimeSort() {
   // 🚀 2. 메모리 정렬 실행 (정규식 완전 삭제!!!!)
   store.currentTableData.sort((a, b) => {
     const key = sortKeyMap[store.currentSortCol] || store.currentSortCol;
-    // 🚀 [수정] 실시간 버퍼(tickerBuffer)에 최신값이 있다면 그걸 우선 사용!
-    let valA =
-      store.tickerBuffer[a.Symbol] && key.includes("Change")
-        ? store.tickerBuffer[a.Symbol].P
-        : a[key];
-    let valB =
-      store.tickerBuffer[b.Symbol] && key.includes("Change")
-        ? store.tickerBuffer[b.Symbol].P
-        : b[key];
+    // 🚨 [잔상 방지 핵심] 화면 텍스트와 정렬 순서의 불일치(0.2초 유령 데이터) 원천 차단
+    let valA = a[key];
+    let valB = b[key];
 
     const isAsc = store.sortState === "asc";
 
@@ -235,7 +226,7 @@ function applyRealtimeSort() {
 
   const tbody = document.getElementById("table-body");
   const topData = store.currentTableData.slice(0, store.currentRenderLimit);
-  const topSymbols = new Set(topData.map((d) => d.Symbol || d.symbol));
+  const topSymbols = new Set(topData.map((d) => d.DisplayTicker));
 
   const existingRows = Array.from(tbody.children);
   const firstRects = new Map();
@@ -262,7 +253,7 @@ function applyRealtimeSort() {
 
   // 4. 새로운 승리자들 DOM 재배치 (재활용 적극 활용)
   topData.forEach((data, index) => {
-    const sym = data.Symbol || data.symbol;
+    const sym = data.DisplayTicker;
     let tr = tbody.querySelector(`tr[data-sym="${sym}"]`);
 
     // DOM이 없다면? (새로 진입한 코인)
@@ -304,14 +295,19 @@ function applyRealtimeSort() {
       const deltaY = firstY - lastY;
 
       if (deltaY !== 0) {
-        row.style.transform = `translateY(${deltaY}px)`;
-        requestAnimationFrame(() => {
+        if (isFlipEnabled) {
+          row.style.transform = `translateY(${deltaY}px)`;
           requestAnimationFrame(() => {
-            row.style.transition =
-              "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)";
-            row.style.transform = "";
+            requestAnimationFrame(() => {
+              row.style.transition =
+                "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)"; // 🚀 0.4초로 늘려 더 쫀득하고 확실한 경주마 효과 부여
+              row.style.transform = "";
+            });
           });
-        });
+        } else {
+          // 🚀 애니메이션 토글 OFF 상태: 스윽 올라오는 잔상 없이 즉시 위치(촤라락)
+          row.style.transform = "";
+        }
       }
     }
   });
@@ -347,7 +343,8 @@ function applySelectedHighlight() {
 // 💡 헬퍼 함수: 재활용한 껍데기에 알맹이만 채우는 함수 (기존 로직 분리)
 function updateRowInnerHTML(tr, row) {
   const pureSymbol = row.Symbol;
-  tr.dataset.sym = pureSymbol;
+  const tId = row.Ticker; // 🚀 DOM ID용 완벽한 고유키 (예: EDGEUSDT, EDGEKRW)
+  tr.dataset.sym = row.DisplayTicker; // 🚀 화면 추적용
   // console.log(`[유기적 체크] 티커: ${row.Ticker} | 최종 이름표: ${pureSymbol}`);
 
   // 백엔드에서 준 Raw 숫자 데이터
@@ -435,15 +432,15 @@ function updateRowInnerHTML(tr, row) {
         </td>
         <td class="p-4">
     <div class="flex flex-col gap-0.5">
-      <span id="price-${pureSymbol}" class="font-bold text-[14px] text-theme-text price-cell">
+      <span id="price-${tId}" data-raw-price="${nPrice}" class="font-bold text-[14px] text-theme-text price-cell">
         ${formattedPrice} ${krwDisplay}
       </span>
       <div class="flex gap-2 text-[11px] font-mono mt-0.5">
         <span class="text-theme-text opacity-70">
-          24h: <span id="change-${pureSymbol}" class="${color24h} font-bold">${n24h > 0 ? "+" : ""}${Number(n24h).toFixed(2)}%</span>
+          24h: <span id="change-${tId}" class="${color24h} font-bold">${n24h > 0 ? "+" : ""}${Number(n24h).toFixed(2)}%</span>
         </span>
         <span class="text-theme-text opacity-70">
-          Day: <span id="today-${pureSymbol}" class="${colorDay} font-bold">${nDay > 0 ? "+" : ""}${Number(nDay).toFixed(2)}%</span>
+          Day: <span id="today-${tId}" class="${colorDay} font-bold">${nDay > 0 ? "+" : ""}${Number(nDay).toFixed(2)}%</span>
         </span>
       </div>
       </div>
@@ -453,9 +450,9 @@ function updateRowInnerHTML(tr, row) {
 
       <!-- 🚀 [수정] 거래대금 분리 표시 로직 -->
       <div class="flex flex-col gap-0 opacity-90 font-mono text-[11px] mb-1">
-         ${row.Binance_Vol_Formatted ? `<span class="text-[#f0b90b]">B: ${row.Binance_Vol_Formatted}</span>` : ''}
-         ${row.Upbit_Vol_Formatted ? `<span class="text-[#093687]">U: ${row.Upbit_Vol_Formatted}</span>` : ''}
-         ${!row.Binance_Vol_Formatted && !row.Upbit_Vol_Formatted ? `<span>Total: ${row.Volume_Formatted || "-"}</span>` : ''}
+         ${row.Binance_Vol_Formatted ? `<span id="vol-binance-${tId}" class="text-[#f0b90b]">B: ${row.Binance_Vol_Formatted}</span>` : ""}
+         ${row.Upbit_Vol_Formatted ? `<span id="vol-upbit-${tId}" class="text-[#093687]">U: ${row.Upbit_Vol_Formatted}</span>` : ""}
+         ${!row.Binance_Vol_Formatted && !row.Upbit_Vol_Formatted ? `<span id="vol-total-${tId}">Total: ${row.Volume_Formatted || "-"}</span>` : ""}
       </div>
 
       <span class="text-[11px] opacity-50">M.Cap: ${row.MarketCap_Formatted}</span>
@@ -613,13 +610,6 @@ document.addEventListener("mousemove", (e) => {
 
     // 1. 패널 크기 변경
     leftPanel.style.width = newWidth + "%";
-
-    // 2. 차트 리사이즈 (가장 무거운 작업)
-    if (window.chart) {
-      // const container = document.getElementById("chart-container");
-      const container = document.getElementById("chart-wrapper");
-      window.chart.resize(container.clientWidth, container.clientHeight);
-    }
   });
 });
 
@@ -641,9 +631,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const tr = e.target.closest("tr");
     if (tr && tr.dataset.sym) {
-      const pureSymbol = tr.dataset.sym;
-      store.currentSelectedSymbol = pureSymbol;
-      selectSymbol(pureSymbol);
+      const displayTicker = tr.dataset.sym;
+      store.currentSelectedSymbol = displayTicker;
+      selectSymbol(displayTicker);
       applySelectedHighlight();
 
       if (window.innerWidth <= CONFIG.SCREEN_WIDTH) {

@@ -1,6 +1,5 @@
 /* z_style.css */
 @import "tailwindcss";
-
 @theme {
   --color-theme-bg: var(--bg);
   --color-theme-panel: var(--panel);
@@ -64,6 +63,14 @@ body.theme-upbit {
 }
 
 body {
+  --color-theme-bg: var(--bg);
+  --color-theme-panel: var(--panel);
+  --color-theme-border: var(--border);
+  --color-theme-text: var(--text);
+  --color-theme-up: var(--up);
+  --color-theme-down: var(--down);
+  --color-theme-accent: var(--accent);
+
   background-color: var(--bg);
   color: var(--text);
   transition: background-color 0.1s ease;
@@ -92,7 +99,9 @@ body.theme-binance {
 
 /* 🚀 차트 로딩 시 쫀득한 애니메이션 효과 */
 #chart-wrapper {
-  transition: transform 0.1s cubic-bezier(0.1, 0, 0.1, 1), filter 0.1s ease;
+  transition:
+    transform 0.1s cubic-bezier(0.1, 0, 0.1, 1),
+    filter 0.1s ease;
   will-change: transform, filter;
 }
 
@@ -196,9 +205,11 @@ body.theme-binance {
 .flash-up {
   color: color-mix(in srgb, var(--up), transparent 50%) !important;
   text-shadow: 0 0 12px color-mix(in srgb, var(--up), transparent 50%) !important;
-  background: radial-gradient(circle,
-      var(--flash-up) 0%,
-      transparent 80%) !important;
+  background: radial-gradient(
+    circle,
+    var(--flash-up) 0%,
+    transparent 80%
+  ) !important;
   box-shadow: inset 2px 0 0 0 var(--up) !important;
   transition: none !important;
 }
@@ -206,9 +217,11 @@ body.theme-binance {
 .flash-down {
   color: color-mix(in srgb, var(--down), transparent 50%) !important;
   text-shadow: 0 0 12px color-mix(in srgb, var(--down), transparent 50%) !important;
-  background: radial-gradient(circle,
-      var(--flash-down) 0%,
-      transparent 80%) !important;
+  background: radial-gradient(
+    circle,
+    var(--flash-down) 0%,
+    transparent 80%
+  ) !important;
   box-shadow: inset 2px 0 0 0 var(--down) !important;
   transition: none !important;
 }
@@ -306,7 +319,6 @@ body.theme-binance {
 
 /* ✅ 모바일 통합 최적화 (768px 이하) */
 @media (max-width: 768px) {
-
   /* 가로 스크롤 완전 차단 */
   body,
   html {

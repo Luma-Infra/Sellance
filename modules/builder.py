@@ -2,11 +2,12 @@
 # ==========================================
 # 🧱 모듈 3: 데이터 조립 및 변동률 계산기
 # ==========================================
+import re
 import requests
 from modules import utils, config_manager
 
 def build_binance_row(
-        ticker, b_info, market_data_map, asset_to_lookup_key,
+        ticker, b_info, binance_data, market_data_map, asset_to_lookup_key,
         global_listings, upbit_krw_set, bithumb_krw_set,
         REVERSE_LOOKUP, processed_uids, mapping):
         
@@ -22,8 +23,15 @@ def build_binance_row(
     # 1. 이름표 및 기본 정보
     raw_symbol = ticker.replace('USDT', '')
     base = utils.get_pure_base_asset(ticker).upper()
-    display_name = REVERSE_LOOKUP.get(f"{raw_symbol.upper()}_BINANCE", base)
+    raw_key = REVERSE_LOOKUP.get(f"{raw_symbol.upper()}_BINANCE", base)
+    display_name = re.sub(r'_(binance|upbit|bithumb)$', '', raw_key, flags=re.IGNORECASE)
     
+    # 🚀 [추가] 괄호 안의 이름 추출 (예: EDGE(edgeX) -> edgeX)
+    explicit_name = ""
+    name_match = re.search(r'\((.*?)\)', display_name)
+    if name_match:
+        explicit_name = name_match.group(1)
+
     # 2. 족보에서 체인 정보 먼저 확정 (구조적 순서 선점)
     # 🚀 [정리 완료] CMC 정보 매칭 및 만능 열쇠 (이 순서가 파이썬의 정석입니다)
     ticker_info = TICKER_DATA.get(display_name)
@@ -52,12 +60,15 @@ def build_binance_row(
     chain = utils.create_image_tag(CHAIN_LOGO_MAP.get(ch_sym, '')) if ch_sym in CHAIN_LOGO_MAP else ch_sym
     logo = utils.create_image_tag(f"https://s2.coinmarketcap.com/static/img/coins/64x64/{final_ucid}.png" if final_ucid else "")
 
+    # 🚀 [수정] 괄호 안의 이름이 있으면 최우선으로 사용, 없으면 CMC 이름 사용
+    coin_name = explicit_name if explicit_name else (info.get('name', base) if info else (ticker_info[2] if ticker_info and len(ticker_info) >= 3 else base))
+
     # 5. 족보 업데이트 (세탁기)
     if not ticker_info or (isinstance(ticker_info, list) and (len(ticker_info) < 4 or not ticker_info[0])):
         TICKER_DATA[display_name] = [
             final_ucid,                           # 🚀 믿음의 최종 UID
             ch_sym,                               
-            info.get('name', base) if info else (ticker_info[2] if ticker_info and len(ticker_info) >= 3 else base),
+            coin_name,                            # 🚀 괄호에서 추출한 이름 우선 반영
             base                                  
         ]
         is_updated = True
@@ -69,14 +80,31 @@ def build_binance_row(
     if info or base in MANUAL_SUPPLY_MAP:
         mcap = info.get('market_cap', 0) if info else 0 # 예시 간소화
 
-    # 6. 상장 거래소 목록
+    # 6. 상장 거래소 목록 및 볼륨 통합
     listed_on = set(global_listings.get(base, set()))
-    if b_info.get('is_spot'): listed_on.add('BINANCE')
-    if b_info.get('is_futures'): listed_on.add('BINANCE_FUTURES')
-    if base in upbit_krw_set: listed_on.add('UPBIT')
-    if base in bithumb_krw_set: listed_on.add('BITHUMB')
+    total_vol_futures = 0.0
+    total_vol_spot = 0.0
+    exact_spot_ticker = ""
+    exact_futures_ticker = ""
     
-    coin_name = info.get('name', base) if info else base
+    for b_tick, b_inf in binance_data.items():
+        b_base = utils.get_pure_base_asset(b_tick.replace('USDT', '')).upper()
+        if b_base == base:
+            if b_inf.get('is_spot'): 
+                listed_on.add('BINANCE')
+                exact_spot_ticker = b_tick.replace('USDT', '')
+            if b_inf.get('is_futures'): 
+                listed_on.add('BINANCE_FUTURES')
+                exact_futures_ticker = b_tick.replace('USDT', '')
+            total_vol_futures += b_inf.get('vol_futures', 0.0)
+            total_vol_spot += b_inf.get('vol_spot', 0.0)
+    
+    # 🚀 [수정] 족보(DUPLICATED_LIST)를 뒤져서 이름이 다르더라도 같은 UID를 가진 형제가 상장되어 있는지 뱃지 검증
+    upbit_aliases = [v[2] for v in DUPLICATED_LIST.values() if len(v) >= 4 and v[0] == final_ucid and v[3].upper() == 'UPBIT']
+    bithumb_aliases = [v[2] for v in DUPLICATED_LIST.values() if len(v) >= 4 and v[0] == final_ucid and v[3].upper() == 'BITHUMB']
+    if base in upbit_krw_set or any(a in upbit_krw_set for a in upbit_aliases): listed_on.add('UPBIT')
+    if base in bithumb_krw_set or any(a in bithumb_krw_set for a in bithumb_aliases): listed_on.add('BITHUMB')
+    
     vol_24h = info.get('volume_24h', 0) if info else 0
     change_24h = b_info.get('change_24h', 0.0)
     precision = b_info.get('precision', 2)
@@ -92,7 +120,7 @@ def build_binance_row(
             "DisplayTicker": display_name,
             "Ticker": ticker, 
             "Logo": logo,
-            "Name": coin_name,
+            "Name": coin_name, # 🚀 추출된 정확한 이름 삽입
             "Chain": chain,
             "Upbit": is_upbit,
             "Note": NOTE_MAP.get(base, ''),
@@ -106,7 +134,7 @@ def build_binance_row(
             "Volume_Formatted": utils.format_volume_string(vol_24h),
             "MarketCap_Formatted": utils.format_market_cap_string(mcap),
             # 🚀 [추가] 바이낸스 전용 거래대금 (선물 + 현물)
-            "Binance_Vol_Formatted": utils.format_volume_string(b_info.get('vol_futures', 0.0) + b_info.get('vol_spot', 0.0)),
+            "Binance_Vol_Formatted": utils.format_volume_string(total_vol_futures + total_vol_spot),
             "MarketCap_Formatted": utils.format_market_cap_string(mcap),
 
             # --- 3. 프론트엔드 정렬용 순수 숫자 데이터 (Raw) ---
@@ -118,8 +146,10 @@ def build_binance_row(
             "utc0_open_Raw": utc0_open,
             
             # 추가 데이터 정리 예정
-            "Binance_Vol_Futures": b_info.get('vol_futures', 0.0),
-            "Binance_Vol_Spot": b_info.get('vol_spot', 0.0),
+            "Binance_Vol_Futures": total_vol_futures,
+            "Binance_Vol_Spot": total_vol_spot,
+            "Exact_Spot": exact_spot_ticker,
+            "Exact_Futures": exact_futures_ticker,
             "Spot_Only": 'O' if b_info.get('is_spot_only') else 'X',
             "Tags": info.get('tags', '') if info else '',
             "Listed_Exchanges": list(listed_on), # 🚀 프론트엔드야, 이거 보고 이미지 박아라!
@@ -156,10 +186,17 @@ def build_upbit_row(
     lookup_id = asset_to_lookup_key.get(f"{base.upper()}_UPBIT")
     info = market_data_map.get(lookup_id)
     ucid = info.get('ucid', '') if info else ''
-    display_name = REVERSE_LOOKUP.get(f"{base}_UPBIT", base)
+    raw_key = REVERSE_LOOKUP.get(f"{base}_UPBIT", base)
+    display_name = re.sub(r'_(binance|upbit|bithumb)$', '', raw_key, flags=re.IGNORECASE)
+
+    # 🚀 [추가] 괄호 안의 이름 추출 (예: EDGE(Definitive) -> Definitive)
+    explicit_name = ""
+    name_match = re.search(r'\((.*?)\)', display_name)
+    if name_match:
+        explicit_name = name_match.group(1)
 
     # 중복 UID 체크
-    if ucid and ucid in processed_uids and display_name not in DUPLICATED_LIST:
+    if ucid and ucid in processed_uids and raw_key not in DUPLICATED_LIST:
         return None, False
     if ucid: processed_uids.add(ucid)
 
@@ -191,7 +228,7 @@ def build_upbit_row(
     if not final_ucid and info: final_ucid = info.get('ucid', '')
 
     # 중복 UID 체크 및 방어
-    if final_ucid and final_ucid in processed_uids and display_name not in DUPLICATED_LIST:
+    if final_ucid and final_ucid in processed_uids and raw_key not in DUPLICATED_LIST:
         return None, False
     if final_ucid: processed_uids.add(final_ucid)
 
@@ -200,12 +237,15 @@ def build_upbit_row(
     chain = utils.create_image_tag(CHAIN_LOGO_MAP.get(ch_sym, '')) if ch_sym in CHAIN_LOGO_MAP else ch_sym
     logo = utils.create_image_tag(f"https://s2.coinmarketcap.com/static/img/coins/64x64/{final_ucid}.png" if final_ucid else "")
 
+    # 🚀 [수정] 괄호 안의 이름이 있으면 최우선으로 사용, 없으면 CMC 이름 사용
+    coin_name = explicit_name if explicit_name else (info.get('name', base) if info else (ticker_info[2] if ticker_info and len(ticker_info) >= 3 else base))
+
     # 🚀 [신규 상장 캐치 & 족보 세탁기]
     if not ticker_info or (isinstance(ticker_info, list) and (len(ticker_info) < 4 or not ticker_info[0])):
         TICKER_DATA[display_name] = [
             final_ucid,                           
             ch_sym,                               
-            info.get('name', base) if info else (ticker_info[2] if ticker_info and len(ticker_info) >= 3 else base),
+            coin_name,                            # 🚀 괄호에서 추출한 이름 우선 반영
             base                                  
         ]
         is_updated = True
@@ -218,13 +258,27 @@ def build_upbit_row(
 
     # 상장 거래소 목록 조립
     listed_on = set(global_listings.get(base, set()))
-    b_ticker = f"{base}USDT"
-    b_global = binance_data.get(b_ticker)
-    if b_global:
-        if b_global.get('is_spot'): listed_on.add('BINANCE')
-        if b_global.get('is_futures'): listed_on.add('BINANCE_FUTURES')
+    exact_spot_ticker = ""
+    exact_futures_ticker = ""
+    
+    for b_tick, b_inf in binance_data.items():
+        b_base = utils.get_pure_base_asset(b_tick.replace('USDT', '')).upper()
+        if b_base == base:
+            # 🚀 [수정] 바이낸스 티커가 실제로 같은 코인인지 검증 (EDGE 등 중복 티커 충돌 방어)
+            alias_binance_raw = REVERSE_LOOKUP.get(f"{b_base}_BINANCE", b_base)
+            alias_binance_clean = re.sub(r'_(binance|upbit|bithumb)$', '', alias_binance_raw, flags=re.IGNORECASE)
+            if alias_binance_clean == display_name:
+                if b_inf.get('is_spot'): 
+                    listed_on.add('BINANCE')
+                    exact_spot_ticker = b_tick.replace('USDT', '')
+                if b_inf.get('is_futures'): 
+                    listed_on.add('BINANCE_FUTURES')
+                    exact_futures_ticker = b_tick.replace('USDT', '')
     if base in upbit_krw_set: listed_on.add('UPBIT')
-    if base in bithumb_krw_set: listed_on.add('BITHUMB')
+    
+    # 🚀 [수정] 업비트 코인도 빗썸에 다른 이름(예: EDGEX)으로 상장되어 있는지 뱃지 검증
+    bithumb_aliases = [v[2] for v in DUPLICATED_LIST.values() if len(v) >= 4 and v[0] == final_ucid and v[3].upper() == 'BITHUMB']
+    if base in bithumb_krw_set or any(a in bithumb_krw_set for a in bithumb_aliases): listed_on.add('BITHUMB')
 
     row = {
             # --- 1. 기본 식별 정보 ---
@@ -233,7 +287,7 @@ def build_upbit_row(
             "DisplayTicker": display_name,
             "Ticker": f"{base}KRW",
             "Logo": logo,
-            "Name": info.get('name', base) if info else base,
+            "Name": coin_name, # 🚀 추출된 정확한 이름 삽입
             "Chain": chain,
             "Upbit": 'O',
             "Note": NOTE_MAP.get(base, 'Upbit Only'),
@@ -256,10 +310,12 @@ def build_upbit_row(
             "Change_Today_Raw": change_today,
             "Volume_Raw": info.get('volume_24h', 0) if info else 0,
             "MarketCap_Raw": info.get('market_cap', 0) if info else 0,
-            "utc0_open": utc0_open,
+            "utc0_open_Raw": utc0_open,
             
             # 추가 예정
             "Upbit_Vol": up_info.get('acc_trade_price_24h', 0.0),
+            "Exact_Spot": exact_spot_ticker,
+            "Exact_Futures": exact_futures_ticker,
             "Listed_Exchanges": list(listed_on), # 🚀 프론트엔드야, 이거 보고 이미지 박아라!
     }
     return row, is_updated
@@ -323,11 +379,11 @@ def assemble_final_dashboard(
     # 1. 바이낸스 투입
     for ticker, b_info in binance_data.items():
         base = utils.get_pure_base_asset(ticker).upper() # 👈 base 추출
-        # 🚀 [누님 솔루션 적용!] EXCLUSION_LIST 거르고, is_valid_ticker로 잡동사니 차단!
+        # 🚀 [솔루션 적용!] EXCLUSION_LIST 거르고, is_valid_ticker로 잡동사니 차단!
         if base in EXCLUSION_LIST or not utils.is_valid_ticker(base): 
             continue
         
-        row, updated = build_binance_row(ticker, b_info, market_data_map, asset_to_lookup_key, global_listings, upbit_krw_set, bithumb_krw_set, REVERSE_LOOKUP, processed_uids, mapping)
+        row, updated = build_binance_row(ticker, b_info, binance_data, market_data_map, asset_to_lookup_key, global_listings, upbit_krw_set, bithumb_krw_set, REVERSE_LOOKUP, processed_uids, mapping)
         if row:
             uid = row.get("UID")
             final_results[uid] = row
@@ -337,11 +393,13 @@ def assemble_final_dashboard(
     binance_base_set = {t.replace('USDT', '') for t in binance_data.keys()} # 🚀 비교를 위해 바낸 셋 준비
     for base in upbit_krw_set:
         # 🚀 [추가] 업비트 심볼의 '진짜 이름(Display Name)'을 확인
-        alias_upbit = REVERSE_LOOKUP.get(f"{base}_UPBIT", base)
+        alias_upbit_raw = REVERSE_LOOKUP.get(f"{base}_UPBIT", base)
+        alias_upbit = re.sub(r'_(binance|upbit|bithumb)$', '', alias_upbit_raw, flags=re.IGNORECASE)
         
         # 🚀 [중요!] 바이낸스에서도 이 코인을 처리했는지 확인합니다.
         # 만약 바이낸스에 이 코인이 있고, 바이낸스에서의 '진짜 이름'도 같다면 중복이므로 패스!
-        alias_binance = REVERSE_LOOKUP.get(f"{base}_BINANCE", base)
+        alias_binance_raw = REVERSE_LOOKUP.get(f"{base}_BINANCE", base)
+        alias_binance = re.sub(r'_(binance|upbit|bithumb)$', '', alias_binance_raw, flags=re.IGNORECASE)
         if base in binance_base_set and alias_binance == alias_upbit:
             continue
         

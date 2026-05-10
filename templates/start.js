@@ -102,7 +102,8 @@ function maskApiKey(key) {
   return `${start}${dots}${end}`;
 }
 
-async function initStartScreen() {
+async function showStartScreen() {
+  // 함수 이름 변경
   // 🚀 Start Screen HTML을 body에 동적으로 추가
   document.body.insertAdjacentHTML("beforeend", getStartScreenHTML());
 

@@ -74,13 +74,15 @@ def get_market_map():
         upbit = [c["Symbol"] for c in cached_data if c.get("Upbit") == "O"]
         futures = [c["Symbol"] for c in cached_data if "BINANCE_FUTURES" in c.get("Listed_Exchanges", [])]
         spot = [c["Symbol"] for c in cached_data if "BINANCE" in c.get("Listed_Exchanges", [])]
-        all_assets = list(set(upbit + futures + spot))
+        bithumb = [c["Symbol"] for c in cached_data if "BITHUMB" in c.get("Listed_Exchanges", [])]
+        all_assets = list(set(upbit + futures + spot + bithumb))
         
         return {
             "all_assets": all_assets,
             "upbit": upbit,
             "futures": futures,
-            "spot": spot
+            "spot": spot,
+            "bithumb": bithumb
         }
     except Exception as e:
         return {"error": str(e)}
@@ -133,6 +135,42 @@ def get_proxy_candles(exchange: str, symbol: str, interval: str, limit: int = 20
             res = requests.get(url, timeout=5)
             res.raise_for_status()
             return res.json()
+            
+        elif exchange == "bithumb":
+            # 빗썸 요청 (업비트 포맷으로 변환하여 반환 - 프론트엔드 무한 스크롤 호환용)
+            bithumb_interval_map = {
+                "minutes/1": "1m", "minutes/3": "3m", "minutes/5": "5m",
+                "minutes/10": "10m", "minutes/15": "10m", "minutes/30": "30m",
+                "minutes/60": "1h", "minutes/240": "6h",
+                "days": "24h", "weeks": "24h", "months": "24h"
+            }
+            b_interval = bithumb_interval_map.get(interval, "24h")
+            url = f"https://api.bithumb.com/public/candlestick/{symbol}/{b_interval}"
+            res = requests.get(url, headers={"Accept": "application/json"}, timeout=5)
+            res.raise_for_status()
+            data = res.json()
+            
+            if data.get("status") == "0000":
+                upbit_format = []
+                # 🚀 KST -> UTC 문자열 비교 시 공백과 T의 불일치(문자열 비교 오류) 완벽 해결
+                to_compare = to.replace(" ", "T") if to else ""
+                
+                # Bithumb은 과거->최신 순이므로 역순(최신->과거)으로 변환
+                for row in reversed(data.get("data", [])):
+                    dt_utc = datetime.utcfromtimestamp(int(row[0])/1000).strftime('%Y-%m-%dT%H:%M:%S')
+                    if to_compare and dt_utc >= to_compare: continue # 'to' 파라미터 정상 작동
+                    upbit_format.append({
+                        "candle_date_time_utc": dt_utc,
+                        "opening_price": float(row[1]),
+                        "trade_price": float(row[2]),
+                        "high_price": float(row[3]),
+                        "low_price": float(row[4]),
+                        "candle_acc_trade_volume": float(row[5])
+                    })
+                    if len(upbit_format) >= limit: break
+                return upbit_format
+            else:
+                return {"error": "Bithumb API Error"}
             
         else:
             return {"error": "알 수 없는 거래소입니다."}

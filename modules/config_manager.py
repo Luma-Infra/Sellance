@@ -23,7 +23,7 @@ def load_mapping_data():
 def save_mapping_data(mapping_data):
     """업데이트된 족보 데이터를 정렬해서 mapping.json에 저장"""
     try:
-        # 🚀 [누님의 요청] TICKER_DATA를 A-Z 알파벳 순으로 깔끔하게 정렬!
+        # 🚀 [요청] TICKER_DATA를 A-Z 알파벳 순으로 깔끔하게 정렬!
         if "TICKER_DATA" in mapping_data:
             mapping_data["TICKER_DATA"] = dict(sorted(mapping_data["TICKER_DATA"].items()))
         
