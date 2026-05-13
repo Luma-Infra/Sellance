@@ -779,72 +779,41 @@ export async function fetchHistory(symbol, isTfChange = false) {
             subRaw = await res.json();
           }
 
-          // 🚀 30초 무한 캐시 엔진이 만들어둔 환율맵 꺼내 쓰기 (없으면 1회 수집)
-          const cacheKey = `${store.currentTF}_${upbitInterval}`;
-          const nowMs = Date.now();
-          let syntheticRateMap = {};
-
-          if (!store.btcRateCache) store.btcRateCache = {};
-          if (
-            !store.btcRateCache[cacheKey] ||
-            nowMs - store.btcRateCache[cacheKey].timestamp > 60000
-          ) {
-            const bBtcUrl = `/api/candles?exchange=binance_spot&symbol=BTCUSDT&interval=${store.currentTF}&limit=500`;
-            const btcResults = await Promise.allSettled([
-              fetchPaginated("upbit", "KRW-BTC", upbitInterval, 500),
-              fetch(bBtcUrl).then((res) => res.json()),
+          // 🚀 [하이브리드 환율 맵] 테더 상장(24.06.07) 이전은 FX_IDC:USDKRW, 이후는 KRW-USDT를 합성
+          const rateCacheKey = `${store.currentTF}_${upbitInterval}`;
+          if (!store.hybridRateCache) store.hybridRateCache = {};
+          
+          if (!store.hybridRateCache[rateCacheKey]) {
+            const results = await Promise.allSettled([
+              fetch("/api/usdkrw").then((res) => res.json()),
+              fetchPaginated("upbit", "KRW-USDT", upbitInterval, 500),
             ]);
-            const uBtcRaw =
-              btcResults[0].status === "fulfilled" ? btcResults[0].value : [];
-            const bBtcRaw =
-              btcResults[1].status === "fulfilled" ? btcResults[1].value : [];
-
-            let bBtcSorted = [];
-            if (Array.isArray(bBtcRaw) && !bBtcRaw.error) {
-              bBtcRaw.forEach((d) =>
-                bBtcSorted.push({
-                  time: Number(d[0]) / 1000,
-                  price: Number(d[4]),
-                }),
-              );
-              bBtcSorted.sort((a, b) => a.time - b.time);
+            
+            const usdkrwRaw = results[0].status === "fulfilled" ? results[0].value : {};
+            const usdtRaw = results[1].status === "fulfilled" ? results[1].value : [];
+            
+            let hybridTimeline = [];
+            // 1. 야후 파이낸스 과거 법정환율 추가
+            if (usdkrwRaw && !usdkrwRaw.error) {
+              for (let [ts, price] of Object.entries(usdkrwRaw)) {
+                hybridTimeline.push({ time: Number(ts), price: price, source: "fiat" });
+              }
             }
-            if (
-              Array.isArray(uBtcRaw) &&
-              !uBtcRaw.error &&
-              bBtcSorted.length > 0
-            ) {
-              let uBtcSorted = [];
-              uBtcRaw.forEach((d) => {
-                uBtcSorted.push({
-                  time: Math.floor(
-                    Date.parse(d.candle_date_time_utc + "Z") / 1000,
-                  ),
-                  price: Number(d.trade_price),
-                });
-              });
-              uBtcSorted.sort((a, b) => a.time - b.time);
-              let bIndex = 0;
-              let lastBtcPrice = bBtcSorted[0].price;
-              uBtcSorted.forEach((u) => {
-                while (
-                  bIndex < bBtcSorted.length &&
-                  bBtcSorted[bIndex].time <= u.time
-                ) {
-                  lastBtcPrice = bBtcSorted[bIndex].price;
-                  bIndex++;
+            // 2. 테더 상장일(1717718400) 이후 테더 환율 덮어쓰기
+            if (Array.isArray(usdtRaw) && !usdtRaw.error) {
+              usdtRaw.forEach((d) => {
+                const t = Math.floor(Date.parse(d.candle_date_time_utc + "Z") / 1000);
+                if (t >= 1717718400) {
+                  hybridTimeline.push({ time: t, price: Number(d.trade_price), source: "tether" });
                 }
-                if (lastBtcPrice > 0)
-                  syntheticRateMap[u.time] = u.price / lastBtcPrice;
               });
             }
-            store.btcRateCache[cacheKey] = {
-              timestamp: nowMs,
-              syntheticRateMap: syntheticRateMap,
-            };
-          } else {
-            syntheticRateMap = store.btcRateCache[cacheKey].syntheticRateMap;
+            hybridTimeline.sort((a, b) => a.time - b.time);
+            store.hybridRateCache[rateCacheKey] = hybridTimeline;
           }
+          
+          const hybridRateMap = store.hybridRateCache[rateCacheKey];
+          const currentFiatRate = store.marketDataMap.krw_usd_rate || 1450.0;
 
           // 🚀 JS 고속 김프 연산
           let newKimchiData = [];
@@ -862,12 +831,17 @@ export async function fetchHistory(symbol, isTfChange = false) {
             });
 
             let subIndex = 0;
+            let rateIndex = 0;
             let lastKnownSubClose = null;
-            let lastKnownRate = exchangeRate;
 
-            store.mainData.forEach((candle) => {
-              if (syntheticRateMap[candle.time])
-                lastKnownRate = syntheticRateMap[candle.time];
+            store.mainData.forEach((candle, index) => {
+              // 환율 맵 슬라이딩 윈도우 동기화
+              let lastKnownRate = currentFiatRate;
+              while (rateIndex < hybridRateMap.length && hybridRateMap[rateIndex].time <= candle.time) {
+                lastKnownRate = hybridRateMap[rateIndex].price;
+                rateIndex++;
+              }
+
               while (subIndex < subRaw.length) {
                 const subItem = subRaw[subIndex];
                 const subTime =
@@ -877,8 +851,28 @@ export async function fetchHistory(symbol, isTfChange = false) {
                     )
                     : Number(subItem[0]) / 1000;
 
-                // 🚀 [조립형 캔들 왜곡 방지] 캔들 마감 시간 전까지의 데이터를 모두 끌어와서 마지막 종가를 찾는다!
-                const nextCandleTime = candle.time + (tfSec[store.currentTF] || 60);
+                // 🚀 [조립형 캔들 왜곡 방지] 실제 다음 캔들의 정확한 시작 시간을 기준으로 탐색
+                const nextCandle = store.mainData[index + 1];
+                let nextCandleTime;
+                if (nextCandle) {
+                  nextCandleTime = nextCandle.time;
+                } else {
+                  // 하드코딩 제거: currentTF(예: "15m", "4h", "1d", "1w", "1M")를 파싱하여 동적으로 시간 연산
+                  const tf = store.currentTF || "1h";
+                  const val = parseInt(tf) || 1;
+                  const unit = tf.replace(/[0-9]/g, "");
+                  const d = new Date(candle.time * 1000);
+
+                  if (unit === "M") d.setUTCMonth(d.getUTCMonth() + val);
+                  else if (unit === "w") d.setUTCDate(d.getUTCDate() + val * 7);
+                  else if (unit === "d") d.setUTCDate(d.getUTCDate() + val);
+                  else if (unit === "h") d.setUTCHours(d.getUTCHours() + val);
+                  else if (unit === "m") d.setUTCMinutes(d.getUTCMinutes() + val);
+                  else d.setTime(d.getTime() + (tfSec[tf] || 60) * 1000);
+
+                  nextCandleTime = d.getTime() / 1000;
+                }
+
                 if (subTime < nextCandleTime) {
                   lastKnownSubClose =
                     subExchange === "upbit"
@@ -947,8 +941,8 @@ export async function fetchHistory(symbol, isTfChange = false) {
           if (noDataMsg) {
             noDataMsg.classList.remove("hidden");
             const pTag = noDataMsg.querySelector("p");
-            if (pTag)
-              pTag.innerHTML = `⚠️ 해당하는 ${missingTarget} 데이터가 없어 김프 차트를 표시할 수 없습니다.`;
+            // if (pTag)
+            //   pTag.innerHTML = `⚠️ 해당하는 ${missingTarget} 데이터가 없어 김프 차트를 표시할 수 없습니다.`;
           }
           let loadingMessageContainer = document.getElementById(
             "kimchi-loading-message",
@@ -1024,84 +1018,7 @@ async function fetchPaginated(exchange, symbol, interval, totalLimit) {
   return result;
 }
 
-// 🚀 [추가] 합성 환율 30초 백그라운드 무한 갱신 엔진 (버벅임 종결자)
-setInterval(async () => {
-  // 차트 보는 중이거나 탭을 내렸을 때는 API 아낌
-  if (!store.currentTF || store.isFetchingChart || document.hidden) return;
-
-  const u = store.currentTF.replace(/[0-9]/g, "");
-  const totalSec = tfSec[store.currentTF] || 60;
-  let upbitInterval = "minutes/1";
-  if (u === "d" || u === "w" || u === "M") {
-    upbitInterval = u === "w" ? "weeks" : u === "M" ? "months" : "days";
-  } else {
-    const baseMin =
-      [1, 3, 5, 10, 15, 30, 60, 240]
-        .reverse()
-        .find((m) => (totalSec / 60) % m === 0) || 1;
-    upbitInterval = `minutes/${baseMin}`;
-  }
-
-  const cacheKey = `${store.currentTF}_${upbitInterval}`;
-  const bBtcUrl = `/api/candles?exchange=binance_spot&symbol=BTCUSDT&interval=${store.currentTF}&limit=500`;
-
-  try {
-    const btcResults = await Promise.allSettled([
-      fetchPaginated("upbit", "KRW-BTC", upbitInterval, 200), // 배경 갱신은 200개면 충분
-      fetch(bBtcUrl).then((res) => res.json()),
-    ]);
-
-    const uBtcRaw =
-      btcResults[0].status === "fulfilled" ? btcResults[0].value : [];
-    const bBtcRaw =
-      btcResults[1].status === "fulfilled" ? btcResults[1].value : [];
-
-    let bBtcSorted = [];
-    if (Array.isArray(bBtcRaw) && !bBtcRaw.error) {
-      bBtcRaw.forEach((d) =>
-        bBtcSorted.push({ time: Number(d[0]) / 1000, price: Number(d[4]) }),
-      );
-      bBtcSorted.sort((a, b) => a.time - b.time);
-    }
-
-    let syntheticRateMap = {};
-    if (Array.isArray(uBtcRaw) && !uBtcRaw.error && bBtcSorted.length > 0) {
-      let uBtcSorted = [];
-      uBtcRaw.forEach((d) => {
-        uBtcSorted.push({
-          time: Math.floor(Date.parse(d.candle_date_time_utc + "Z") / 1000),
-          price: Number(d.trade_price),
-        });
-      });
-      uBtcSorted.sort((a, b) => a.time - b.time);
-
-      let bIndex = 0;
-      let lastBtcPrice = bBtcSorted[0].price;
-
-      uBtcSorted.forEach((u) => {
-        while (
-          bIndex < bBtcSorted.length &&
-          bBtcSorted[bIndex].time <= u.time
-        ) {
-          lastBtcPrice = bBtcSorted[bIndex].price;
-          bIndex++;
-        }
-        if (lastBtcPrice > 0) {
-          syntheticRateMap[u.time] = u.price / lastBtcPrice;
-        }
-      });
-    }
-
-    if (Object.keys(syntheticRateMap).length > 0) {
-      if (!store.btcRateCache) store.btcRateCache = {};
-      store.btcRateCache[cacheKey] = {
-        timestamp: Date.now(),
-        syntheticRateMap: syntheticRateMap,
-      };
-      console.log(`♻️ [백그라운드] 환율 맵 30초 자동 갱신 완료 (${cacheKey})`);
-    }
-  } catch (e) { }
-}, 30000);
+// 🚀 [합성 환율 제거] 30초 백그라운드 합성 환율 무한 갱신 엔진 삭제 (수학적 오류 방지 및 무의미한 API 호출 근절)
 
 // 🚀 김프 비교군 스위칭 전역 함수 노출
 window.switchKimchiSub = function (newSubId) {

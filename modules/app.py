@@ -179,6 +179,34 @@ def get_proxy_candles(exchange: str, symbol: str, interval: str, limit: int = 20
         print(f"🚨 캔들 프록시 에러 ({exchange} - {symbol}): {e}")
         return {"error": str(e)}
 
+# 🚀 메모리 캐시 변수 추가
+app.state.usdkrw_cache = None
+
+@app.get("/api/usdkrw")
+def get_usdkrw_history():
+    """야후 파이낸스에서 USDKRW 10년 치 데이터를 가져와 최초 1회만 메모리에 저장하고 내려줍니다."""
+    if app.state.usdkrw_cache is not None:
+        return app.state.usdkrw_cache
+        
+    try:
+        import yfinance as yf
+        ticker = yf.Ticker("KRW=X")
+        # 10년치 일봉 데이터 수집
+        df = ticker.history(period="10y", interval="1d")
+        
+        history_map = {}
+        for date, row in df.iterrows():
+            # 날짜를 UTC 자정 기준 유닉스 타임스탬프(초)로 변환
+            utc_date = date.tz_convert('UTC') if date.tzinfo else date.tz_localize('UTC')
+            ts = int(utc_date.timestamp())
+            history_map[str(ts)] = float(row['Close'])
+            
+        app.state.usdkrw_cache = history_map
+        return history_map
+    except Exception as e:
+        print(f"🚨 환율 기록 수집 에러: {e}")
+        return {"error": str(e)}
+
 def open_browser():
     webbrowser.open("http://127.0.0.1:8000")
     

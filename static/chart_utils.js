@@ -5,6 +5,17 @@ function resetChartScale() {
   if (!store.chart || !store.candleSeries) return;
   store.chart.timeScale().fitContent();
   store.chart.priceScale("right").applyOptions({ autoScale: true });
+  
+  if (store.chartVol) {
+    store.chartVol.timeScale().fitContent();
+    store.chartVol.priceScale("right").applyOptions({ autoScale: true });
+    store.chartVol.priceScale("left").applyOptions({ autoScale: true });
+  }
+
+  // 🚀 더블클릭 등으로 스케일 리셋 시, 늘어나있던 Y축 여백도 함께 리셋!
+  if (typeof window.resetPriceScaleWidthSync === "function") {
+    window.resetPriceScaleWidthSync();
+  }
 }
 
 // ✅ 포맷팅 by precision
@@ -245,3 +256,4 @@ window.formatVolumeKRW = formatVolumeKRW;
 window.updateLegend = updateLegend;
 window.updateStatus = updateStatus;
 window.autoFit = autoFit;
+window.calculateTimeRemaining = calculateTimeRemaining; // 🚀 이거 빠져있었음!
