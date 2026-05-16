@@ -1,4 +1,5 @@
 /* z_style.css */
+/* css-disable unknownAtRules */
 @import "tailwindcss";
 @theme {
   --color-theme-bg: var(--bg);
@@ -46,6 +47,7 @@ body.theme-binance {
   --up: #26a69a;
   --down: #ef5350;
   --accent: #f0b90b;
+  --accent-rgb: 240, 185, 11;
   --flash-up: rgba(38, 166, 154, 0.2);
   --flash-down: rgba(239, 83, 80, 0.2);
 }
@@ -58,6 +60,7 @@ body.theme-upbit {
   --up: #c84a31;
   --down: #1261c4;
   --accent: #1261c4;
+  --accent-rgb: 18, 97, 196;
   --flash-up: rgba(200, 74, 49, 0.2);
   --flash-down: rgba(18, 97, 196, 0.2);
 }
@@ -97,6 +100,17 @@ body.theme-binance {
   }
 }
 
+/* 🚀 테마 전환 시 모든 요소가 한꺼번에 '스르륵' 변하게 만드는 동기화 설정 */
+body.theme-binance:not(.resizing-active),
+body.theme-upbit:not(.resizing-active),
+body.theme-binance:not(.resizing-active) *:not(.price-cell),
+body.theme-upbit:not(.resizing-active) *:not(.price-cell) {
+  transition: background-color 0.3s ease-in-out, 
+              color 0.3s ease-in-out, 
+              border-color 0.3s ease-in-out,
+              box-shadow 0.3s ease-in-out !important;
+}
+
 /* 🚀 차트 로딩 시 쫀득한 애니메이션 효과 */
 #chart-wrapper {
   transition:
@@ -126,27 +140,58 @@ body.theme-binance {
   }
 }
 
-/* 🚨 JS가 동적으로 생성하는 테이블 행(tr) 렌더링 최적화 끝판왕 */
+/* 🚀 [디자인 개선] 테이블 행 2층 구조를 위한 최적화 */
 #table-body tr {
   content-visibility: auto;
-  contain-intrinsic-size: 40px;
-  /* tr의 대략적인 예상 높이 */
+  contain-intrinsic-size: 52px;
+  height: 52px !important;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.05);
+
+  /* 🚀 [HTS급 최적화] 하드웨어 가속 및 레이어 격리 */
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  contain: layout paint; 
+  position: relative;
 }
 
-/* 🚨 JS가 생성하는 td(셀) 기본 디자인 */
 #table-body td {
-  padding: 10px;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.1);
-  /* 테마 호환을 위해 투명도 사용 */
+  padding: 4px 8px;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  vertical-align: middle;
 }
 
-/* 마우스 호버 시 행 하이라이트 */
 #table-body tr:hover td {
-  background: rgba(128, 128, 128, 0.1);
+  background: rgba(var(--accent-rgb), 0.05) !important;
+}
+
+/* 🚀 [신규] 상단 컨트롤러 디자인 */
+#mcap-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: rgba(var(--accent-rgb), 0.1);
+  border-radius: 2px;
+  outline: none;
+}
+
+#mcap-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.3);
+  transition: transform 0.1s ease;
+}
+
+#mcap-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
 }
 
 /* 🚀 테이블 바디 스크롤 필살기 */

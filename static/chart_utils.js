@@ -1,5 +1,21 @@
-// chart_utils.js
-import { store, tfSec, CONFIG } from "./store.js";
+import { store, tfSec, CONFIG } from "./_store.js";
+
+// ⚙️ 시간 변환 통합 헬퍼
+export const getUnixSeconds = (t) => {
+  if (typeof t === "object" && t !== null) {
+    // 🚀 [UTC 고정] t.year, t.month, t.day를 절대적인 UTC 0시로 변환
+    return Date.UTC(t.year, t.month - 1, t.day) / 1000;
+  }
+  if (typeof t === "string") {
+    // 🚀 [UTC 고정] 문자열 뒤에 Z를 붙이거나 T00:00:00Z를 강제하여 UTC로 파싱
+    if (!t.includes("T") && !t.includes("Z")) {
+      return Date.parse(t + "T00:00:00Z") / 1000;
+    }
+    return Date.parse(t) / 1000;
+  }
+  return t; // 이미 숫자(타임스탬프)인 경우 그대로 반환
+};
+window.getUnixSeconds = getUnixSeconds;
 
 function resetChartScale() {
   if (!store.chart || !store.candleSeries) return;
@@ -19,7 +35,7 @@ function resetChartScale() {
 }
 
 // ✅ 포맷팅 by precision
-function formatSmartPrice(price, p) {
+export function formatSmartPrice(price, p) {
   try {
     if (price === 0) return (0).toFixed(p || 2);
     if (!price) return "";
@@ -122,7 +138,7 @@ function updateLegend(d, v, k) {
   `;
 }
 
-function updateStatus(d) {
+function updateStatus(d, p) {
   // 🚀 핵심: d(실시간 데이터)가 들어오면 그걸 최우선으로 쓴다!
   // d가 없으면(마우스 이벤트 등) 그때만 mainData에서 꺼내온다.
   const last =
@@ -131,13 +147,13 @@ function updateStatus(d) {
 
   if (!last) return;
 
-  // console.log(d);
-  // // 확인용
+  // 🚀 [수정] 정밀도(p)가 있으면 사용하고, 없으면 store나 기본값에서 가져옴
+  const precision = p !== undefined ? p : (store.currentPrecision || 2);
 
-  // 가격 업데이트 (toLocaleString 대신 formatSmartPrice 추천!)
+  // 가격 업데이트
   const priceEl = document.getElementById("head-price");
   if (priceEl) {
-    priceEl.innerText = formatSmartPrice(last.close);
+    priceEl.innerText = formatSmartPrice(last.close, precision);
   }
 
   // 거래량 업데이트
@@ -257,3 +273,115 @@ window.updateLegend = updateLegend;
 window.updateStatus = updateStatus;
 window.autoFit = autoFit;
 window.calculateTimeRemaining = calculateTimeRemaining; // 🚀 이거 빠져있었음!
+
+// 🚀 [추가] 백엔드 정규식 이식: 1000XEC, 1MBABYDOGE 등 단위 배수 추출기
+export function getMultiplier(sym) {
+  if (!sym) return 1;
+  const match = sym.match(/^(10+|1[MB])(?=[A-Z])/i);
+  if (!match) return 1;
+  const p = match[1].toUpperCase();
+  if (p === "1M") return 1000000;
+  if (p === "1B") return 1000000000;
+  return parseInt(p, 10);
+}
+
+// 🚀 [추가] 순수 코인명(Base Asset) 추출기 (1000XEC -> XEC)
+export function getPureBase(sym) {
+  if (!sym) return "";
+  return sym.replace(/^(10+|1[MB])(?=[A-Z])/i, "").toUpperCase();
+}
+
+// ================== chart.js에서 이동됨 ==================
+// 🚀 김프 다채로운 색상 적용 엔진
+window.getKimchiColor = function (val) {
+  if (val < -4) return "#4B0082"; // 인디고
+  if (val < -2) return "#1E3A8A"; // 딥 블루
+  if (val < 0) return "#2E8B57"; // 씨그린
+  if (val < 2) return "#57a4fc"; // 하늘색
+  if (val < 4) return "#FF69B4"; // 핫핑크
+  if (val < 6) return "#B22222"; // 파이어브릭
+  if (val < 8) return "#FF4500"; // 오렌지레드
+  return "#8B0000"; // 다크레드
+};
+
+export function toggleCountdown(isChecked) {
+  store.showCountdown = isChecked;
+  const knob = document.getElementById("countdown-knob");
+
+  if (isChecked) {
+    knob.style.transform = "translateX(10px)";
+    knob.parentElement.classList.add("bg-theme-accent");
+  } else {
+    knob.style.transform = "translateX(0)";
+    knob.parentElement.classList.remove("bg-theme-accent");
+    if (store.countdownOverlay) store.countdownOverlay.style.display = "none";
+  }
+}
+
+export function updateRealtimeCountdown(serverMs) {
+  if (!store.candleSeries || store.mainData.length === 0) {
+    if (store.countdownPriceLine) {
+      store.candleSeries.removePriceLine(store.countdownPriceLine);
+      store.countdownPriceLine = null;
+    }
+    return;
+  }
+
+  let displayTime = "Wait...";
+  if (serverMs && serverMs > 0) {
+    if (!store.localTimeAtUpdate) {
+      store.localTimeAtUpdate = performance.now();
+    }
+
+    const interpolatedMs =
+      store.lastServerMs + (performance.now() - store.localTimeAtUpdate);
+
+    const secondsPerBar = tfSec[store.currentTF] || 60;
+    const lastCandleTime = store.mainData[store.mainData.length - 1].time;
+    const nextBarTimeMs = (lastCandleTime + secondsPerBar) * 1000;
+
+    if (interpolatedMs >= nextBarTimeMs) {
+      displayTime = "00:00";
+    } else {
+      if (typeof window.calculateTimeRemaining === "function") {
+        displayTime = window.calculateTimeRemaining(
+          store.currentTF,
+          interpolatedMs,
+        );
+      }
+    }
+  }
+
+  const lastCandle = store.mainData[store.mainData.length - 1];
+  const isDown = lastCandle.close < lastCandle.open;
+  const style = getComputedStyle(document.body);
+  const varName = isDown ? "--down" : "--up";
+  const rawColor =
+    style.getPropertyValue(varName).trim() || (isDown ? "#ef5350" : "#26a69a");
+
+  const lineOptions = {
+    price: lastCandle.close,
+    color: rawColor, // 🚀 투명색 대신 현재 양봉/음봉 색상 사용 (이게 없어서 안 보였음)
+    lineWidth: 1,
+    lineStyle: window.LightweightCharts ? window.LightweightCharts.LineStyle.Dashed : 2, // 🚀 점선(Dashed)으로 차별화
+    axisLabelVisible: true,
+    title: store.showCountdown ? `${displayTime}` : "",
+    axisLabelColor: rawColor,
+    axisLabelTextColor: "#ffffff",
+  };
+
+  if (!store.countdownPriceLine) {
+    store.countdownPriceLine = store.candleSeries.createPriceLine(lineOptions);
+  } else {
+    store.countdownPriceLine.applyOptions(lineOptions);
+  }
+}
+
+window.toggleCountdown = toggleCountdown;
+window.updateRealtimeCountdown = updateRealtimeCountdown;
+
+setInterval(() => {
+  if (store.lastServerMs > 0) {
+    updateRealtimeCountdown(store.lastServerMs);
+  }
+}, 50);

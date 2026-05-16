@@ -1,7 +1,7 @@
+// start.js
 // 🚀 스타트뷰 엔진: 실시간 마스킹 + env 연동 + 유효성 검사
 // 🚀 스타트뷰 엔진: 무한 확장 마스킹 버전
 // 🚀 스타트뷰 엔진: 완전 가변형 마스킹 (글자수 무제한)
-
 // 🚀 Start Screen HTML을 반환하는 함수
 function getStartScreenHTML() {
   // 이전에 index.html에 있던 start-screen div 전체를 여기에 옮겨왔습니다.

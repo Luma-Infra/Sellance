@@ -1,23 +1,17 @@
 // _main.js
-import { store, CONFIG, tfSec, measureDOM } from "./store.js";
-import {
-  loadSymbols,
-  searchSymbols,
-  clearSearch,
-  selectSymbol,
-  fetchHistory,
-  clearChartData,
-  updateExchangeBadges,
-} from "./api.js";
+import { store, CONFIG, tfSec, measureDOM } from "./_store.js";
+import { loadSymbols } from "./api.js";
+import { searchSymbols, clearSearch, selectSymbol, updateExchangeBadges } from "./ui_control.js";
+import { fetchHistory, clearChartData } from "./chart_data.js";
+import { initChart } from "./chart.js";
+import { initMeasureEvents } from "./chart_measure.js";
 import "./chart_utils.js";
-import { initChart, initMeasureEvents } from "./chart.js";
+import "./chart_layout.js";
 import "./sim_engine.js";
-import "./ui_control.js";
 import "./stream.js";
 import "./streamEach.js";
 import "./table.js";
 import "./start.js";
-// import './app_loader.js';
 
 window.store = store;
 
@@ -48,20 +42,32 @@ document.addEventListener("DOMContentLoaded", async () => {
       initInfiniteScroll();
       console.log("✅ 2. 차트 및 인터페이스 준비 완료");
 
-      // 3️⃣ [소켓 점화] 모든 준비가 끝났을 때 비로소 소켓을 연결!
-      // (장부가 꽉 차 있어서 켜지자마자 바로 구독 성공함)
+      // 3️⃣ [소켓 점화]
       initSniperSocket();
-      if (typeof startBinanceMarketRadar === "function")
-        startBinanceMarketRadar();
+      if (typeof startBinanceMarketRadar === "function") startBinanceMarketRadar();
       if (typeof startUpbitMarketRadar === "function") startUpbitMarketRadar();
       console.log("✅ 3. 실시간 소켓 연결 성공!");
     } else {
-      throw new Error("장부 데이터가 비어있습니다.");
+      // 🚀 [수정] 성급하게 에러 던지지 말고 재시도 유도
+      console.warn("⚠️ 장부가 아직 비어있습니다. 수집 완료를 기다리는 중...");
+      const loadingText = document.querySelector("#loading-modal h2");
+      if (loadingText) loadingText.innerText = "데이터 수집 완료 대기 중 (5초 후 재시도)...";
+      
+      setTimeout(() => {
+        console.log("🔄 데이터 수집 완료 재확인 시도...");
+        location.reload();
+      }, 5000);
+      return; 
     }
 
     // 4️⃣ [UI 이벤트] 슬라이더 및 버튼 반응 설정
     setupSliderEvents();
     setupButtonEvents();
+
+    // 🚀 [추가] 초기 필터 UI 상태 동기화 (3단 토글 슬라이더 위치 등)
+    if (typeof switchFilter === "function") {
+      switchFilter(store.filterMode);
+    }
   } catch (err) {
     console.error("🚨 시동 실패:", err);
     // 보험: 2초 뒤 자동 새로고침 시도
@@ -106,12 +112,6 @@ function setupButtonEvents() {
 
 // ⚙️ 시간 변환 통합 헬퍼 (전역으로 이동!)
 // 이제 initChart와 startRealtimeCandle 양쪽에서 모두 사용 가능합니다.
-const getUnixSeconds = (t) => {
-  if (typeof t === "object" && t !== null)
-    return new Date(t.year, t.month - 1, t.day).getTime() / 1000;
-  if (typeof t === "string") return new Date(t).getTime() / 1000;
-  return t;
-};
 
 // 🚀 검색창 바깥 클릭 시 닫기
 document.addEventListener("click", (e) => {

@@ -29,6 +29,30 @@ def get_cmc_api_key():
         
     return ""
 
+def set_cmc_api_key(new_key):
+    global CMC_API_KEY
+    CMC_API_KEY = new_key
+    # .env 파일 업데이트
+    lines = []
+    found = False
+    if ENV_FILE.exists():
+        with open(ENV_FILE, "r") as f:
+            for line in f:
+                if line.startswith("CMC_API_KEY="):
+                    lines.append(f"CMC_API_KEY={new_key}\n")
+                    found = True
+                else:
+                    lines.append(line)
+    if not found:
+        lines.append(f"CMC_API_KEY={new_key}\n")
+    
+    with open(ENV_FILE, "w") as f:
+        f.writelines(lines)
+    
+    # 환경 변수도 업데이트
+    os.environ["CMC_API_KEY"] = new_key
+    return True
+
 CMC_API_KEY = get_cmc_api_key()
 # 전역 변수로 할당 (다른 모듈에서 config.CMC_API_KEY 로 호출)
 

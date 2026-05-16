@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta charset="UTF-8" />
   <title>Sellnance</title>
-  <link rel="icon" type="image/svg+xml" href="../static/gemini-svg-dark.svg" id="favicon-link" />
-  <!-- <img src="../static/gemini-svg-light.svg" alt="logo" id="main-logo-img" class="hidden" /> -->
+  <link rel="icon" type="image/svg+xml" href="../static/_gemini-svg-dark.svg" id="favicon-link" />
+  <!-- <img src="../static/_gemini-svg-light.svg" alt="logo" id="main-logo-img" class="hidden" /> -->
   <!-- <img src="../static/gemini-svg.svg" alt="logo" /> -->
   <script src="https://unpkg.com/lightweight-charts@5.2.0/dist/lightweight-charts.standalone.production.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <!-- <link rel="stylesheet" href="/static/z_style.css"> -->
-  <link rel="stylesheet" href="/static/z_style.min.css" />
+  <link rel="stylesheet" href="../static/z_style.min.css" />
 
   <!-- 🚀 Vite 호환: 단일 Entry Point(ES Module) 사용 -->
   <!-- _main.js 내부에서 필요한 모든 모듈을 import 하도록 묶습니다. -->
@@ -129,111 +129,131 @@
     <div
       class="flex flex-col w-full h-[calc(100vh-64px)] md:h-full md:w-[768px] lg:w-[540px] border-r border-theme-border bg-theme-bg transition-all duration-300 shrink-0 overflow-hidden"
       id="left-panel">
-      <div class="flex justify-between items-center h-16 p-4 border-b border-theme-border bg-theme-panel/20">
+      <div class="flex justify-between items-center h-14 px-4 border-b border-theme-border bg-theme-panel/40 backdrop-blur-md">
+        <!-- 1. 좌측: 로고 및 테마 -->
         <div class="flex items-center gap-3">
-          <!-- 다크 라이트 토글 -->
           <button id="theme-toggle-btn" onclick="toggleTheme()"
-            class="bg-transparent border border-theme-border text-theme-text px-3 py-1.5 rounded cursor-pointer text-sm hover:bg-theme-border/50 transition-colors shadow-sm">
+            class="w-8 h-8 flex items-center justify-center bg-theme-border/20 border border-theme-border/30 text-theme-text rounded-lg cursor-pointer text-sm hover:bg-theme-accent hover:text-white transition-all shadow-sm">
             ☀️
           </button>
-          <h2 class="m-0 text-lg font-extrabold tracking-wider text-theme-accent uppercase">
+          <h2 class="m-0 text-lg font-black tracking-tighter text-theme-accent uppercase italic">
             sellance
           </h2>
         </div>
 
-        <!-- ==============================임시 경주마 토글 버튼============================== -->
-
-        <div class="flex items-center gap-2 p-2 bg-theme-panel border-b border-theme-border">
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" id="flip-toggle" class="sr-only peer" checked />
-            <div
-              class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-theme-accent">
-            </div>
-            <span class="ml-2 text-[10px] font-bold opacity-70 uppercase tracking-tighter">Flip Anim</span>
-          </label>
-        </div>
-
-        <div id="connection-status" class="flex items-center gap-2 px-4 py-2 text-[11px]">
-          <span id="status-dot" class="w-2 h-2 rounded-full bg-gray-500 shadow-[0_0_5px_rgba(0,0,0,0.5)]"></span>
-          <span id="status-text" class="font-bold opacity-70 tracking-wide">Waiting...</span>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <div class="flex flex-col items-end gap-1 min-w-[80px]">
-            <div class="flex items-center gap-1.5">
-              <!-- <span
-                  id="update-timer-text"
-                  class="text-[10px] font-mono font-bold text-theme-accent"
-                  >3.0s</span
-                > -->
-              <span id="update-time" class="text-[10px] opacity-40 font-mono italic">로딩 중...</span>
-            </div>
-            <div class="w-20 h-1 bg-theme-border/30 rounded-full overflow-hidden">
-              <div id="update-progress-bar"
-                class="h-full bg-theme-accent w-full transition-all duration-100 ease-linear"></div>
+        <!-- 2. 우측: 타이머, 설정, 접기 -->
+        <div class="flex items-center gap-4">
+          <!-- ⏱️ 업데이트 타이머 -->
+          <div class="flex flex-col items-end gap-1">
+            <span id="update-time" class="text-[9px] opacity-40 font-mono italic tracking-tighter">로딩 중...</span>
+            <div class="w-16 h-1 bg-theme-border/30 rounded-full overflow-hidden">
+              <div id="update-progress-bar" class="h-full bg-theme-accent w-full transition-all duration-100 ease-linear"></div>
             </div>
           </div>
-          <button onclick="toggleSidebar()"
-            class="hidden md:block px-2 py-1 rounded bg-theme-border/30 hover:bg-theme-accent hover:text-white text-theme-text opacity-70 hover:opacity-100 transition-all text-xs font-bold"
-            title="리스트 숨기기">
-            ◀ 접기
+
+          <!-- ⚙️ 설정 -->
+          <button onclick="openSettingsModal()" class="p-1 text-theme-text opacity-40 hover:opacity-100 hover:text-theme-accent transition-all" title="Settings">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
+
+          <!-- ◀ 접기 버튼 (Pretty) -->
+          <button onclick="toggleSidebar()"
+            class="hidden md:flex items-center justify-center w-8 h-8 rounded-lg bg-theme-border/20 border border-theme-border/30 hover:bg-theme-accent group transition-all duration-300"
+            title="리스트 숨기기">
+            <span class="text-[10px] text-theme-text group-hover:text-white transition-transform group-hover:-translate-x-0.5">◀</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- [연결 상태 일시 주석 처리]
+      <div id="connection-status" class="flex items-center gap-2 px-2 py-2 text-[11px]">
+        <span id="status-dot" class="w-2 h-2 rounded-full bg-gray-500 shadow-[0_0_5px_rgba(0,0,0,0.5)]"></span>
+        <span id="status-text" class="font-bold opacity-70 tracking-wide">Waiting...</span>
+      </div>
+      -->
+
+      <!-- 🚀 [신규] 상단 제어 바: 시총 슬라이더 + 토글 버튼군 -->
+      <div class="flex flex-col gap-3 p-3 bg-theme-panel/10 border-b border-theme-border">
+        <!-- 1층: 필터 및 뷰 모드 -->
+        <div class="flex items-center justify-between gap-4">
+          <div class="relative flex p-1 bg-theme-border/20 rounded-xl overflow-hidden min-w-[180px]">
+            <div id="filter-slider" class="absolute top-1 left-1 bottom-1 w-[calc(33.33%-4px)] bg-theme-accent rounded-lg transition-all duration-300 ease-out z-0 shadow-lg"></div>
+            <button onclick="switchFilter('ALL')" id="filter-all-main" class="relative z-10 flex-1 px-2 py-1.5 text-[10px] font-black transition-all text-white">ALL</button>
+            <button onclick="switchFilter('BINANCE')" id="filter-binance" class="relative z-10 flex-1 px-2 py-1.5 text-[10px] font-black transition-all text-theme-text opacity-50 hover:opacity-100">BINANCE</button>
+            <button onclick="switchFilter('UPBIT')" id="filter-upbit" class="relative z-10 flex-1 px-2 py-1.5 text-[10px] font-black transition-all text-theme-text opacity-50 hover:opacity-100">UPBIT</button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="lang-toggle" onclick="toggleLang()" class="px-3 py-1.5 bg-theme-border/20 border border-theme-border/40 rounded-lg text-[10px] font-black text-theme-text hover:bg-theme-accent hover:text-white transition-all shadow-sm">KR</button>
+            <label class="relative inline-flex items-center cursor-pointer scale-90">
+              <input type="checkbox" id="flip-toggle" class="sr-only peer" checked>
+              <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-theme-accent"></div>
+              <span class="ml-2 text-[10px] font-bold opacity-60 uppercase tracking-tighter">Flip</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2층: 카테고리 탭 및 간편 필터 -->
+        <div class="flex items-center gap-1 overflow-x-auto scrollbar-hide px-1">
+          <button onclick="switchTab('ALL')" id="tab-all" class="tab-btn px-4 py-1.5 text-[10px] font-black rounded-full transition-all bg-theme-accent text-white border border-theme-accent shadow-md whitespace-nowrap">MAIN LIST</button>
+          <button onclick="switchTab('FAV')" id="tab-fav" class="tab-btn px-4 py-1.5 text-[10px] font-black rounded-full transition-all text-theme-text opacity-50 hover:opacity-100 border border-theme-border whitespace-nowrap">⭐ FAVORITES</button>
+          
+          <div class="w-px h-4 bg-theme-border/30 mx-1"></div> <!-- 구분선 -->
+
+          <button onclick="toggleSmallCap()" id="btn-small-cap" class="tab-btn px-4 py-1.5 text-[10px] font-black rounded-full transition-all text-theme-text opacity-50 hover:opacity-100 border border-theme-border whitespace-nowrap">🚫 Hiding Mcap < 1M</button>
         </div>
       </div>
 
       <!-- TABLE overflow-y-auto -->
       <div class="flex-1 flex flex-col min-h-0 h-full overflow-hidden">
         <table id="market-table" class="w-full border-collapse text-left text-[13px] table-fixed">
-          <thead class="sticky top-0 z-10 bg-theme-panel shadow-sm border-b border-theme-border text-xs">
-            <tr>
-              <th onclick="sortTable('Ticker')"
-                class="p-4 cursor-pointer select-none hover:bg-white/5 transition-colors group w-[25%]">
-                Ticker
-                <span id="sort-Ticker" class="sort-arrow text-theme-accent ml-1 transition-opacity"></span>
-              </th>
-
-              <th class="p-4 select-none w-[30%] hover:bg-white/5">
-                <div class="flex flex-col gap-1">
-                  <div onclick="sortTable('Price_Raw')"
-                    class="cursor-pointer hover:text-theme-accent transition-colors group font-bold">
-                    Price
-                    <span id="sort-Price_Raw"
-                      class="sort-arrow text-[10px] text-theme-accent ml-1 transition-opacity"></span>
-                  </div>
-                  <div class="flex gap-3 text-[10px]">
-                    <span onclick="sortTable('Change_24h_Raw')"
-                      class="cursor-pointer hover:text-theme-accent transition-colors group">
-                      24h
-                      <span id="sort-Change_24h_Raw" class="sort-arrow text-theme-accent ml-0.5"></span>
-                    </span>
-                    <span onclick="sortTable('Change_Today_Raw')"
-                      class="cursor-pointer hover:text-theme-accent transition-colors group">
-                      Day
-                      <span id="sort-Change_Today_Raw" class="sort-arrow text-theme-accent ml-0.5"></span>
-                    </span>
-                  </div>
+          <thead class="sticky top-0 z-10 bg-theme-panel shadow-sm border-b border-theme-border text-[9px] font-black uppercase tracking-widest opacity-60">
+            <!-- 🚀 1층 헤더: 대분류 -->
+            <tr class="border-b border-theme-border/30">
+              <th onclick="sortTable('Ticker')" class="p-2 cursor-pointer hover:bg-white/5 transition-colors w-[20%]">
+                <div class="flex items-center gap-1">
+                  Asset <span id="sort-Ticker" class="sort-arrow"></span>
                 </div>
               </th>
-
-              <th class="p-4 select-none w-[30%] hover:bg-white/5">
-                <div class="flex flex-col gap-1">
-                  <div onclick="sortTable('Volume')"
-                    class="cursor-pointer hover:text-theme-accent transition-colors group font-bold">
-                    Volume
-                    <span id="sort-Volume"
-                      class="sort-arrow text-[10px] text-theme-accent ml-1 transition-opacity"></span>
-                  </div>
-                  <div onclick="sortTable('MarketCap')"
-                    class="cursor-pointer hover:text-theme-accent transition-colors group text-[10px] opacity-70">
-                    M.Cap
-                    <span id="sort-MarketCap" class="sort-arrow text-theme-accent ml-1"></span>
-                  </div>
+              <th onclick="sortTable('Price')" class="p-2 cursor-pointer hover:bg-white/5 transition-colors w-[20%]">
+                <div class="flex items-center gap-1">
+                  Price <span id="sort-Price" class="sort-arrow"></span>
                 </div>
               </th>
-
-              <!-- <th class="p-4 w-[15%] text-right opacity-50 text-[11px]">
-                  Note
-                </th> -->
+              <th onclick="sortTable('MarketCap')" class="p-2 cursor-pointer hover:bg-white/5 transition-colors w-[20%]">
+                <div class="flex items-center gap-1">
+                  MarketCap <span id="sort-MarketCap" class="sort-arrow"></span>
+                </div>
+              </th>
+              <th onclick="sortTable('Kimchi')" class="p-2 cursor-pointer hover:bg-white/5 transition-colors w-[25%] text-right pr-3">
+                <div class="flex items-center justify-end gap-1">
+                  Kimch <span id="sort-Kimchi" class="sort-arrow"></span>
+                </div>
+              </th>
+              <th class="p-2 w-[15%]">
+                <div class="flex items-center gap-1">Exchanges</div>
+              </th>
+            </tr>
+            <!-- 🚀 2층 헤더: 상세 지표 -->
+            <tr class="bg-theme-bg/50">
+              <th class="p-2 text-[9px] opacity-70">Name</th>
+              <th class="p-2 text-[9px] opacity-70">
+                <div class="flex gap-2">
+                  <span onclick="sortTable('Change_24h')" class="cursor-pointer hover:text-theme-accent">24H</span>
+                  <span onclick="sortTable('Change_Today')" class="cursor-pointer hover:text-theme-accent">DAY</span>
+                </div>
+              </th>
+              <th class="p-2 text-[9px] opacity-70">
+                <div class="flex gap-2">
+                  <span onclick="sortTable('Volume')" class="cursor-pointer hover:text-theme-accent">Volume</span>
+                  <span onclick="sortTable('VMC')" class="cursor-pointer hover:text-theme-accent">VMC</span>
+                </div>
+              </th>
+              <th class="p-2 text-[9px] opacity-70 text-right pr-3">
+                <div class="flex justify-end gap-2">
+                   <span onclick="sortTable('Funding')" class="cursor-pointer hover:text-theme-accent">FUNDING</span>
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody id="table-body" class="overflow-y-auto"></tbody>
@@ -444,8 +464,31 @@
           </button>
         </div>
       </div>
-    </div>
-  </div>
-</body>
+    <!-- ⚙️ 전문가용 설정 모달 -->
+    <div id="settings-modal" class="fixed inset-0 z-[300] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="bg-theme-panel border border-theme-border p-6 rounded-2xl shadow-2xl w-[400px] flex flex-col gap-5">
+            <div class="flex justify-between items-center border-b border-theme-border pb-3">
+                <h3 class="text-lg font-black text-theme-accent uppercase tracking-tighter">Engine Settings</h3>
+                <button onclick="closeSettingsModal()" class="text-theme-text opacity-50 hover:opacity-100 text-xl">×</button>
+            </div>
+            
+            <div class="flex flex-col gap-4">
+                <!-- CMC API 키 -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-black opacity-40 uppercase tracking-widest">CoinMarketCap API KEY</label>
+                    <div class="relative">
+                        <input id="setting-cmc-key" type="password" class="w-full bg-theme-bg border border-theme-border p-3 rounded-xl text-xs text-theme-text outline-none focus:border-theme-accent transition-all font-mono" placeholder="Paste your API key here...">
+                        <button onclick="togglePasswordVisibility('setting-cmc-key')" class="absolute right-3 top-1/2 -translate-y-1/2 text-theme-text opacity-30 hover:opacity-100 transition-all">👁️</button>
+                    </div>
+                    <p class="text-[9px] opacity-30 mt-1 italic">API key is required to fetch real-time MarketCap and Rank data.</p>
+                </div>
+            </div>
 
+            <div class="flex gap-2 mt-2">
+                <button onclick="saveSettings()" class="flex-1 bg-theme-accent text-white py-3 rounded-xl font-black text-sm shadow-lg hover:brightness-110 active:scale-95 transition-all">SAVE & APPLY</button>
+                <button onclick="closeSettingsModal()" class="flex-1 bg-theme-border/20 text-theme-text py-3 rounded-xl font-bold text-sm hover:bg-theme-border/40 transition-all">CANCEL</button>
+            </div>
+        </div>
+    </div>
+</body>
 </html>

@@ -1,5 +1,6 @@
 // table.js
-import { store, CONFIG } from "./store.js";
+import { store, CONFIG } from "./_store.js";
+import { formatSmartPrice, formatVolumeKRW } from "./chart_utils.js"; // 🚀 기존 유틸리티 적극 재사용
 
 // 1. 데이터 로드 함수
 async function loadTableData(force = false) {
@@ -97,8 +98,8 @@ function sortTable(colKey) {
 //  [추가] 표 그리기 행(TR) 생성 헬퍼 (초기 렌더링 & 신규 진입 시 사용)
 function createRowElement(row) {
   const tr = document.createElement("tr");
-  const displayTicker = row.DisplayTicker;
-  tr.dataset.sym = displayTicker; // 🚀 화면 노출용 고유 식별자 사용
+  const ticker = row.Ticker; // 🚀 중복 없는 유니크 티커 사용 (BTCKRW != BTCUSDT)
+  tr.dataset.sym = ticker; 
 
   // 껍데기 만들고 알맹이 채우는 함수 재활용
   updateRowInnerHTML(tr, row);
@@ -109,40 +110,115 @@ function createRowElement(row) {
 }
 
 // 🚀 [수정됨] 표 그리기 함수 (딱 100개만 렌더링하도록 변경)
+
+// 🚀 [추가] 공통 필터 로직 (renderTable와 applyRealtimeSort에서 공유)
+function getFilteredData() {
+  let filteredData = [...store.currentTableData];
+
+  // 1. 탭 필터링 (ALL, FAV)
+  if (store.currentTab === "FAV") {
+    const favorites = JSON.parse(localStorage.getItem("sellnance_favs") || "[]");
+    filteredData = filteredData.filter((d) =>
+      favorites.includes(d.DisplayTicker || d.Symbol),
+    );
+  }
+
+  // 2. 마켓 필터링 (ALL / BINANCE / UPBIT)
+  if (store.filterMode === "UPBIT") {
+    filteredData = filteredData.filter((d) => 
+      d.Listed_Exchanges?.includes("UPBIT") || d.Listed_Exchanges?.includes("BITHUMB")
+    );
+  } else if (store.filterMode === "BINANCE") {
+    filteredData = filteredData.filter((d) =>
+      d.Listed_Exchanges?.some((ex) => ex.startsWith("BINANCE"))
+    );
+  }
+
+  // 3. 시총 필터링 (1M 미만 숨기기 토글)
+  if (store.hideSmallCap) {
+    filteredData = filteredData.filter((d) => (d.MarketCap_Raw || 0) >= 1000000);
+  }
+
+  // 4. 바운더리 필터링
+  const boundary = store.settings?.SORT_BOUNDARY;
+  if (boundary) {
+    filteredData = filteredData.filter((d) => {
+      const c24 = Math.abs(d.Change_24h_Raw || 0);
+      return c24 <= boundary;
+    });
+  }
+
+  return filteredData;
+}
+
+// 🚀 [수정됨] 표 그리기 함수 (딱 100개만 렌더링하도록 변경)
 function renderTable() {
   const tbody = document.getElementById("table-body");
+  if (!tbody) return;
   tbody.innerHTML = "";
 
+  // ⭐️ [해결] 렌더링 시작 전 가시성 정보 초기화
+  store.visibleSymbols.clear();
+
   // ⭐️ 기존 감시 카메라 끄고 초기화
-  // 🚀 핵심: 새 카메라 달기 전에 "기존 카메라"를 완전히 파괴해야 합니다!
   if (store.tableObserver) {
     store.tableObserver.disconnect();
-    store.tableObserver = null; // 참조까지 끊어버리세요
+    store.tableObserver = null;
   }
 
   // ⭐️ 새 감시 카메라 설치
   store.tableObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        const sym = entry.target.dataset.sym; // 코인 이름 가져오기
-        if (entry.isIntersecting)
-          store.visibleSymbols.add(sym); // 화면에 들어오면 추가
-        else store.visibleSymbols.delete(sym); // 화면 밖으로 나가면 삭제
+        const sym = entry.target.dataset.sym; // 🚀 Ticker (BTCUSDT 등)
+        if (entry.isIntersecting) store.visibleSymbols.add(sym);
+        else store.visibleSymbols.delete(sym);
       });
     },
     {
       root: document.querySelector(".table-container"),
-      rootMargin: "100px 0px",
+      rootMargin: "50px 0px", // 조금 더 좁게 설정하여 정밀도 향상
     },
   );
 
-  // 🚨 핵심: 전체가 아니라 상위 RENDER_LIMIT만 자릅니다!
-  const topData = store.currentTableData.slice(0, store.currentRenderLimit); // 🚀 이걸로 변경
+  const filteredData = getFilteredData();
+  const topData = filteredData.slice(0, store.currentRenderLimit);
   topData.forEach((row) => {
-    // 만들어둔 헬퍼 함수로 깔끔하게 렌더링
     tbody.appendChild(createRowElement(row));
   });
-  applySelectedHighlight(); // 🚀 [추가] 정렬 끝나고 내 코인 다시 찾아!
+  applySelectedHighlight();
+
+  // 🚀 [핵심] 테이블이 새로 그려졌으므로, 즉시 가시성 계산
+  updateVisibleSymbols();
+
+  if (typeof window.refreshSniperTarget === "function") {
+    setTimeout(() => {
+        window.refreshSniperTarget();
+    }, 10);
+  }
+}
+
+// 🎯 [신규] 현재 화면에 진짜로 뭐가 보이는지 즉시 계산하는 정밀 함수
+function updateVisibleSymbols() {
+  const container = document.querySelector(".table-container");
+  if (!container) return;
+
+  const rows = container.querySelectorAll("tr[data-sym]");
+  const containerRect = container.getBoundingClientRect();
+
+  rows.forEach((row) => {
+    const rect = row.getBoundingClientRect();
+    const isVisible = (
+      rect.top < containerRect.bottom &&
+      rect.bottom > containerRect.top
+    );
+    const sym = row.dataset.sym;
+    if (isVisible) {
+      store.visibleSymbols.add(sym);
+    } else {
+      store.visibleSymbols.delete(sym);
+    }
+  });
 }
 
 //  애니메이션 없이 정렬만 하는 깔끔한 함수
@@ -156,6 +232,10 @@ function simpleSortData() {
     // "Volume": "Volume_Raw",
     Volume: "Binance_Vol_Futures",
     Ticker: "DisplayTicker",
+    Kimchi: "Kimchi_Raw",
+    Gap: "Basis_Raw",
+    Funding: "Funding_Raw",
+    VMC: "VMC_Raw",
   };
 
   const key = sortKeyMap[store.currentSortCol] || store.currentSortCol;
@@ -179,62 +259,52 @@ function simpleSortData() {
   });
 }
 
-const flipToggleEl = document.getElementById("flip-toggle");
-// 🚀 HTML 스위치의 실제 상태(checked)를 읽어와 완벽하게 동기화! (기본값 true)
-let isFlipEnabled = flipToggleEl ? flipToggleEl.checked : true;
-
-if (flipToggleEl) {
-  flipToggleEl.addEventListener("change", (e) => {
-    isFlipEnabled = e.target.checked; // 토글 시 부드러운 애니메이션 활성/비활성
-  });
-}
-
 // ⭐️ 실시간 재정렬 & 경주마 애니메이션 함수
 function applyRealtimeSort() {
   if (!store.currentSortCol || store.sortState === "") return;
 
-  // 🚀 정렬용 맵핑 (클릭한 컬럼 -> 미리 계산된 숫자 필드)
+  // 🚀 [수정] 무조건 필터링 먼저 진행! (그래야 즐겨찾기/업비트 전용이 유지됨)
+  const filteredData = getFilteredData();
+  
+  // 🚀 [수정] 필터링된 결과물 내에서만 정렬을 진행해야 함
   const sortKeyMap = {
     MarketCap: "MarketCap_Raw",
     Price: "Price_Raw",
     Change_24h: "Change_24h_Raw",
     Change_Today: "Change_Today_Raw",
-    // "Volume": "Volume_Raw",
     Volume: "Binance_Vol_Futures",
     Ticker: "DisplayTicker",
+    Kimchi: "Kimchi_Raw",
+    Funding: "Funding_Raw",
+    VMC: "VMC_Raw",
+    Gap: "Basis_Raw",
   };
 
-  // 🚀 2. 메모리 정렬 실행 (정규식 완전 삭제!!!!)
-  store.currentTableData.sort((a, b) => {
-    const key = sortKeyMap[store.currentSortCol] || store.currentSortCol;
-    // 🚨 [잔상 방지 핵심] 화면 텍스트와 정렬 순서의 불일치(0.2초 유령 데이터) 원천 차단
+  const key = sortKeyMap[store.currentSortCol] || store.currentSortCol;
+  const isAsc = store.sortState === "asc";
+
+  filteredData.sort((a, b) => {
     let valA = a[key];
     let valB = b[key];
-
-    const isAsc = store.sortState === "asc";
-
-    // 숫자 데이터면 단순 연산
     if (typeof valA === "number" && typeof valB === "number") {
       return isAsc ? valA - valB : valB - valA;
     }
-
-    // 문자열 데이터면 localeCompare
     valA = (valA || "").toString().toLowerCase();
     valB = (valB || "").toString().toLowerCase();
     return isAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
   });
 
   const tbody = document.getElementById("table-body");
-  const topData = store.currentTableData.slice(0, store.currentRenderLimit);
-  const topSymbols = new Set(topData.map((d) => d.DisplayTicker));
+  const topData = filteredData.slice(0, store.currentRenderLimit);
+  const topSymbols = new Set(topData.map((d) => d.Ticker)); // 🚀 DisplayTicker -> Ticker 변경
 
   const existingRows = Array.from(tbody.children);
   const firstRects = new Map();
 
-  // 🚀 [최적화 2] FLIP First: "화면에 보이는 놈들만" 위치 기억
+  // 🚀 [수정] FLIP First: 모든 기존 행의 현재 위치를 기억 (가시성 체크에만 의존하면 센서 지연 시 애니메이션 누락됨)
   existingRows.forEach((row) => {
     const sym = row.dataset.sym;
-    if (store.visibleSymbols.has(sym)) {
+    if (sym) {
       firstRects.set(sym, row.getBoundingClientRect().top);
     }
   });
@@ -246,6 +316,7 @@ function applyRealtimeSort() {
     const sym = row.dataset.sym;
     if (!topSymbols.has(sym)) {
       recycleBin.push(row);
+      row.remove(); // 🚀 [핵심] 테이블에서 즉시 제거하여 제자리에서 데이터만 바뀌는 '변신 잔상' 방지
       // 재활용 대기열에 들어갔으니 일단 CCTV에서 뺌
       store.visibleSymbols.delete(sym);
     }
@@ -253,7 +324,7 @@ function applyRealtimeSort() {
 
   // 4. 새로운 승리자들 DOM 재배치 (재활용 적극 활용)
   topData.forEach((data, index) => {
-    const sym = data.DisplayTicker;
+    const sym = data.Ticker; // 🚀 DisplayTicker -> Ticker 변경 (중복 방어)
     let tr = tbody.querySelector(`tr[data-sym="${sym}"]`);
 
     // DOM이 없다면? (새로 진입한 코인)
@@ -282,35 +353,46 @@ function applyRealtimeSort() {
     row.remove();
   });
 
-  // 🚀 [최적화] FLIP Last & Play: "화면에 보였던 놈들만" 부드럽게 이동
+  // 🚀 [최적화] FLIP Last & Play: "보이는 화면만" 정밀 타격 애니메이션
   const finalRows = Array.from(tbody.children);
-  finalRows.forEach((row) => {
-    const sym = row.dataset.sym;
-    const firstY = firstRects.get(sym);
-
-    // 안 보였던 놈(firstY 없음)은 좌표 연산 스킵!
-    if (firstY !== undefined) {
-      row.style.transition = "none";
-      const lastY = row.getBoundingClientRect().top; // 여기서 Reflow 발생 (최소화됨)
-      const deltaY = firstY - lastY;
-
-      if (deltaY !== 0) {
-        if (isFlipEnabled) {
-          row.style.transform = `translateY(${deltaY}px)`;
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              row.style.transition =
-                "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)"; // 🚀 0.4초로 늘려 더 쫀득하고 확실한 경주마 효과 부여
-              row.style.transform = "";
-            });
-          });
-        } else {
-          // 🚀 애니메이션 토글 OFF 상태: 스윽 올라오는 잔상 없이 즉시 위치(촤라락)
-          row.style.transform = "";
-        }
+  
+  if (store.useFlip) {
+    // 1단계: 모든 행의 새로운 위치(Last) 측정 (가시성 체크 완화)
+    const lastRects = new Map();
+    finalRows.forEach((row) => {
+      const sym = row.dataset.sym;
+      if (firstRects.has(sym)) {
+        lastRects.set(sym, row.getBoundingClientRect().top);
       }
-    }
-  });
+    });
+
+    // 2단계: 위치가 바뀐 행들만 부드럽게 이동 (Write Phase)
+    finalRows.forEach((row) => {
+      const sym = row.dataset.sym;
+      const firstY = firstRects.get(sym);
+      const lastY = lastRects.get(sym);
+
+      if (firstY !== undefined && lastY !== undefined && firstY !== lastY) {
+        const deltaY = firstY - lastY;
+        row.style.transition = "none";
+        row.style.transform = `translateY(${deltaY}px)`;
+        row.style.willChange = "transform";
+        row.offsetHeight; // 🚀 [핵심] 강제 리플로우로 브라우저에게 시작 위치를 확실히 각인
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            row.style.transition = "transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)"; // 0.3s로 단축 (400ms 주기와 간섭 방지)
+            row.style.transform = "";
+            // 애니메이션 완료 후 최적화 레이어 해제
+            setTimeout(() => { if(row) row.style.willChange = "auto"; }, 350);
+          });
+        });
+      }
+    });
+  } else {
+    // 🚀 애니메이션 OFF: 모든 행의 transform을 깨끗이 비워 즉시 위치 반영
+    finalRows.forEach(row => { row.style.transform = ""; row.style.transition = "none"; });
+  }
   // 🚀 안전장치 장착 (스크롤 쪽이랑 똑같이!)
   if (typeof refreshSniperTarget === "function") {
     refreshSniperTarget();
@@ -344,21 +426,15 @@ function applySelectedHighlight() {
 function updateRowInnerHTML(tr, row) {
   const pureSymbol = row.Symbol;
   const tId = row.Ticker; // 🚀 DOM ID용 완벽한 고유키 (예: EDGEUSDT, EDGEKRW)
-  tr.dataset.sym = row.DisplayTicker; // 🚀 화면 추적용
-  // console.log(`[유기적 체크] 티커: ${row.Ticker} | 최종 이름표: ${pureSymbol}`);
+  tr.dataset.sym = tId; // 🚀 화면 추적용 (이제 DisplayTicker가 아닌 Ticker 사용!)
 
   // 백엔드에서 준 Raw 숫자 데이터
   const p = row.precision || 2;
   const n24h = row.Change_24h_Raw ?? 0;
-  const nDay = row.Change_Today_Raw ?? 0;
   const nPrice = row.Price_Raw ?? 0;
-  const Listed_Exchanges = row.Listed_Exchanges ?? null;
 
   // 🚀 가격 포맷팅 (p값 꽂아넣기)
   const formattedPrice = formatSmartPrice(nPrice, p);
-  const krwDisplay = row.Price_KRW
-    ? `<span class="text-[12px] text-theme-text opacity-70 ml-1"> ( ${Number(row.Price_KRW).toLocaleString()} 원 )</span>`
-    : "";
 
   // 테마 색상 결정
   const color24h =
@@ -367,103 +443,102 @@ function updateRowInnerHTML(tr, row) {
       : n24h < 0
         ? "text-theme-down"
         : "text-theme-text";
-  const colorDay =
-    nDay > 0
-      ? "text-theme-up"
-      : nDay < 0
-        ? "text-theme-down"
-        : "text-theme-text";
 
   // 즐겨찾기 상태
   const favorites = JSON.parse(localStorage.getItem("sellnance_favs") || "[]");
   const isFav = favorites.includes(pureSymbol);
 
-  // 거래소 로고 이미지
-  const EX_LOGOS = {
-    BINANCE: "https://s2.coinmarketcap.com/static/img/exchanges/64x64/270.png",
-    COINBASE: "https://s2.coinmarketcap.com/static/img/exchanges/64x64/89.png",
-    UPBIT: "https://s2.coinmarketcap.com/static/img/exchanges/64x64/351.png",
-    BITHUMB: "https://s2.coinmarketcap.com/static/img/exchanges/64x64/200.png",
-    BITGET: "https://s2.coinmarketcap.com/static/img/exchanges/64x64/513.png",
-    BYBIT: "https://s2.coinmarketcap.com/static/img/exchanges/64x64/521.png",
-    GATEIO: "https://s2.coinmarketcap.com/static/img/exchanges/64x64/302.png",
-    OKX: "https://s2.coinmarketcap.com/static/img/exchanges/64x64/294.png",
-  };
+  const isDetailed = store.viewMode === "detailed";
+  const nDay = row.Change_Today_Raw ?? 0;
+  const colorDay = nDay > 0 ? "text-theme-up" : nDay < 0 ? "text-theme-down" : "text-theme-text";
 
-  const exchanges = row.Listed_Exchanges || [];
-  let listedExchangesHtml = exchanges
-    .map((ex) => {
-      // 선물(FUTURES)은 로고에 노란색 테두리를 주거나 작게 'F'를 달아주면 꿀잼입니다
-      if (ex === "BINANCE_FUTURES") {
-        return `<div class="relative inline-block"><img src="${EX_LOGOS["BINANCE"]}" class="w-4 h-4 rounded-full border border-yellow-400"><span class="absolute -top-1 -right-1 text-[8px] bg-yellow-400 text-black font-bold rounded px-[2px]">F</span></div>`;
-      }
-      if (EX_LOGOS[ex]) {
-        return `<img src="${EX_LOGOS[ex]}" class="w-4 h-4 rounded-full" title="${ex}">`;
-      }
-      return "";
-    })
-    .join('<span class="w-1"></span>'); // 로고 사이 간격
-
-  let tagsHtml = "";
-  if (row.Tags) {
-    // 너무 많으면 지저분하니까 딱 2개만 자르기!
-    tagsHtml = row.Tags.split(",")
-      .slice(0, 2)
-      .map(
-        (tag) =>
-          `<span class="text-[9px] bg-gray-700 text-gray-300 px-1 py-0.5 rounded mr-1">${tag}</span>`,
-      )
-      .join("");
-  }
-
+  // 🚀 [신규] 2층 구조 레이아웃 (디자인 가이드 준수 + 스트리밍 ID 추가)
   tr.innerHTML = `
-  <td class="p-4">
+  <td class="p-2">
     <div class="flex items-center gap-2">
-    <span class="star-btn ${isFav ? "active" : ""}" 
-            onclick="toggleFavorite('${pureSymbol}', event)"
-            style="cursor:pointer; font-size:16px; color: ${isFav ? "var(--accent)" : "gray"};">
+      <!-- 1. 별 버튼 (완전 분리) -->
+      <button onclick="toggleFavorite('${pureSymbol}', event)" class="star-btn text-[14px] transition-all hover:scale-125 ${isFav ? "active" : ""}" style="color: ${isFav ? "var(--accent)" : "gray"}">
         ${isFav ? "⭐" : "☆"}
-      </span>
-      ${row.Logo || ""}
-      <div class="flex flex-col">
-        <b class="text-sm text-theme-text">${row.DisplayTicker || row.Symbol}</b>
-        <span class="text-[10px] text-theme-text opacity-60">${row.Name || ""}</span>
-        </div>
-        </td>
-        <td class="p-4">
-    <div class="flex flex-col gap-0.5">
-      <span id="price-${tId}" data-raw-price="${nPrice}" class="font-bold text-[14px] text-theme-text price-cell">
-        ${formattedPrice} ${krwDisplay}
-      </span>
-      <div class="flex gap-2 text-[11px] font-mono mt-0.5">
-        <span class="text-theme-text opacity-70">
-          24h: <span id="change-${tId}" class="${color24h} font-bold">${n24h > 0 ? "+" : ""}${Number(n24h).toFixed(2)}%</span>
-        </span>
-        <span class="text-theme-text opacity-70">
-          Day: <span id="today-${tId}" class="${colorDay} font-bold">${nDay > 0 ? "+" : ""}${Number(nDay).toFixed(2)}%</span>
+      </button>
+      
+      <!-- 2. 티커 이미지 (고정 영역) -->
+      <div class="flex-shrink-0 w-8 h-6 flex items-center justify-center bg-white/5 rounded-full overflow-hidden">
+        ${row.Logo || ""}
+      </div>
+      
+      <!-- 3. 티커 & 이름 묶음 -->
+      <div class="flex flex-col leading-[1.1] min-w-0">
+        <b class="text-[12px] text-theme-text truncate font-black tracking-tighter">${row.DisplayTicker || row.Symbol}</b>
+        <span class="text-[9px] text-theme-text opacity-60 truncate uppercase font-bold tracking-tighter">
+          ${(() => {
+            const n = store.lang === "KR" ? (row.Name_KR || row.Name || "") : (row.Name || "");
+            return n.length > 8 ? n.substring(0, 8) + ".." : n;
+          })()}
         </span>
       </div>
+    </div>
+  </td>
+  <td class="p-2">
+    <div class="flex flex-col leading-tight">
+      <span id="price-${tId}" data-raw-price="${nPrice}" class="font-black text-[14px] text-theme-text price-cell tracking-tighter">
+        ${formattedPrice}
+        ${row.Price_KRW ? `<span class="text-[12px] text-theme-text opacity-70 ml-1"> ( ${Number(row.Price_KRW).toLocaleString()} 원 )</span>` : ""}
+      </span>
+      <div class="flex gap-2 text-[10px] font-black">
+        <span id="change-${tId}" class="${color24h} ${store.currentSortCol === "Change_Today" ? "opacity-40" : "opacity-100"}">${n24h > 0 ? "+" : ""}${Number(n24h).toFixed(2)}%</span>
+        <span id="today-${tId}" class="${colorDay} ${store.currentSortCol === "Change_Today" ? "opacity-100" : "opacity-40"}">${nDay > 0 ? "+" : ""}${Number(nDay).toFixed(2)}%</span>
       </div>
-      </td>
-      <td class="p-4">
-      <div class="flex flex-col gap-0.5 text-theme-text">
-
-      <!-- 🚀 [수정] 거래대금 분리 표시 로직 -->
-      <div class="flex flex-col gap-0 opacity-90 font-mono text-[11px] mb-1">
-         ${row.Binance_Vol_Formatted ? `<span id="vol-binance-${tId}" class="text-[#f0b90b]">B: ${row.Binance_Vol_Formatted}</span>` : ""}
-         ${row.Upbit_Vol_Formatted ? `<span id="vol-upbit-${tId}" class="text-[#093687]">U: ${row.Upbit_Vol_Formatted}</span>` : ""}
-         ${!row.Binance_Vol_Formatted && !row.Upbit_Vol_Formatted ? `<span id="vol-total-${tId}">Total: ${row.Volume_Formatted || "-"}</span>` : ""}
+    </div>
+  </td>
+  <td class="p-2">
+    <div class="flex flex-col leading-tight">
+      <span class="text-[12px] font-black text-theme-text opacity-90 tracking-tighter">${row.MarketCap_Formatted || "0"}</span>
+      <div class="flex items-center gap-2 text-[10px] font-black opacity-60">
+        <span id="vol-binance-${tId}">${row.Volume_Formatted || "0"}</span>
+        <span class="text-theme-accent">${row.VMC_Formatted || "0.0%"}</span>
       </div>
-
-      <span class="text-[11px] opacity-50">M.Cap: ${row.MarketCap_Formatted}</span>
-      <div class="flex items-center gap-1 mt-1 opacity-80">${listedExchangesHtml}</div>
-      <div class="flex items-center gap-1 mt-1 opacity-80">${tagsHtml}</div>
+    </div>
+  </td>
+  <td class="p-2 text-right pr-3">
+    <div class="flex flex-col leading-tight items-end">
+      <div class="flex items-center justify-end gap-1">
+         <span class="text-[12px] font-black ${row.Kimchi_Raw > 0 ? "text-theme-up" : "text-theme-down"}">${row.Kimchi_Formatted || "0.0%"}</span>
+         <span class="text-[9px] font-black opacity-40 uppercase tracking-tighter">(${row.Kimchi_Label || "-"})</span>
+      </div>
+      <div class="flex items-center justify-end gap-2 text-[10px] font-black">
+         <span class="text-theme-accent opacity-70">${row.Funding_Formatted || "-"}</span>
+      </div>
+    </div>
+  </td>
+  <td class="p-2">
+    <!-- 🚀 8대 거래소 4x2 그리드 로고 (CMC 이미지 활용) -->
+    <div class="grid grid-cols-4 gap-[2px] w-fit">
+      ${(() => {
+        const exchanges = row.Listed_Exchanges || [];
+        const list = [
+          { id: 'BINANCE', cmcId: 270 },
+          { id: 'UPBIT', cmcId: 351 },
+          { id: 'BITHUMB', cmcId: 200 },
+          { id: 'BYBIT', cmcId: 521 },
+          { id: 'OKX', cmcId: 294 },
+          { id: 'BITGET', cmcId: 513 },
+          { id: 'GATEIO', cmcId: 302 },
+          { id: 'COINBASE', cmcId: 89 }
+        ];
+        return list.map(ex => {
+          const isListed = exchanges.some(e => e.includes(ex.id)) || (ex.id === 'UPBIT' && row.Upbit === 'O');
+          const imgUrl = `https://s2.coinmarketcap.com/static/img/exchanges/64x64/${ex.cmcId}.png`;
+          return `
+            <div class="w-[14px] h-[14px] flex items-center justify-center rounded-[2px] overflow-hidden bg-white/5 transition-all"
+                 style="${isListed ? 'filter: none; opacity: 1;' : 'filter: grayscale(1); opacity: 0.1;'}">
+              <img src="${imgUrl}" alt="${ex.id}" class="w-full h-full object-contain" />
+            </div>
+          `;
+        }).join('');
+      })()}
     </div>
   </td>
 `;
-
-  // <div class="flex items-center gap-1 mt-1 opacity-80">${listedExchangesHtml}</div>
-  // <div class="flex items-center gap-1 mt-1 opacity-80">${tagsHtml}</div>
 }
 
 // 🚀 [table.js 또는 main.js] 무한 스크롤 & 스나이퍼 통합 엔진
@@ -570,6 +645,7 @@ function toggleFavorite(symbol, event) {
 // 🚀 가격 변화에 따른 반짝이 효과 통합 관리자
 function applyPriceFlash(element, newPrice, oldPrice) {
   if (!element || newPrice === oldPrice) return;
+  if (!store.useFlip) return; // 🚀 플립(반짝이) 기능 꺼져있으면 즉시 퇴근
 
   const flashClass = newPrice > oldPrice ? "flash-up" : "flash-down";
 
@@ -582,13 +658,6 @@ function applyPriceFlash(element, newPrice, oldPrice) {
   element.classList.add(flashClass);
   setTimeout(() => element.classList.remove(flashClass), 100);
 }
-
-// <td class="p-4 text-right">
-//     <div class="flex flex-col items-end justify-center h-full gap-1">
-//         <span class="text-[13px]">${row.Upbit === "O" ? "🔵" : "⚫"}</span>
-//         <span style="font-size:10px; opacity:0.6;">${row.Note || ""}</span>
-//     </div>
-// </td>
 
 // ⭐️ 2. 좌우 넓이 드래그 조절 기능 ⭐️
 const leftPanel = document.getElementById("left-panel");
@@ -631,9 +700,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const tr = e.target.closest("tr");
     if (tr && tr.dataset.sym) {
-      const displayTicker = tr.dataset.sym;
-      store.currentSelectedSymbol = displayTicker;
-      selectSymbol(displayTicker);
+      const ticker = tr.dataset.sym; // 🚀 Ticker (BTCUSDT 등)
+      store.currentSelectedSymbol = ticker;
+      selectSymbol(ticker);
       applySelectedHighlight();
 
       if (window.innerWidth <= CONFIG.SCREEN_WIDTH) {
@@ -643,6 +712,224 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+function switchTab(tab) {
+  // 🚀 [토글 로직 추가] 이미 FAV 모드인데 또 FAV를 누르면 ALL(LIST)로 복구
+  if (tab === "FAV" && store.currentTab === "FAV") {
+    tab = "ALL";
+  }
+
+  store.currentTab = tab;
+  store.currentRenderLimit = 50;
+
+  // UI 업데이트
+  document.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.classList.remove("bg-theme-accent", "text-white", "shadow-md");
+    btn.classList.add("text-theme-text", "opacity-50", "border-theme-border");
+  });
+
+  const activeBtn = document.getElementById(`tab-${tab.toLowerCase()}`);
+  if (activeBtn) {
+    activeBtn.classList.remove(
+      "text-theme-text",
+      "opacity-50",
+      "border-theme-border",
+    );
+    activeBtn.classList.add("bg-theme-accent", "text-white", "shadow-md");
+  }
+
+  renderTable();
+}
+
+function switchFilter(mode) {
+  const slider = document.getElementById("filter-slider");
+  const btnAll = document.getElementById("filter-all-main");
+  const btnBinance = document.getElementById("filter-binance");
+  const btnUpbit = document.getElementById("filter-upbit");
+
+  const updateUI = (activeBtn, offset) => {
+    [btnAll, btnBinance, btnUpbit].forEach((btn) => {
+      if (btn) {
+        btn.classList.remove("text-white", "font-black");
+        btn.classList.add("text-theme-text", "opacity-50");
+      }
+    });
+    if (activeBtn) {
+      activeBtn.classList.remove("text-theme-text", "opacity-50");
+      activeBtn.classList.add("text-white", "font-black");
+    }
+    if (slider) slider.style.left = offset;
+  };
+
+  if (mode === "ALL") {
+    store.filterMode = "ALL";
+    updateUI(btnAll, "4px");
+  } else if (mode === "BINANCE") {
+    store.filterMode = "BINANCE";
+    updateUI(btnBinance, "calc(33.33% + 2px)");
+  } else if (mode === "UPBIT") {
+    store.filterMode = "UPBIT";
+    updateUI(btnUpbit, "calc(66.66% + 1px)");
+  } else {
+    // FUTURES, SPOT 필터 (서브 필터)
+    store.filterMode = mode;
+    document.querySelectorAll(".filter-type-btn").forEach((btn) => {
+      btn.classList.remove("bg-theme-accent", "text-white", "shadow-sm");
+      btn.classList.add("text-theme-text", "opacity-50", "hover:opacity-100");
+    });
+    const activeBtn = document.getElementById(`filter-${mode.toLowerCase()}`);
+    if (activeBtn) {
+      activeBtn.classList.remove(
+        "text-theme-text",
+        "opacity-50",
+        "hover:opacity-100",
+      );
+      activeBtn.classList.add("bg-theme-accent", "text-white", "shadow-sm");
+    }
+  }
+
+  store.currentRenderLimit = 50;
+  renderTable();
+}
+
+function switchView(mode) {
+  store.viewMode = mode;
+  document.getElementById("view-detailed").className =
+    mode === "detailed"
+      ? "view-btn px-3 py-1.5 text-[11px] font-bold rounded-md transition-all bg-theme-accent text-white shadow-sm"
+      : "view-btn px-3 py-1.5 text-[11px] font-bold rounded-md transition-all text-theme-text opacity-50 hover:opacity-100";
+  document.getElementById("view-simple").className =
+    mode === "simple"
+      ? "view-btn px-3 py-1.5 text-[11px] font-bold rounded-md transition-all bg-theme-accent text-white shadow-sm"
+      : "view-btn px-3 py-1.5 text-[11px] font-bold rounded-md transition-all text-theme-text opacity-50 hover:opacity-100";
+
+  renderTable();
+}
+
+
+
+
+// 🚀 [신규] 상단 제어기 함수들
+window.toggleLang = () => {
+  store.lang = store.lang === "KR" ? "EN" : "KR";
+  const btn = document.getElementById("lang-toggle");
+  if (btn) btn.innerText = store.lang;
+  renderTable();
+};
+
+window.toggleSmallCap = () => {
+  store.hideSmallCap = !store.hideSmallCap;
+  
+  // UI 상태 업데이트
+  const btn = document.getElementById("btn-small-cap");
+  if (btn) {
+    if (store.hideSmallCap) {
+      btn.classList.remove("text-theme-text", "opacity-50", "border-theme-border");
+      btn.classList.add("bg-theme-down", "text-white", "border-theme-down", "shadow-md", "opacity-100");
+      btn.innerText = "🚫 Hiding Mcap < 1M";
+    } else {
+      btn.classList.add("text-theme-text", "opacity-50", "border-theme-border");
+      btn.classList.remove("bg-theme-down", "text-white", "border-theme-down", "shadow-md", "opacity-100");
+      btn.innerText = "🚫 Hiding Mcap < 1M";
+    }
+  }
+
+  store.currentRenderLimit = 50;
+  renderTable();
+};
+
+// 🚀 플립 토글 중복 선언 제거됨
+
+// ⚙️ 설정 모달 관련 함수 및 마스킹 엔진 (start.js와 동일한 쌀먹 아키텍처)
+function maskApiKey(key) {
+  if (!key) return "";
+  const len = key.length;
+  if (len <= 8) return key;
+
+  const start = key.slice(0, 4);
+  const end = key.slice(-4);
+  const dots = "*".repeat(len - 8);
+  return `${start}${dots}${end}`;
+}
+
+async function openSettingsModal() {
+  const modal = document.getElementById("settings-modal");
+  modal.classList.remove("hidden");
+
+  try {
+    const res = await fetch("/api/settings");
+    const data = await res.json();
+    store.settings = data;
+    const input = document.getElementById("setting-cmc-key");
+    const btn = input.nextElementSibling; // 🚀 버튼 찾기 (input 바로 다음 요소)
+    input.type = "text"; // 🚀 마스킹된 텍스트가 바로 보이도록 text 타입으로 설정
+    input.value = maskApiKey(data.CMC_API_KEY || "");
+    input.dataset.masked = "true";
+    if (btn) btn.innerText = "🙈"; // 🚀 가려진 상태이므로 눈알 닫기 이모지
+  } catch (e) {
+    console.error("Failed to load settings:", e);
+  }
+}
+
+function closeSettingsModal() {
+  document.getElementById("settings-modal").classList.add("hidden");
+}
+
+async function saveSettings() {
+  const input = document.getElementById("setting-cmc-key");
+  let newKey = input.value.trim();
+
+  // 🚀 마스킹된 별표(*) 문자열 그대로라면 원본 키를 유지 (안전장치)
+  if (newKey.includes("*") && store.settings) {
+    newKey = store.settings.CMC_API_KEY || "";
+  }
+
+  try {
+    const res = await fetch("/api/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        CMC_API_KEY: newKey
+      }),
+    });
+
+    if (res.ok) {
+      alert("Settings saved successfully! Restarting data fetch...");
+      closeSettingsModal();
+      loadTableData(true); // 새 키로 데이터 강제 다시 읽기
+    }
+  } catch (e) {
+    alert("Failed to save settings.");
+  }
+}
+
+function togglePasswordVisibility(id) {
+  const input = document.getElementById(id);
+  const btn = input.nextElementSibling; // 🚀 버튼 찾기
+  if (!store.settings) return;
+  const raw = store.settings.CMC_API_KEY || "";
+
+  if (input.dataset.masked === "true") {
+    // 🚀 마스킹 해제 (원본 노출 - 열면 눈알 열리기)
+    input.value = raw;
+    input.dataset.masked = "false";
+    if (btn) btn.innerText = "👁️";
+  } else {
+    // 🚀 다시 마스킹 (가리면 눈알 닫기)
+    input.value = maskApiKey(raw);
+    input.dataset.masked = "true";
+    if (btn) btn.innerText = "🙈";
+  }
+}
+
+
+// 🚀 [HTS급 실시간 정렬 엔진] 0.4초마다 순위 재배치 및 고속 FLIP 실행
+setInterval(() => {
+  if (store.currentSortCol && store.sortState !== "") {
+    applyRealtimeSort();
+  }
+}, 400);
+
+// 🚀 [통합] 전역 수출 구간
 window.loadTableData = loadTableData;
 window.sortTable = sortTable;
 window.renderTable = renderTable;
@@ -651,3 +938,12 @@ window.applySelectedHighlight = applySelectedHighlight;
 window.initInfiniteScroll = initInfiniteScroll;
 window.toggleFavorite = toggleFavorite;
 window.applyPriceFlash = applyPriceFlash;
+window.switchTab = switchTab;
+window.switchFilter = switchFilter;
+window.switchView = switchView;
+window.toggleSmallCap = toggleSmallCap;
+window.updateVisibleSymbols = updateVisibleSymbols;
+window.openSettingsModal = openSettingsModal;
+window.closeSettingsModal = closeSettingsModal;
+window.saveSettings = saveSettings;
+window.togglePasswordVisibility = togglePasswordVisibility;

@@ -137,6 +137,18 @@ func main() {
 			url = fmt.Sprintf("https://fapi.binance.com/fapi/v1/klines?symbol=%s&interval=%s&limit=%s", symbol, interval, limit)
 		} else if exchange == "binance_spot" {
 			url = fmt.Sprintf("https://api.binance.com/api/v3/klines?symbol=%s&interval=%s&limit=%s", symbol, interval, limit)
+		} else if exchange == "bybit" {
+			// 바이비트 인터벌 변환 (1d -> D, 1w -> W 등)
+			bybitInterval := interval
+			if interval == "1d" { bybitInterval = "D" }
+			if interval == "1w" { bybitInterval = "W" }
+			if interval == "1M" { bybitInterval = "M" }
+			url = fmt.Sprintf("https://api.bybit.com/v5/market/kline?category=spot&symbol=%s&interval=%s&limit=%s", symbol, bybitInterval, limit)
+		} else if exchange == "bithumb" {
+			// 빗썸 인터벌 변환 (1d -> 24h)
+			bithumbInterval := interval
+			if interval == "1d" { bithumbInterval = "24h" }
+			url = fmt.Sprintf("https://api.bithumb.com/public/candlestick/%s/%s", symbol, bithumbInterval)
 		} else {
 			return c.Status(400).JSON(fiber.Map{"error": "알 수 없는 거래소입니다."})
 		}

@@ -119,8 +119,13 @@ def execute_cmc_requests(id_lookup, sym_lookup):
             quote_tasks.append((url, headers, {'symbol': ",".join(chunk), 'convert': 'USD'}))
 
     market_data_map = {}
-    with ThreadPoolExecutor(max_workers=25) as executor:
-        results = list(executor.map(_fetch_cmc_api_chunk, quote_tasks))
+    results = []
+    try:
+        with ThreadPoolExecutor(max_workers=25) as executor:
+            results = list(executor.map(_fetch_cmc_api_chunk, quote_tasks))
+    except RuntimeError:
+        # 인터프리터 종료 중이면 그냥 빈 결과 리턴 (에러 방지)
+        return {}
 
     for res in results:
         if not res or 'data' not in res: continue

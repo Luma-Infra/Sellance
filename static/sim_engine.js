@@ -1,6 +1,6 @@
 // sim_engine.js
 // --- 🎮 시뮬레이터 수학 & 로직 ---
-import { store, tfSec } from './store.js';
+import { store, tfSec } from './_store.js';
 
 function changeDir(d) {
     const bodyInput = document.getElementById('input-body');
@@ -89,3 +89,13 @@ window.changeDir = changeDir;
 window.addCandle = addCandle;
 window.undoLast = undoLast;
 window.getNext = getNext;
+// ================== chart.js에서 이동됨 ==================
+export function updatePreview() {
+  if (
+    store.mainData.length &&
+    store.isHover &&
+    typeof window.getNext === "function"
+  )
+    store.previewSeries.setData([window.getNext()]);
+}
+window.updatePreview = updatePreview;

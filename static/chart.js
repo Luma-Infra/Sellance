@@ -1,124 +1,7 @@
-// chart.js
-import { store, tfSec, measureDOM } from "./store.js";
-import { fetchHistory } from "./api.js";
-
-// 🚀 김프 다채로운 색상 적용 엔진
-window.getKimchiColor = function (val) {
-  if (val < -4) return "#4B0082"; // 인디고
-  if (val < -2) return "#1E3A8A"; // 딥 블루
-  if (val < 0) return "#2E8B57"; // 씨그린
-  if (val < 2) return "#57a4fc"; // 하늘색
-  if (val < 4) return "#FF69B4"; // 핫핑크
-  if (val < 6) return "#B22222"; // 파이어브릭
-  if (val < 8) return "#FF4500"; // 오렌지레드
-  return "#8B0000"; // 다크레드
-};
-
-// 🚀 [추가] 차트 패널 (볼륨, 김프) 토글 관리자
-function togglePane(paneName) {
-  store.paneConfig[paneName] = !store.paneConfig[paneName];
-  applyChartLayout();
-}
-
-let isDraggingResizer = null;
-
-// 🚀 1. 마진 레이아웃 & 선 위치 업데이트
-window.applyChartLayout = function() {
-  if (!store.chart || !store.candleSeries) return;
-
-  const v = store.paneConfig.volume;
-  const k = store.paneConfig.kimchi;
-
-  const paneMain = document.getElementById("pane-main");
-  const paneVol = document.getElementById("pane-vol");
-  const rVol = document.getElementById("resizer-vol");
-
-  // 1. 시리즈 & 스케일 표시/숨김 설정 (김프가 볼륨 캔버스 안에 기생)
-  if (store.volumeSeries) {
-    store.volumeSeries.applyOptions({ visible: v });
-    store.chartVol.priceScale("right").applyOptions({ visible: v });
-  }
-  if (store.kimchiSeries) {
-    store.kimchiSeries.applyOptions({ visible: !!k });
-    store.chartVol.priceScale("left").applyOptions({ visible: !!k });
-  }
-
-  // 2. 패널 표시/숨김 및 플렉스 비율
-  let mainFlex = 1, subFlex = 0;
-  
-  if (v || k) {
-    if (paneVol) paneVol.style.display = "block";
-    if (rVol) rVol.style.display = "block";
-    mainFlex = store.chartSplits.s1 || 0.75;
-    subFlex = 1 - mainFlex;
-  } else {
-    if (paneVol) paneVol.style.display = "none";
-    if (rVol) rVol.style.display = "none";
-    mainFlex = 1;
-    subFlex = 0;
-  }
-
-  if (paneMain) paneMain.style.flex = `${mainFlex}`;
-  if (paneVol) paneVol.style.flex = `${subFlex}`;
-
-  // 🚀 X축(시간) 스케일 중복 방지
-  if (store.chart) store.chart.timeScale().applyOptions({ visible: !v && !k });
-  if (store.chartVol) store.chartVol.timeScale().applyOptions({ visible: v || k });
-
-  if (store.chart && paneMain) store.chart.resize(paneMain.clientWidth, paneMain.clientHeight);
-  if (store.chartVol && paneVol) store.chartVol.resize(paneVol.clientWidth, paneVol.clientHeight);
-
-  // 🚀 김프 비교군 스위처 위치 연동
-  const kimchiSwitcher = document.getElementById("kimchi-switcher");
-  if (kimchiSwitcher) {
-    if (k) {
-      kimchiSwitcher.style.display = "flex";
-      kimchiSwitcher.style.top = "auto";
-      kimchiSwitcher.style.bottom = `calc(${subFlex * 100}% - 30px)`;
-    } else {
-      kimchiSwitcher.style.display = "none";
-    }
-  }
-};
-
-// 🚀 2. 드래그 엔진 초기화
-function initResizers() {
-  const wrapper = document.getElementById("chart-wrapper");
-  const rVol = document.getElementById("resizer-vol");
-
-  const startDrag = (e) => {
-    isDraggingResizer = true;
-    document.body.style.cursor = "row-resize";
-  };
-
-  if (rVol) rVol.addEventListener("mousedown", startDrag);
-
-  window.addEventListener("mousemove", (e) => {
-    if (!isDraggingResizer) return;
-    const rect = wrapper.getBoundingClientRect();
-    let pct = (e.clientY - rect.top) / rect.height;
-
-    if (pct < 0.2) pct = 0.2;
-    if (pct > 0.9) pct = 0.9;
-    store.chartSplits.s1 = pct;
-    if (typeof window.applyChartLayout === "function") window.applyChartLayout();
-  });
-
-  window.addEventListener("mouseup", () => {
-    if (isDraggingResizer) {
-      isDraggingResizer = false;
-      document.body.style.cursor = "default";
-    }
-  });
-}
-
-// ⚙️ 시간 변환 헬퍼 (Lightweight Charts 포맷팅용)
-const getUnixSeconds = (t) => {
-  if (typeof t === "object" && t !== null)
-    return new Date(t.year, t.month - 1, t.day).getTime() / 1000;
-  if (typeof t === "string") return new Date(t).getTime() / 1000;
-  return t;
-};
+// chart.js - 순수 차트 엔진 코어
+import { store, tfSec, measureDOM } from './_store.js';
+import { fetchHistory } from './chart_data.js';
+import { getUnixSeconds } from './chart_utils.js';
 
 // 🚀 3. 차트 생성
 export function initChart() {
@@ -231,9 +114,9 @@ export function initChart() {
   // 🚀 무한 재귀 방지용 실제 마우스 위치 추적
   elMain.addEventListener('mouseenter', () => store.activeChart = store.chart);
   elVol.addEventListener('mouseenter', () => store.activeChart = store.chartVol);
-  
-  elMain.addEventListener('mouseleave', () => { if(store.activeChart === store.chart) store.activeChart = null; });
-  elVol.addEventListener('mouseleave', () => { if(store.activeChart === store.chartVol) store.activeChart = null; });
+
+  elMain.addEventListener('mouseleave', () => { if (store.activeChart === store.chart) store.activeChart = null; });
+  elVol.addEventListener('mouseleave', () => { if (store.activeChart === store.chartVol) store.activeChart = null; });
 
   store.candleSeries = store.chart.addSeries(
     window.LightweightCharts.CandlestickSeries,
@@ -304,7 +187,7 @@ export function initChart() {
 
       try {
         const isHover = param.point !== undefined && param.time !== undefined && param.point.x >= 0 && param.point.y >= 0;
-        
+
         if (isHover) {
           if (sourceChart._horzVisible !== true) {
             sourceChart.applyOptions({ crosshair: { horzLine: { visible: true, labelVisible: true } } });
@@ -324,7 +207,7 @@ export function initChart() {
                 if (data) price = data.value !== undefined ? data.value : data.close;
               }
               if (typeof tChart.setCrosshairPosition === 'function' && tSeries) {
-                try { tChart.setCrosshairPosition(price || 0, param.time, tSeries); } catch (e) {}
+                try { tChart.setCrosshairPosition(price || 0, param.time, tSeries); } catch (e) { }
               }
             }
           });
@@ -337,14 +220,14 @@ export function initChart() {
         if (isHover) {
           store.isCrosshairActive = true;
           const pTime = getUnixSeconds(param.time);
-          
+
           let d = null;
           if (sourceChart === store.chart) d = param.seriesData.get(store.candleSeries);
           else d = store.mainData?.find(item => item.time === pTime) || null;
 
           const v = store.volumeData?.find(item => item.time === pTime) || null;
           const k = store.kimchiData?.find(item => item.time === pTime) || null;
-          
+
           if (d && typeof window.updateLegend === "function") window.updateLegend(d, v, k);
         } else {
           store.isCrosshairActive = false;
@@ -355,7 +238,7 @@ export function initChart() {
             window.updateLegend(store.mainData[lastIdx], v, k);
           }
         }
-      } catch (err) {}
+      } catch (err) { }
     });
   };
 
@@ -410,14 +293,14 @@ export function initChart() {
     isSyncingWidth = true;
     maxPriceScaleWidth = 0;
     maxLeftPriceScaleWidth = 0;
-    
+
     allCharts.forEach((c) => {
       if (c) {
         c.priceScale("right").applyOptions({ minimumWidth: 0 });
         c.priceScale("left").applyOptions({ minimumWidth: 0 });
       }
     });
-    
+
     isSyncingWidth = false;
   };
 
@@ -432,6 +315,62 @@ export function initChart() {
     if (typeof window.setupMeasureTool === "function")
       window.setupMeasureTool();
   }, 50);
+}
+
+export function updateChartTheme() {
+  // 🚀 테마 변경 시 차트를 부수지 않고 색상만 즉각적으로 갈아끼우는 함수
+  if (!store.chart) return;
+
+  const style = getComputedStyle(document.body);
+  const textColor = style.getPropertyValue("--text").trim() || "#d1d4dc";
+  const gridColor = style.getPropertyValue("--border").trim() || "#2a2a22";
+  const upColor = style.getPropertyValue("--up").trim() || "#26a69a";
+  const downColor = style.getPropertyValue("--down").trim() || "#ef5350";
+
+  // 1. 차트 배경 및 그리드 색상 업데이트
+  const commonTheme = {
+    layout: { textColor: textColor },
+    grid: { vertLines: { color: gridColor }, horzLines: { color: gridColor } },
+    rightPriceScale: { borderColor: gridColor },
+  };
+
+  store.chart.applyOptions(commonTheme);
+  if (store.chartVol) store.chartVol.applyOptions(commonTheme);
+  if (store.chartKimchi) store.chartKimchi.applyOptions(commonTheme);
+
+  // 2. 캔들 시리즈 색상 업데이트
+  if (store.candleSeries) {
+    store.candleSeries.applyOptions({
+      upColor,
+      downColor,
+      wickUpColor: upColor,
+      wickDownColor: downColor,
+    });
+  }
+  if (store.previewSeries) {
+    store.previewSeries.applyOptions({
+      upColor: upColor + "4D",
+      downColor: downColor + "4D",
+    });
+  }
+
+  // 🚀 3. 볼륨 시리즈 및 막대그래프 색상 업데이트
+  if (store.volumeSeries && store.volumeData && store.mainData) {
+    const upColorVol = upColor + "80"; // 50% 투명도
+    const downColorVol = downColor + "80";
+
+    store.volumeSeries.applyOptions({ color: upColorVol });
+
+    store.volumeData.forEach((volItem, index) => {
+      const candle = store.mainData[index];
+      if (candle) {
+        volItem.color = candle.close >= candle.open ? upColorVol : downColorVol;
+      }
+    });
+    store.volumeSeries.setData(store.volumeData);
+  }
+
+  applyChartLayout();
 }
 
 // function initChart() {
@@ -638,402 +577,3 @@ export function initChart() {
 //     window.chartResizeObserver.observe(chartContainer);
 //   }
 // }
-
-// 🚀 테마 변경 시 차트를 부수지 않고 색상만 즉각적으로 갈아끼우는 함수
-export function updateChartTheme() {
-  if (!store.chart) return;
-
-  const style = getComputedStyle(document.body);
-  const textColor = style.getPropertyValue("--text").trim() || "#d1d4dc";
-  const gridColor = style.getPropertyValue("--border").trim() || "#2a2a22";
-  const upColor = style.getPropertyValue("--up").trim() || "#26a69a";
-  const downColor = style.getPropertyValue("--down").trim() || "#ef5350";
-
-  // 1. 차트 배경 및 그리드 색상 업데이트
-  const commonTheme = {
-    layout: { textColor: textColor },
-    grid: { vertLines: { color: gridColor }, horzLines: { color: gridColor } },
-    rightPriceScale: { borderColor: gridColor },
-  };
-
-  store.chart.applyOptions(commonTheme);
-  if (store.chartVol) store.chartVol.applyOptions(commonTheme);
-  if (store.chartKimchi) store.chartKimchi.applyOptions(commonTheme);
-
-  // 2. 캔들 시리즈 색상 업데이트
-  if (store.candleSeries) {
-    store.candleSeries.applyOptions({
-      upColor,
-      downColor,
-      wickUpColor: upColor,
-      wickDownColor: downColor,
-    });
-  }
-  if (store.previewSeries) {
-    store.previewSeries.applyOptions({
-      upColor: upColor + "4D",
-      downColor: downColor + "4D",
-    });
-  }
-
-  // 🚀 3. 볼륨 시리즈 및 막대그래프 색상 업데이트
-  if (store.volumeSeries && store.volumeData && store.mainData) {
-    const upColorVol = upColor + "80"; // 50% 투명도
-    const downColorVol = downColor + "80";
-
-    store.volumeSeries.applyOptions({ color: upColorVol });
-
-    store.volumeData.forEach((volItem, index) => {
-      const candle = store.mainData[index];
-      if (candle) {
-        volItem.color = candle.close >= candle.open ? upColorVol : downColorVol;
-      }
-    });
-    store.volumeSeries.setData(store.volumeData);
-  }
-
-  applyChartLayout();
-}
-
-window.togglePane = togglePane;
-window.applyChartLayout = applyChartLayout;
-
-// --- _main.js에서 옮겨온 함수들 ---
-
-export function setTF(tf) {
-  const btnSim = document.getElementById("tab-btn-sim");
-  const isSimMode = btnSim ? btnSim.classList.contains("active") : false;
-
-  if (isSimMode) {
-    window.Swal.fire({
-      title: "초기화 경고!",
-      text: "타임프레임을 변경하면 현재 그려둔 가상 차트가 모두 날아갑니다. 바꿀까요?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "var(--up)",
-      cancelButtonColor: "var(--border)",
-      confirmButtonText: "네, 변경할게요 🚀",
-      cancelButtonText: "아니요, 취소",
-      background: "var(--panel)",
-      color: "var(--text)",
-    }).then((result) => {
-      if (result.isConfirmed) executeSetTF(tf);
-    });
-  } else {
-    executeSetTF(tf);
-  }
-}
-
-export function executeSetTF(tf) {
-  store.currentTF = tf;
-  document.querySelectorAll(".tf-btn").forEach((b) => {
-    const onClickAttr = b.getAttribute("onclick") || "";
-    const isMatch = onClickAttr.includes(`'${tf}'`);
-
-    b.classList.toggle("active", isMatch);
-    b.classList.toggle("opacity-100", isMatch);
-    b.classList.toggle("opacity-50", !isMatch);
-  });
-
-  if (typeof window.renderTimeframeButtons === "function") {
-    window.renderTimeframeButtons(tf);
-  }
-
-  // 4. 차트 데이터 갱신 함수 호출 (타임프레임 변경임을 명시: true)
-  if (typeof fetchHistory === "function")
-    fetchHistory(store.currentAsset, true);
-}
-
-export function toggleLogScale() {
-  store.isLogMode = !store.isLogMode;
-  const btn = document.getElementById("log-btn");
-  if (btn) {
-    btn.innerText = store.isLogMode ? "Log ON" : "Log Off";
-    btn.classList.toggle("active", store.isLogMode);
-  }
-  if (store.chart) {
-    store.chart
-      .priceScale("right")
-      .applyOptions({ mode: store.isLogMode ? 1 : 0 });
-  }
-}
-
-export function updatePreview() {
-  if (
-    store.mainData.length &&
-    store.isHover &&
-    typeof window.getNext === "function"
-  )
-    store.previewSeries.setData([window.getNext()]);
-}
-
-export function stopMeasuring() {
-  store.isMeasuring = false;
-  store.measureStart = null;
-  store.measureEnd = null;
-  [
-    measureDOM.box,
-    measureDOM.startLabel,
-    measureDOM.endLabel,
-    measureDOM.rangeBar,
-  ].forEach((el) => {
-    el.style.display = "none";
-    el.innerText = "";
-  });
-}
-
-export function setupMeasureTool() {
-  const container = document.getElementById("pane-main");
-  if (!container) return;
-  store.cachedChartTd = container.querySelector("td:nth-child(2)");
-  store.cachedPriceTd = container.querySelector("td:nth-child(3)");
-
-  if (!store.cachedChartTd || !store.cachedPriceTd) return;
-
-  store.cachedChartTd.style.position = "relative";
-  store.cachedPriceTd.style.position = "relative";
-  store.cachedChartTd.appendChild(measureDOM.box);
-  store.cachedPriceTd.appendChild(measureDOM.rangeBar);
-  store.cachedPriceTd.appendChild(measureDOM.startLabel);
-  store.cachedPriceTd.appendChild(measureDOM.endLabel);
-}
-
-export function initMeasureEvents() {
-  const container = document.getElementById("pane-main");
-  if (!container) return;
-
-  container.addEventListener("mousedown", (e) => {
-    if (
-      !store.cachedChartTd ||
-      !store.cachedPriceTd ||
-      !store.chart ||
-      !store.candleSeries
-    )
-      return;
-
-    const rect = container.getBoundingClientRect();
-    if (
-      e.clientX - rect.left >
-      rect.width - (store.cachedPriceTd.clientWidth || 60)
-    )
-      return;
-
-    if (e.shiftKey && e.button === 0) {
-      stopMeasuring();
-      store.isMeasuring = true;
-
-      const chartRect = store.cachedChartTd.getBoundingClientRect();
-      const sX = e.clientX - chartRect.left;
-      const sY = e.clientY - chartRect.top;
-      const price = store.candleSeries.coordinateToPrice(sY);
-      const rawTime = store.chart.timeScale().coordinateToTime(sX);
-
-      if (price === null || rawTime === null) {
-        store.isMeasuring = false;
-        return;
-      }
-
-      let unixTime = rawTime;
-      if (typeof rawTime === "object" && rawTime !== null)
-        unixTime =
-          new Date(rawTime.year, rawTime.month - 1, rawTime.day).getTime() /
-          1000;
-      else if (typeof rawTime === "string")
-        unixTime = new Date(rawTime).getTime() / 1000;
-
-      store.measureStart = {
-        x: sX,
-        y: sY,
-        price: price,
-        rawTime: rawTime,
-        unixTime: unixTime,
-      };
-
-      measureDOM.box.style.cssText += `left: ${sX}px; top: ${sY}px; width: 0px; height: 0px; display: flex;`;
-      measureDOM.rangeBar.style.cssText += `top: ${sY}px; height: 0px; display: block;`;
-      measureDOM.startLabel.style.cssText += `top: ${sY - 10}px; display: block;`;
-      measureDOM.endLabel.style.cssText += `top: ${sY - 10}px; display: block;`;
-
-      measureDOM.box.innerText = "";
-      const formattedPrice =
-        typeof window.formatSmartPrice === "function"
-          ? window.formatSmartPrice(price)
-          : price.toFixed(2);
-      measureDOM.startLabel.innerText = formattedPrice;
-      measureDOM.endLabel.innerText = formattedPrice;
-      e.preventDefault();
-    } else if (e.button === 0 && store.isMeasuring) {
-      store.isMeasuring = false;
-    } else if (!e.shiftKey && !store.isMeasuring && store.measureStart) {
-      stopMeasuring();
-    }
-  });
-
-  container.addEventListener("mousemove", (e) => {
-    if (
-      !store.isMeasuring ||
-      !store.measureStart ||
-      !store.cachedChartTd ||
-      !store.candleSeries
-    )
-      return;
-
-    const chartRect = store.cachedChartTd.getBoundingClientRect();
-    const curX = e.clientX - chartRect.left;
-    const curY = e.clientY - chartRect.top;
-
-    const curPrice = store.candleSeries.coordinateToPrice(curY);
-    const curTimeRaw = store.chart.timeScale().coordinateToTime(curX);
-    if (curPrice === null || curTimeRaw === null) return;
-
-    let curUnixTime = curTimeRaw;
-    if (typeof curTimeRaw === "object" && curTimeRaw !== null)
-      curUnixTime =
-        new Date(
-          curTimeRaw.year,
-          curTimeRaw.month - 1,
-          curTimeRaw.day,
-        ).getTime() / 1000;
-    else if (typeof curTimeRaw === "string")
-      curUnixTime = new Date(curTimeRaw).getTime() / 1000;
-
-    store.measureEnd = { price: curPrice, time: curTimeRaw };
-
-    if (!store.measureStart.rawTime) return;
-    const startX = store.chart
-      .timeScale()
-      .timeToCoordinate(store.measureStart.rawTime);
-    const startY = store.candleSeries.priceToCoordinate(
-      store.measureStart.price,
-    );
-    if (startX === null || startY === null) return;
-
-    const priceDiff = curPrice - store.measureStart.price;
-    const percentDiff = (priceDiff / store.measureStart.price) * 100;
-    const isUp = priceDiff >= 0;
-    const tColor = isUp ? "var(--up, #26a69a)" : "var(--down, #ef5350)";
-    const tBg = isUp ? "rgba(38,166,154,0.15)" : "rgba(239,83,80,0.15)";
-
-    const topY = Math.min(startY, curY),
-      heightY = Math.max(0.5, Math.abs(curY - startY));
-    const leftX = Math.min(startX, curX),
-      widthX = Math.abs(curX - startX);
-
-    measureDOM.box.style.cssText += `left: ${leftX}px; top: ${topY}px; width: ${widthX}px; height: ${heightY}px; border-color: ${tColor}; background-color: ${tBg}; color: ${tColor};`;
-    measureDOM.rangeBar.style.cssText += `top: ${topY}px; height: ${heightY}px; background-color: ${tBg};`;
-    measureDOM.startLabel.style.cssText += `top: ${startY - 10}px; background-color: ${tColor};`;
-    measureDOM.endLabel.style.cssText += `top: ${curY - 10}px; background-color: ${tColor};`;
-    measureDOM.endLabel.innerText =
-      typeof window.formatSmartPrice === "function"
-        ? window.formatSmartPrice(curPrice)
-        : curPrice.toFixed(2);
-
-    const barsDiff = Math.abs(
-      Math.round(
-        (curUnixTime - store.measureStart.unixTime) /
-        (tfSec[store.currentTF] || 86400),
-      ),
-    );
-    const formattedDiff =
-      typeof window.formatSmartPrice === "function"
-        ? window.formatSmartPrice(priceDiff)
-        : priceDiff.toFixed(2);
-    measureDOM.box.innerText = `${barsDiff} bars\n${formattedDiff}\n(${isUp ? "+" : ""}${percentDiff.toFixed(2)}%)`;
-  });
-
-  container.addEventListener("contextmenu", (e) => {
-    if (store.measureStart) {
-      e.preventDefault();
-      stopMeasuring();
-    }
-  });
-}
-
-export function toggleCountdown(isChecked) {
-  store.showCountdown = isChecked;
-  const knob = document.getElementById("countdown-knob");
-
-  if (isChecked) {
-    knob.style.transform = "translateX(10px)";
-    knob.parentElement.classList.add("bg-theme-accent");
-  } else {
-    knob.style.transform = "translateX(0)";
-    knob.parentElement.classList.remove("bg-theme-accent");
-    if (store.countdownOverlay) store.countdownOverlay.style.display = "none";
-  }
-}
-
-export function updateRealtimeCountdown(serverMs) {
-  if (!store.candleSeries || store.mainData.length === 0) {
-    if (store.countdownPriceLine) {
-      store.candleSeries.removePriceLine(store.countdownPriceLine);
-      store.countdownPriceLine = null;
-    }
-    return;
-  }
-
-  let displayTime = "Wait...";
-  if (serverMs && serverMs > 0) {
-    if (serverMs !== store.lastServerMs) {
-      store.lastServerMs = serverMs;
-      store.localTimeAtUpdate = performance.now();
-    }
-
-    const interpolatedMs =
-      store.lastServerMs + (performance.now() - store.localTimeAtUpdate);
-
-    const secondsPerBar = tfSec[store.currentTF] || 60;
-    const lastCandleTime = store.mainData[store.mainData.length - 1].time;
-    const nextBarTimeMs = (lastCandleTime + secondsPerBar) * 1000;
-
-    if (interpolatedMs >= nextBarTimeMs) {
-      displayTime = "00:00";
-    } else {
-      if (typeof window.calculateTimeRemaining === "function") {
-        displayTime = window.calculateTimeRemaining(
-          store.currentTF,
-          interpolatedMs,
-        );
-      }
-    }
-  }
-
-  const lastCandle = store.mainData[store.mainData.length - 1];
-  const isDown = lastCandle.close < lastCandle.open;
-  const style = getComputedStyle(document.body);
-  const varName = isDown ? "--down" : "--up";
-  const rawColor =
-    style.getPropertyValue(varName).trim() || (isDown ? "#ef5350" : "#26a69a");
-
-  const lineOptions = {
-    price: lastCandle.close,
-    color: rawColor, // 🚀 투명색 대신 현재 양봉/음봉 색상 사용 (이게 없어서 안 보였음)
-    lineWidth: 1,
-    lineStyle: window.LightweightCharts ? window.LightweightCharts.LineStyle.Dashed : 2, // 🚀 점선(Dashed)으로 차별화
-    axisLabelVisible: true,
-    title: store.showCountdown ? `${displayTime}` : "",
-    axisLabelColor: rawColor,
-    axisLabelTextColor: "#ffffff",
-  };
-
-  if (!store.countdownPriceLine) {
-    store.countdownPriceLine = store.candleSeries.createPriceLine(lineOptions);
-  } else {
-    store.countdownPriceLine.applyOptions(lineOptions);
-  }
-}
-
-setInterval(() => {
-  if (store.lastServerMs > 0) {
-    updateRealtimeCountdown(store.lastServerMs);
-  }
-}, 50);
-
-window.setTF = setTF;
-window.executeSetTF = executeSetTF;
-window.toggleLogScale = toggleLogScale;
-window.updatePreview = updatePreview;
-window.stopMeasuring = stopMeasuring;
-window.setupMeasureTool = setupMeasureTool;
-window.initMeasureEvents = initMeasureEvents;
-window.toggleCountdown = toggleCountdown;

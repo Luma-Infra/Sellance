@@ -9,7 +9,16 @@ export const store = {
 
   currentAsset: "BTC",
   currentSelectedSymbol: null,
-  currentMarket: "SPOT",
+  mcapMin: 0,                  // 🚀 시총 최소값 (기본 0)
+  mcapMax: 10000000000,        // 🚀 시총 최대값 (기본 10B)
+  useFlip: true,               // 🚀 플립 애니메이션 사용 여부
+  hideSmallCap: false,         // 🚀 시총 1M 미만 숨기기 여부
+  lang: "KR",                  // 🚀 한/영 토글 (KR, EN)
+  filterMode: "ALL", // 🚀 [추가] ALL, BINANCE, UPBIT, FUTURES, SPOT
+  viewMode: "DETAILED",
+  settings: {
+    CMC_API_KEY: "",
+  },
   currentTF: "1d",
 
   chart: null,

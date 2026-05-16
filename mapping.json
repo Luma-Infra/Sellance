@@ -171,7 +171,7 @@
         ],
         "AAPL": [
             "39624",
-            "HYPE",
+            null,
             "Apple Tokenized Stock (Hyperliquid)",
             "AAPL"
         ],
@@ -183,19 +183,19 @@
         ],
         "ACE": [
             "28674",
-            "BNB",
+            null,
             "Fusionist",
             "ACE"
         ],
         "ACH": [
             "6958",
-            "ETH",
+            null,
             "Alchemy Pay",
             "ACH"
         ],
         "ACM": [
             "8538",
-            "CHZ",
+            null,
             "AC Milan Fan Token",
             "ACM"
         ],
@@ -207,13 +207,13 @@
         ],
         "ACU": [
             "36492",
-            "ETH",
+            null,
             "Acurast",
             "ACU"
         ],
         "ACX": [
             "22620",
-            "ETH",
+            null,
             "Across Protocol",
             "ACX"
         ],
@@ -225,7 +225,7 @@
         ],
         "ADX": [
             "1768",
-            "ETH",
+            null,
             "heyAura",
             "ADX"
         ],
@@ -243,13 +243,13 @@
         ],
         "AEUR": [
             "28596",
-            "ETH",
+            null,
             "Anchored Coins AEUR",
             "AEUR"
         ],
         "AEVO": [
             "29676",
-            "ETH",
+            null,
             "Aevo",
             "AEVO"
         ],
@@ -261,7 +261,7 @@
         ],
         "AGT": [
             "36195",
-            "BNB",
+            null,
             "Alaya Governance Token",
             "AGT"
         ],
@@ -279,7 +279,7 @@
         ],
         "AIA": [
             "38430",
-            "BNB",
+            null,
             "DeAgentAI",
             "AIA"
         ],
@@ -291,31 +291,31 @@
         ],
         "AIN": [
             "36770",
-            "BNB",
+            null,
             "Infinity Ground",
             "AIN"
         ],
         "AIO": [
             "37562",
-            "BNB",
+            null,
             "OLAXBT",
             "AIO"
         ],
         "AIOT": [
             "36319",
-            "BNB",
+            null,
             "OKZOO",
             "AIOT"
         ],
         "AIXBT": [
             "34103",
-            "ETH",
+            null,
             "aixbt",
             "AIXBT"
         ],
         "AKE": [
             "38127",
-            "BNB",
+            null,
             "AKEDO",
             "AKE"
         ],
@@ -327,13 +327,13 @@
         ],
         "ALCH": [
             "34880",
-            "SOL",
+            null,
             "Alchemist AI",
             "ALCH"
         ],
         "ALCX": [
             "8613",
-            "ETH",
+            null,
             "Alchemix",
             "ALCX"
         ],
@@ -345,19 +345,19 @@
         ],
         "ALICE": [
             "8766",
-            "ETH",
+            null,
             "MyNeighborAlice",
             "ALICE"
         ],
         "ALLO": [
             "38908",
-            "ETH",
+            null,
             "Allora",
             "ALLO"
         ],
         "ALPINE": [
             "18112",
-            "BNB",
+            null,
             "Alpine F1 Team Fan Token",
             "ALPINE"
         ],
@@ -369,19 +369,19 @@
         ],
         "AMD": [
             "39489",
-            "AMD",
+            null,
             "Advanced Micro Devices Inc (Derivatives)",
             "AMD"
         ],
         "AMP": [
             "6945",
-            "ETH",
+            null,
             "Amp",
             "AMP"
         ],
         "AMZN": [
             "39471",
-            "AMZN",
+            null,
             "Amazon.com Inc (Derivatives)",
             "AMZN"
         ],
@@ -399,7 +399,7 @@
         ],
         "APE": [
             "18876",
-            "ETH",
+            null,
             "ApeCoin",
             "APE"
         ],
@@ -411,7 +411,7 @@
         ],
         "APR": [
             "38569",
-            "ETH",
+            null,
             "aPriori",
             "APR"
         ],
@@ -429,7 +429,7 @@
         ],
         "AR": [
             "5632",
-            "AR",
+            null,
             "Arweave",
             "AR"
         ],
@@ -441,7 +441,7 @@
         ],
         "ARC": [
             "34926",
-            "SOL",
+            null,
             "AI Rig Complex",
             "ARC"
         ],
@@ -453,7 +453,7 @@
         ],
         "ARIA": [
             "38102",
-            "BNB",
+            null,
             "AriaAI",
             "ARIA"
         ],
@@ -471,19 +471,19 @@
         ],
         "ARPA": [
             "4039",
-            "ETH",
+            null,
             "ARPA",
             "ARPA"
         ],
         "ASR": [
             "5229",
-            "CHZ",
+            null,
             "AS Roma Fan Token",
             "ASR"
         ],
         "ASTER": [
             "36341",
-            "BNB",
+            null,
             "Aster",
             "ASTER"
         ],
@@ -495,13 +495,13 @@
         ],
         "AT": [
             "38757",
-            "ETH",
+            null,
             "APRO",
             "AT"
         ],
         "ATA": [
             "10188",
-            "ETH",
+            null,
             "Automata Network",
             "ATA"
         ],
@@ -513,7 +513,7 @@
         ],
         "ATM": [
             "5227",
-            "CHZ",
+            null,
             "Atletico De Madrid Fan Token",
             "ATM"
         ],
@@ -531,13 +531,13 @@
         ],
         "AUDIO": [
             "7455",
-            "ETH",
+            null,
             "Audius",
             "AUDIO"
         ],
         "AVA": [
             "2776",
-            "ETH",
+            null,
             "AVA (Travala)",
             "AVA"
         ],
@@ -555,7 +555,7 @@
         ],
         "AVGO": [
             "39871",
-            "AVGO",
+            null,
             "Broadcom Inc (Derivatives)",
             "AVGO"
         ],
@@ -591,13 +591,13 @@
         ],
         "B": [
             "36532",
-            "BNB",
+            null,
             "BUILDon",
             "B"
         ],
         "B2": [
             "36352",
-            "BNB",
+            null,
             "BSquared Network",
             "B2"
         ],
@@ -609,13 +609,13 @@
         ],
         "BABA": [
             "39486",
-            "BABA",
+            null,
             "Alibaba Group Holding Limited (Derivatives)",
             "BABA"
         ],
         "BABY": [
             "32198",
-            "BABY",
+            null,
             "Babylon",
             "BABY"
         ],
@@ -627,37 +627,37 @@
         ],
         "BAN": [
             "33881",
-            "SOL",
+            null,
             "Comedian",
             "BAN"
         ],
         "BANANA": [
             "28066",
-            "ETH",
+            null,
             "Banana Gun",
             "BANANA"
         ],
         "BANANAS31": [
             "34118",
-            "BNB",
+            null,
             "Banana For Scale",
             "BANANAS31"
         ],
         "BAND": [
             "4679",
-            "ETH",
+            null,
             "Band",
             "BAND"
         ],
         "BANK": [
             "36296",
-            "BNB",
+            null,
             "Lorenzo Protocol",
             "BANK"
         ],
         "BAR": [
             "5225",
-            "SOL",
+            null,
             "FC Barcelona Fan Token",
             "BAR"
         ],
@@ -669,13 +669,13 @@
         ],
         "BAS": [
             "37387",
-            "BNB",
+            null,
             "BNB Attestation Service",
             "BAS"
         ],
         "BASED": [
             "39812",
-            "ETH",
+            null,
             "Based",
             "BASED"
         ],
@@ -687,7 +687,7 @@
         ],
         "BB": [
             "30746",
-            "BB",
+            null,
             "BounceBit",
             "BB"
         ],
@@ -711,13 +711,13 @@
         ],
         "BEAT": [
             "38837",
-            "BNB",
+            null,
             "Audiera",
             "BEAT"
         ],
         "BEL": [
             "6928",
-            "ETH",
+            null,
             "Bella Protocol",
             "BEL"
         ],
@@ -729,13 +729,13 @@
         ],
         "BFUSD": [
             "37760",
-            "BFUSD",
+            null,
             "BFUSD",
             "BFUSD"
         ],
         "BICO": [
             "9543",
-            "ETH",
+            null,
             "Biconomy",
             "BICO"
         ],
@@ -747,7 +747,7 @@
         ],
         "BILL": [
             "39545",
-            "ETH",
+            null,
             "Billions Network",
             "BILL"
         ],
@@ -777,13 +777,13 @@
         ],
         "BLESS": [
             "38466",
-            "BNB",
+            null,
             "Bless",
             "BLESS"
         ],
         "BLUAI": [
             "38717",
-            "BNB",
+            null,
             "Bluwhale",
             "BLUAI"
         ],
@@ -795,25 +795,25 @@
         ],
         "BMT": [
             "35214",
-            "BNB",
+            null,
             "Bubblemaps",
             "BMT"
         ],
         "BNB": [
             "1839",
-            "https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png",
+            null,
             "BNB",
             "BNB"
         ],
         "BNSOL": [
             "32882",
-            "SOL",
+            null,
             "Binance Staked SOL",
             "BNSOL"
         ],
         "BNT": [
             "1727",
-            "ETH",
+            null,
             "Bancor",
             "BNT"
         ],
@@ -829,7 +829,7 @@
         ],
         "BOME": [
             "29870",
-            "SOL",
+            null,
             "BOOK OF MEME",
             "BOME"
         ],
@@ -853,13 +853,13 @@
         ],
         "BR": [
             "36063",
-            "BNB",
+            null,
             "Bedrock",
             "BR"
         ],
         "BRETT": [
             "29743",
-            "BNB",
+            null,
             "Brett (Based)",
             "BRETT"
         ],
@@ -883,7 +883,7 @@
         ],
         "BSB": [
             "38889",
-            "BNB",
+            null,
             "Block Street",
             "BSB"
         ],
@@ -901,7 +901,7 @@
         ],
         "BTR": [
             "36277",
-            "BTR",
+            null,
             "Bitlayer",
             "BTR"
         ],
@@ -919,31 +919,31 @@
         ],
         "BULLA": [
             "36769",
-            "BNB",
+            null,
             "Bulla",
             "BULLA"
         ],
         "BZ": [
             "39804",
-            "BZ",
+            null,
             "Brent Oil (Derivatives)",
             "BZ"
         ],
         "C": [
             "37340",
-            "BNB",
+            null,
             "Chainbase",
             "C"
         ],
         "C98": [
             "10903",
-            "ETH",
+            null,
             "Coin98",
             "C98"
         ],
         "CAKE": [
             "7186",
-            "ETH",
+            null,
             "PancakeSwap",
             "CAKE"
         ],
@@ -955,13 +955,13 @@
         ],
         "CAT": [
             "32724",
-            "BNB",
+            null,
             "Simon's Cat",
             "CAT"
         ],
         "CATI": [
             "32966",
-            "TON",
+            null,
             "Catizen",
             "CATI"
         ],
@@ -985,13 +985,13 @@
         ],
         "CELR": [
             "3814",
-            "ETH",
+            null,
             "Celer Network",
             "CELR"
         ],
         "CETUS": [
             "25114",
-            "SUI",
+            null,
             "Cetus Protocol",
             "CETUS"
         ],
@@ -1003,25 +1003,25 @@
         ],
         "CFX": [
             "7334",
-            "CFX",
+            null,
             "Conflux",
             "CFX"
         ],
         "CGPT": [
             "23756",
-            "ETH",
+            null,
             "ChainGPT",
             "CGPT"
         ],
         "CHEEMS": [
             "33280",
-            "BNB",
+            null,
             "Cheems (cheems.pet)",
             "CHEEMS"
         ],
         "CHILLGUY": [
             "34125",
-            "SOL",
+            null,
             "Just a chill guy",
             "CHILLGUY"
         ],
@@ -1033,7 +1033,7 @@
         ],
         "CHR": [
             "3978",
-            "ETH",
+            null,
             "Chromia",
             "CHR"
         ],
@@ -1045,7 +1045,7 @@
         ],
         "CITY": [
             "10049",
-            "SOL",
+            null,
             "Manchester City Fan Token",
             "CITY"
         ],
@@ -1057,31 +1057,31 @@
         ],
         "CL": [
             "39487",
-            "CL",
+            null,
             "Crude Oil Futures (Derivatives)",
             "CL"
         ],
         "CLANKER": [
             "34285",
-            "-",
+            null,
             "tokenbot",
             "CLANKER"
         ],
         "CLO": [
             "38634",
-            "BNB",
+            null,
             "Yei Finance",
             "CLO"
         ],
         "COAI": [
             "38489",
-            "BNB",
+            null,
             "ChainOpera AI",
             "COAI"
         ],
         "COLLECT": [
             "39170",
-            "BNB",
+            null,
             "Collect on Fanable",
             "COLLECT"
         ],
@@ -1093,25 +1093,25 @@
         ],
         "COOKIE": [
             "31838",
-            "BNB",
+            null,
             "Cookie DAO",
             "COOKIE"
         ],
         "COPPER": [
             "36847",
-            "SOL",
+            null,
             "$COPPER",
             "COPPER"
         ],
         "COS": [
             "4036",
-            "BNB",
+            null,
             "Contentos",
             "COS"
         ],
         "COTI": [
             "3992",
-            "COTI",
+            null,
             "COTI",
             "COTI"
         ],
@@ -1129,7 +1129,7 @@
         ],
         "CRCL": [
             "36949",
-            "-",
+            null,
             "[Fake]Circle (crcl.top)",
             "CRCL"
         ],
@@ -1141,15 +1141,21 @@
         ],
         "CROSS": [
             "37166",
-            "BNB",
+            null,
             "CROSS",
             "CROSS"
         ],
         "CRV": [
             "6538",
-            "ETH",
+            null,
             "Curve DAO Token",
             "CRV"
+        ],
+        "CSCO": [
+            "39631",
+            null,
+            "Cisco Systems (Derivatives)",
+            "CSCO"
         ],
         "CTC": [
             "5198",
@@ -1159,13 +1165,13 @@
         ],
         "CTK": [
             "4807",
-            "CTK",
+            null,
             "Shentu",
             "CTK"
         ],
         "CTSI": [
             "5444",
-            "ETH",
+            null,
             "Cartesi",
             "CTSI"
         ],
@@ -1177,7 +1183,7 @@
         ],
         "CVX": [
             "9903",
-            "ETH",
+            null,
             "Convex Finance",
             "CVX"
         ],
@@ -1189,25 +1195,25 @@
         ],
         "CYS": [
             "39071",
-            "BNB",
+            null,
             "Cysic",
             "CYS"
         ],
         "D": [
             "11374",
-            "ETH",
+            null,
             "DAR Open Network",
             "D"
         ],
         "DASH": [
             "131",
-            "DASH",
+            null,
             "Dash",
             "DASH"
         ],
         "DCR": [
             "1168",
-            "DCR",
+            null,
             "Decred",
             "DCR"
         ],
@@ -1219,21 +1225,27 @@
         ],
         "DEXE": [
             "7326",
-            "ETH",
+            null,
             "DeXe",
             "DEXE"
         ],
         "DGB": [
             "109",
-            "DGB",
+            null,
             "DigiByte",
             "DGB"
         ],
         "DIA": [
             "6138",
-            "ETH",
+            null,
             "DIA",
             "DIA"
+        ],
+        "DIS": [
+            "8310",
+            null,
+            "TosDis",
+            "DIS"
         ],
         "DKA": [
             "5908",
@@ -1243,7 +1255,7 @@
         ],
         "DODO": [
             "7224",
-            "ETH",
+            null,
             "DODO",
             "DODO"
         ],
@@ -1261,13 +1273,13 @@
         ],
         "DOGS": [
             "32698",
-            "TON",
+            null,
             "DOGS",
             "DOGS"
         ],
         "DOLO": [
             "35929",
-            "ETH",
+            null,
             "Dolomite",
             "DOLO"
         ],
@@ -1291,25 +1303,25 @@
         ],
         "DUSK": [
             "4092",
-            "ETH",
+            null,
             "Dusk",
             "DUSK"
         ],
         "DYDX": [
             "28324",
-            "OSMO",
+            null,
             "dYdX",
             "DYDX"
         ],
         "DYM": [
             "28932",
-            "DYM",
+            null,
             "Dymension",
             "DYM"
         ],
         "EDEN": [
             "38513",
-            "ETH",
+            null,
             "OpenEden",
             "EDEN"
         ],
@@ -1327,7 +1339,7 @@
         ],
         "EDU": [
             "24613",
-            "BNB",
+            null,
             "Open Campus",
             "EDU"
         ],
@@ -1339,7 +1351,7 @@
         ],
         "EIGEN": [
             "30494",
-            "ETH",
+            null,
             "EigenCloud",
             "EIGEN"
         ],
@@ -1363,7 +1375,7 @@
         ],
         "ENJ": [
             "2130",
-            "ENJ",
+            null,
             "Enjin Coin",
             "ENJ"
         ],
@@ -1381,7 +1393,7 @@
         ],
         "EPIC": [
             "8615",
-            "ETH",
+            null,
             "Epic Chain",
             "EPIC"
         ],
@@ -1399,7 +1411,7 @@
         ],
         "ESPORTS": [
             "37414",
-            "BNB",
+            null,
             "Yooldo",
             "ESPORTS"
         ],
@@ -1423,37 +1435,37 @@
         ],
         "ETHW": [
             "21296",
-            "ETHW",
+            null,
             "EthereumPoW",
             "ETHW"
         ],
         "EUL": [
             "14280",
-            "ETH",
+            null,
             "Euler",
             "EUL"
         ],
         "EURI": [
             "32644",
-            "ETH",
+            null,
             "Eurite",
             "EURI"
         ],
         "EVAA": [
             "38376",
-            "BNB",
+            null,
             "EVAA Protocol",
             "EVAA"
         ],
         "EWJ": [
             "39685",
-            "EWJ",
+            null,
             "iShares MSCI Japan ETF (Derivatives)",
             "EWJ"
         ],
         "EWY": [
             "39654",
-            "EWY",
+            null,
             "Ishares Msci South Korea ETF (Derivatives)",
             "EWY"
         ],
@@ -1465,13 +1477,13 @@
         ],
         "FARM": [
             "6859",
-            "ETH",
+            null,
             "Harvest Finance",
             "FARM"
         ],
         "FARTCOIN": [
             "33597",
-            "SOL",
+            null,
             "Fartcoin",
             "FARTCOIN"
         ],
@@ -1483,13 +1495,13 @@
         ],
         "FDUSD": [
             "26081",
-            "ETH",
+            null,
             "First Digital USD",
             "FDUSD"
         ],
         "FET": [
             "3773",
-            "FET",
+            null,
             "Artificial Superintelligence Alliance",
             "FET"
         ],
@@ -1501,19 +1513,19 @@
         ],
         "FHE": [
             "36153",
-            "ETH",
+            null,
             "Mind Network",
             "FHE"
         ],
         "FIDA": [
             "7978",
-            "SOL",
+            null,
             "Bonfida",
             "FIDA"
         ],
         "FIGHT": [
             "38963",
-            "BNB",
+            null,
             "FIGHT",
             "FIGHT"
         ],
@@ -1531,13 +1543,13 @@
         ],
         "FLOKI": [
             "10804",
-            "ETH",
+            null,
             "FLOKI",
             "FLOKI"
         ],
         "FLOW": [
             "4558",
-            "FLOW",
+            null,
             "Flow",
             "FLOW"
         ],
@@ -1549,37 +1561,37 @@
         ],
         "FLUX": [
             "3029",
-            "FLUX",
+            null,
             "Flux",
             "FLUX"
         ],
         "FOGO": [
             "38356",
-            "FOGO",
+            null,
             "Fogo",
             "FOGO"
         ],
         "FOLKS": [
             "38864",
-            "ETH",
+            null,
             "Folks Finance",
             "FOLKS"
         ],
         "FORM": [
             "23635",
-            "BNB",
+            null,
             "Four",
             "FORM"
         ],
         "FRAX": [
             "6952",
-            "ETH",
+            null,
             "Legacy Frax Dollar",
             "FRAX"
         ],
         "FTT": [
             "4195",
-            "BNB",
+            null,
             "FTX Token",
             "FTT"
         ],
@@ -1591,7 +1603,7 @@
         ],
         "GALA": [
             "7080",
-            "ETH",
+            null,
             "Gala",
             "GALA"
         ],
@@ -1609,13 +1621,13 @@
         ],
         "GENIUS": [
             "39841",
-            "BNB",
+            null,
             "Genius Terminal",
             "GENIUS"
         ],
         "GIGGLE": [
             "38470",
-            "BNB",
+            null,
             "Giggle Fund",
             "GIGGLE"
         ],
@@ -1627,7 +1639,7 @@
         ],
         "GLMR": [
             "6836",
-            "GLMR",
+            null,
             "Moonbeam",
             "GLMR"
         ],
@@ -1639,49 +1651,49 @@
         ],
         "GMX": [
             "11857",
-            "SOL",
+            null,
             "GMX",
             "GMX"
         ],
         "GNO": [
             "1659",
-            "ETH",
+            null,
             "Gnosis",
             "GNO"
         ],
         "GNS": [
             "13663",
-            "POL",
+            null,
             "Gains Network",
             "GNS"
         ],
         "GOAT": [
             "33440",
-            "SOL",
+            null,
             "Goatseus Maximus",
             "GOAT"
         ],
         "GOOGL": [
             "39622",
-            "HYPE",
+            null,
             "Alphabet Tokenized Stock (Hyperliquid)",
             "GOOGL"
         ],
         "GPS": [
             "35268",
-            "BNB",
+            null,
             "GoPlus Security",
             "GPS"
         ],
         "GRASS": [
             "32956",
-            "SOL",
+            null,
             "Grass",
             "GRASS"
         ],
         "GRIFFAIN": [
             "34792",
-            "SOL",
+            null,
             "GRIFFAIN",
             "GRIFFAIN"
         ],
@@ -1693,43 +1705,43 @@
         ],
         "GTC": [
             "10052",
-            "ETH",
+            null,
             "Gitcoin",
             "GTC"
         ],
         "GUA": [
             "38984",
-            "BNB",
+            null,
             "SUPERFORTUNE",
             "GUA"
         ],
         "GUN": [
             "36156",
-            "GUN",
+            null,
             "GUNZ",
             "GUN"
         ],
         "GWEI": [
             "39379",
-            "ETH",
+            null,
             "ETHGas",
             "GWEI"
         ],
         "H": [
             "36922",
-            "ETH",
+            null,
             "Humanity",
             "H"
         ],
         "HAEDAL": [
             "36369",
-            "BNB",
+            null,
             "Haedal Protocol",
             "HAEDAL"
         ],
         "HANA": [
             "38468",
-            "BNB",
+            null,
             "Hana Network",
             "HANA"
         ],
@@ -1739,27 +1751,33 @@
             "Hedera",
             "HBAR"
         ],
+        "HD": [
+            "39996",
+            null,
+            "Home Depot Inc (Derivatives)",
+            "HD"
+        ],
         "HEI": [
             "35724",
-            "ETH",
+            null,
             "Heima",
             "HEI"
         ],
         "HEMI": [
             "38159",
-            "ETH",
+            null,
             "Hemi",
             "HEMI"
         ],
         "HFT": [
             "22461",
-            "ETH",
+            null,
             "Hashflow",
             "HFT"
         ],
         "HIGH": [
             "11232",
-            "ETH",
+            null,
             "Highstreet",
             "HIGH"
         ],
@@ -1771,7 +1789,7 @@
         ],
         "HMSTR": [
             "32195",
-            "HMSTR",
+            null,
             "Hamster Kombat",
             "HMSTR"
         ],
@@ -1783,19 +1801,19 @@
         ],
         "HOME": [
             "36133",
-            "BNB",
+            null,
             "Defi App",
             "HOME"
         ],
         "HOOD": [
             "35566",
-            "SOL",
+            null,
             "Robinhood",
             "HOOD"
         ],
         "HOT": [
             "2682",
-            "ETH",
+            null,
             "Holo",
             "HOT"
         ],
@@ -1807,7 +1825,7 @@
         ],
         "HUMA": [
             "36576",
-            "BNB",
+            null,
             "Huma Finance",
             "HUMA"
         ],
@@ -1819,7 +1837,7 @@
         ],
         "HYPE": [
             "32196",
-            "HYPE",
+            null,
             "Hyperliquid",
             "HYPE"
         ],
@@ -1831,7 +1849,7 @@
         ],
         "ICNT": [
             "37070",
-            "ETH",
+            null,
             "Impossible Cloud Network",
             "ICNT"
         ],
@@ -1855,13 +1873,13 @@
         ],
         "IDOL": [
             "36775",
-            "BNB",
+            null,
             "MEET48",
             "IDOL"
         ],
         "ILV": [
             "8719",
-            "ETH",
+            null,
             "Illuvium",
             "ILV"
         ],
@@ -1879,7 +1897,7 @@
         ],
         "INIT": [
             "33120",
-            "INIT",
+            null,
             "Initia",
             "INIT"
         ],
@@ -1891,19 +1909,19 @@
         ],
         "INTC": [
             "39472",
-            "INTC",
+            null,
             "Intel Corp (Derivatives)",
             "INTC"
         ],
         "INX": [
             "39461",
-            "ETH",
+            null,
             "Infinex",
             "INX"
         ],
         "IO": [
             "29835",
-            "SOL",
+            null,
             "io.net",
             "IO"
         ],
@@ -1921,7 +1939,7 @@
         ],
         "IOTX": [
             "2777",
-            "IOTX",
+            null,
             "IoTeX",
             "IOTX"
         ],
@@ -1939,31 +1957,31 @@
         ],
         "IRYS": [
             "38978",
-            "ETH",
+            null,
             "Irys",
             "IRYS"
         ],
         "JASMY": [
             "8425",
-            "ETH",
+            null,
             "JasmyCoin",
             "JASMY"
         ],
         "JCT": [
             "38909",
-            "ETH",
+            null,
             "Janction",
             "JCT"
         ],
         "JELLYJELLY": [
             "35537",
-            "SOL",
+            null,
             "Jelly-My-Jelly",
             "JELLYJELLY"
         ],
         "JOE": [
             "11396",
-            "AVAX",
+            null,
             "JOE",
             "JOE"
         ],
@@ -1987,13 +2005,13 @@
         ],
         "JUV": [
             "5224",
-            "SOL",
+            null,
             "Juventus Fan Token",
             "JUV"
         ],
         "KAIA": [
             "32880",
-            "KAIA",
+            null,
             "Kaia",
             "KAIA"
         ],
@@ -2005,7 +2023,7 @@
         ],
         "KAS": [
             "20396",
-            "KAS",
+            null,
             "Kaspa",
             "KAS"
         ],
@@ -2029,13 +2047,13 @@
         ],
         "KGEN": [
             "38554",
-            "BNB",
+            null,
             "KGeN",
             "KGEN"
         ],
         "KGST": [
             "39162",
-            "BNB",
+            null,
             "KGST",
             "KGST"
         ],
@@ -2047,7 +2065,7 @@
         ],
         "KMNO": [
             "30986",
-            "SOL",
+            null,
             "Kamino",
             "KMNO"
         ],
@@ -2059,13 +2077,13 @@
         ],
         "KOMA": [
             "33405",
-            "BNB",
+            null,
             "Koma Inu",
             "KOMA"
         ],
         "KSM": [
             "5034",
-            "KSM",
+            null,
             "Kusama",
             "KSM"
         ],
@@ -2077,7 +2095,7 @@
         ],
         "LAB": [
             "33223",
-            "BNB",
+            null,
             "LAB",
             "LAB"
         ],
@@ -2089,13 +2107,13 @@
         ],
         "LAZIO": [
             "12687",
-            "BNB",
+            null,
             "S.S. Lazio Fan Token",
             "LAZIO"
         ],
         "LDO": [
             "8000",
-            "ETH",
+            null,
             "Lido DAO",
             "LDO"
         ],
@@ -2119,15 +2137,21 @@
         ],
         "LISTA": [
             "21533",
-            "BNB",
+            null,
             "Lista DAO",
             "LISTA"
         ],
         "LIT": [
             "39125",
-            "ETH",
+            null,
             "Lighter",
             "LIT"
+        ],
+        "LITE": [
+            "39944",
+            null,
+            "Lumentum Holdings (Derivatives)",
+            "LITE"
         ],
         "LPT": [
             "3640",
@@ -2137,7 +2161,7 @@
         ],
         "LQTY": [
             "7429",
-            "ETH",
+            null,
             "Liquity",
             "LQTY"
         ],
@@ -2149,19 +2173,19 @@
         ],
         "LTC": [
             "2",
-            "LTC",
+            null,
             "Litecoin",
             "LTC"
         ],
         "LUMIA": [
             "33439",
-            "BNB",
+            null,
             "Lumia",
             "LUMIA"
         ],
         "LUNA": [
             "20314",
-            "LUNA",
+            null,
             "Terra",
             "LUNA"
         ],
@@ -2173,31 +2197,31 @@
         ],
         "LUNC": [
             "4172",
-            "LUNC",
+            null,
             "Terra Classic",
             "LUNC"
         ],
         "LYN": [
             "38561",
-            "BNB",
+            null,
             "Everlyn AI",
             "LYN"
         ],
         "M": [
             "35491",
-            "M",
+            null,
             "MemeCore",
             "M"
         ],
         "MAGIC": [
             "14783",
-            "ETH",
+            null,
             "Treasure",
             "MAGIC"
         ],
         "MAGMA": [
             "39121",
-            "SUI",
+            null,
             "Magma Finance",
             "MAGMA"
         ],
@@ -2209,7 +2233,7 @@
         ],
         "MANTA": [
             "13631",
-            "MANTA",
+            null,
             "Manta Network",
             "MANTA"
         ],
@@ -2227,13 +2251,13 @@
         ],
         "MAV": [
             "18037",
-            "ETH",
+            null,
             "Maverick Protocol",
             "MAV"
         ],
         "MAVIA": [
             "28829",
-            "ETH",
+            null,
             "Heroes of Mavia",
             "MAVIA"
         ],
@@ -2245,7 +2269,7 @@
         ],
         "MBOX": [
             "9175",
-            "BNB",
+            null,
             "MOBOX",
             "MBOX"
         ],
@@ -2269,19 +2293,19 @@
         ],
         "MELANIA": [
             "35347",
-            "SOL",
+            null,
             "Official Melania Meme",
             "MELANIA"
         ],
         "MEME": [
             "28301",
-            "ETH",
+            null,
             "Memecoin",
             "MEME"
         ],
         "MERL": [
             "30712",
-            "ETH",
+            null,
             "Merlin Chain",
             "MERL"
         ],
@@ -2305,7 +2329,7 @@
         ],
         "METIS": [
             "9640",
-            "ETH",
+            null,
             "Metis",
             "METIS"
         ],
@@ -2329,7 +2353,7 @@
         ],
         "MITO": [
             "38204",
-            "BNB",
+            null,
             "Mitosis",
             "MITO"
         ],
@@ -2341,7 +2365,7 @@
         ],
         "MLN": [
             "1552",
-            "ETH",
+            null,
             "Enzyme",
             "MLN"
         ],
@@ -2371,7 +2395,7 @@
         ],
         "MOG": [
             "27659",
-            "ETH",
+            null,
             "Mog Coin",
             "MOG"
         ],
@@ -2389,7 +2413,7 @@
         ],
         "MORPHO": [
             "34104",
-            "ETH",
+            null,
             "Morpho",
             "MORPHO"
         ],
@@ -2401,19 +2425,25 @@
         ],
         "MOVR": [
             "9285",
-            "MOVR",
+            null,
             "Moonriver",
             "MOVR"
         ],
+        "MRVL": [
+            "39946",
+            null,
+            "Marvell Technology (Derivatives)",
+            "MRVL"
+        ],
         "MSFT": [
             "39495",
-            "MSFT",
+            null,
             "Microsoft Corporation (Derivatives)",
             "MSFT"
         ],
         "MSTR": [
             "33356",
-            "ETH",
+            null,
             "MSTR2100",
             "MSTR"
         ],
@@ -2425,13 +2455,13 @@
         ],
         "MU": [
             "39469",
-            "MU",
+            null,
             "Micron Technology Inc (Derivatives)",
             "MU"
         ],
         "MUBARAK": [
             "36041",
-            "BNB",
+            null,
             "Mubarak",
             "MUBARAK"
         ],
@@ -2443,19 +2473,19 @@
         ],
         "MYX": [
             "36410",
-            "BNB",
+            null,
             "MYX Finance",
             "MYX"
         ],
         "NAORIS": [
             "35114",
-            "ETH",
+            null,
             "Naoris Protocol",
             "NAORIS"
         ],
         "NATGAS": [
             "39464",
-            "NATGAS",
+            null,
             "Natural Gas (Derivatives)",
             "NATGAS"
         ],
@@ -2467,7 +2497,7 @@
         ],
         "NEIRO": [
             "32521",
-            "ETH",
+            null,
             "Neiro",
             "NEIRO"
         ],
@@ -2485,49 +2515,49 @@
         ],
         "NEXO": [
             "2694",
-            "ETH",
+            null,
             "Nexo",
             "NEXO"
         ],
         "NFP": [
             "28778",
-            "BNB",
+            null,
             "NFPrompt",
             "NFP"
         ],
         "NIGHT": [
             "39064",
-            "BNB",
+            null,
             "Midnight",
             "NIGHT"
         ],
         "NIL": [
             "35702",
-            "ETH",
+            null,
             "Nillion",
             "NIL"
         ],
         "NMR": [
             "1732",
-            "ETH",
+            null,
             "Numeraire",
             "NMR"
         ],
         "NOM": [
             "38464",
-            "ETH",
+            null,
             "Nomina",
             "NOM"
         ],
         "NOT": [
             "28850",
-            "TON",
+            null,
             "Notcoin",
             "NOT"
         ],
         "NVDA": [
             "38153",
-            "NVDA",
+            null,
             "NVIDIA (Derivatives)",
             "NVDA"
         ],
@@ -2539,19 +2569,19 @@
         ],
         "OG": [
             "5309",
-            "CHZ",
+            null,
             "OG Fan Token",
             "OG"
         ],
         "OGN": [
             "5117",
-            "ETH",
+            null,
             "Origin Protocol",
             "OGN"
         ],
         "ON": [
             "38750",
-            "ETH",
+            null,
             "Orochi Network",
             "ON"
         ],
@@ -2563,7 +2593,7 @@
         ],
         "ONE": [
             "3945",
-            "ONE",
+            null,
             "Harmony",
             "ONE"
         ],
@@ -2593,13 +2623,13 @@
         ],
         "OPG": [
             "39800",
-            "-",
+            null,
             "OpenGradient",
             "OPG"
         ],
         "OPN": [
             "39564",
-            "ETH",
+            null,
             "Opinion",
             "OPN"
         ],
@@ -2615,6 +2645,12 @@
             "Orca",
             "ORCA"
         ],
+        "ORCL": [
+            "39482",
+            null,
+            "Oracle Corp (Derivatives)",
+            "ORCL"
+        ],
         "ORDER": [
             "32809",
             "ETH",
@@ -2623,31 +2659,31 @@
         ],
         "ORDI": [
             "25028",
-            "BTC",
+            null,
             "ORDI",
             "ORDI"
         ],
         "OSMO": [
             "12220",
-            "OSMO",
+            null,
             "Osmosis",
             "OSMO"
         ],
         "PARTI": [
             "36102",
-            "BNB",
+            null,
             "Particle Network",
             "PARTI"
         ],
         "PAXG": [
             "4705",
-            "ETH",
+            null,
             "PAX Gold",
             "PAXG"
         ],
         "PAYP": [
             "39725",
-            "PAYP",
+            null,
             "PayPay Corp (Derivatives)",
             "PAYP"
         ],
@@ -2665,7 +2701,7 @@
         ],
         "PEOPLE": [
             "14806",
-            "ETH",
+            null,
             "ConstitutionDAO",
             "PEOPLE"
         ],
@@ -2677,13 +2713,19 @@
         ],
         "PHA": [
             "6841",
-            "PHA",
+            null,
             "Phala Network",
             "PHA"
         ],
+        "PHAROS": [
+            "",
+            null,
+            null,
+            "PHAROS"
+        ],
         "PHB": [
             "13969",
-            "PHB",
+            null,
             "Phoenix",
             "PHB"
         ],
@@ -2695,31 +2737,31 @@
         ],
         "PIPPIN": [
             "35053",
-            "SOL",
+            null,
             "pippin",
             "PIPPIN"
         ],
         "PIVX": [
             "1169",
-            "PIVX",
+            null,
             "PIVX",
             "PIVX"
         ],
         "PIXEL": [
             "29335",
-            "ETH",
+            null,
             "Pixels",
             "PIXEL"
         ],
         "PLAY": [
             "37534",
-            "-",
+            null,
             "PlaysOut",
             "PLAY"
         ],
         "PLTR": [
             "39475",
-            "PLTR",
+            null,
             "Palantir Technologies Inc (Derivatives)",
             "PLTR"
         ],
@@ -2731,7 +2773,7 @@
         ],
         "PNUT": [
             "33788",
-            "SOL",
+            null,
             "Peanut the Squirrel",
             "PNUT"
         ],
@@ -2755,31 +2797,31 @@
         ],
         "POND": [
             "7497",
-            "ETH",
+            null,
             "Marlin",
             "POND"
         ],
         "POPCAT": [
             "28782",
-            "SOL",
+            null,
             "Popcat (SOL)",
             "POPCAT"
         ],
         "PORTAL": [
             "29555",
-            "ETH",
+            null,
             "Portal",
             "PORTAL"
         ],
         "PORTO": [
             "14052",
-            "BNB",
+            null,
             "FC Porto Fan Token",
             "PORTO"
         ],
         "POWER": [
             "39042",
-            "ETH",
+            null,
             "Power Protocol",
             "POWER"
         ],
@@ -2797,15 +2839,21 @@
         ],
         "PROM": [
             "4120",
-            "ETH",
+            null,
             "Prom",
             "PROM"
         ],
         "PROMPT": [
             "36223",
-            "ETH",
+            null,
             "Wayfinder",
             "PROMPT"
+        ],
+        "PROS": [
+            "",
+            "",
+            "PROS",
+            "PROS"
         ],
         "PROVE": [
             "37593",
@@ -2815,13 +2863,13 @@
         ],
         "PSG": [
             "5226",
-            "SOL",
+            null,
             "Paris Saint-Germain Fan Token",
             "PSG"
         ],
         "PTB": [
             "37372",
-            "ETH",
+            null,
             "Portal To Bitcoin",
             "PTB"
         ],
@@ -2845,7 +2893,7 @@
         ],
         "PYR": [
             "9308",
-            "ETH",
+            null,
             "Vulcan Forged (PYR)",
             "PYR"
         ],
@@ -2857,19 +2905,19 @@
         ],
         "Q": [
             "38236",
-            "ETH",
+            null,
             "Quack AI",
             "Q"
         ],
         "QCOM": [
             "39932",
-            "QCOM",
+            null,
             "Qualcomm (Derivatives)",
             "QCOM"
         ],
         "QI": [
             "9288",
-            "AVAX",
+            null,
             "BENQI",
             "QI"
         ],
@@ -2881,14 +2929,14 @@
         ],
         "QNT": [
             "3155",
-            "ETH",
+            null,
             "Quant",
             "QNT"
         ],
         "QQQ": [
-            "39517",
-            "QQQ",
-            "QQQ (Derivatives)",
+            "39623",
+            null,
+            "Invesco QQQ Trust Tokenized ETF (Hyperliquid)",
             "QQQ"
         ],
         "QTUM": [
@@ -2905,13 +2953,13 @@
         ],
         "RAD": [
             "6843",
-            "RAD",
+            null,
             "Radworks",
             "RAD"
         ],
         "RARE": [
             "11294",
-            "ETH",
+            null,
             "SuperRare",
             "RARE"
         ],
@@ -2923,7 +2971,7 @@
         ],
         "RAVE": [
             "38967",
-            "ETH",
+            null,
             "RaveDAO",
             "RAVE"
         ],
@@ -2941,7 +2989,7 @@
         ],
         "RECALL": [
             "38669",
-            "-",
+            null,
             "Recall",
             "RECALL"
         ],
@@ -2959,49 +3007,49 @@
         ],
         "REQ": [
             "2071",
-            "ETH",
+            null,
             "Request",
             "REQ"
         ],
         "RESOLV": [
             "36713",
-            "ETH",
+            null,
             "Resolv",
             "RESOLV"
         ],
         "REZ": [
             "30843",
-            "ETH",
+            null,
             "Renzo",
             "REZ"
         ],
         "RIF": [
             "3701",
-            "ETH",
+            null,
             "Rootstock Infrastructure Framework",
             "RIF"
         ],
         "RIVER": [
             "38417",
-            "ETH",
+            null,
             "River",
             "RIVER"
         ],
         "RLC": [
             "1637",
-            "ETH",
+            null,
             "iExec RLC",
             "RLC"
         ],
         "RLUSD": [
             "34387",
-            "XRP",
+            null,
             "Ripple USD",
             "RLUSD"
         ],
         "ROBO": [
             "39595",
-            "ETH",
+            null,
             "Fabric Protocol",
             "ROBO"
         ],
@@ -3013,25 +3061,25 @@
         ],
         "ROSE": [
             "7653",
-            "BNB",
+            null,
             "Oasis",
             "ROSE"
         ],
         "RPL": [
             "2943",
-            "ETH",
+            null,
             "Rocket Pool",
             "RPL"
         ],
         "RSR": [
             "3964",
-            "ETH",
+            null,
             "Reserve Rights",
             "RSR"
         ],
         "RUNE": [
             "4157",
-            "RUNE",
+            null,
             "THORChain",
             "RUNE"
         ],
@@ -3043,7 +3091,7 @@
         ],
         "S": [
             "32684",
-            "S",
+            null,
             "Sonic",
             "S"
         ],
@@ -3055,7 +3103,7 @@
         ],
         "SAGA": [
             "30372",
-            "ETH",
+            null,
             "Saga",
             "SAGA"
         ],
@@ -3073,19 +3121,19 @@
         ],
         "SANTOS": [
             "15248",
-            "BNB",
+            null,
             "Santos FC Fan Token",
             "SANTOS"
         ],
         "SAPIEN": [
             "38117",
-            "-",
+            null,
             "Sapien",
             "SAPIEN"
         ],
         "SATS": [
             "28194",
-            "BTC",
+            null,
             "SATS (Ordinals)",
             "SATS"
         ],
@@ -3097,13 +3145,13 @@
         ],
         "SCR": [
             "26998",
-            "SCR",
+            null,
             "Scroll",
             "SCR"
         ],
         "SCRT": [
             "5604",
-            "SCRT",
+            null,
             "Secret",
             "SCRT"
         ],
@@ -3121,13 +3169,13 @@
         ],
         "SFP": [
             "8119",
-            "BNB",
+            null,
             "SafePal",
             "SFP"
         ],
         "SHELL": [
             "35710",
-            "ETH",
+            null,
             "MyShell",
             "SHELL"
         ],
@@ -3145,13 +3193,13 @@
         ],
         "SIREN": [
             "35766",
-            "BNB",
+            null,
             "siren",
             "SIREN"
         ],
         "SKL": [
             "5691",
-            "ETH",
+            null,
             "SKALE",
             "SKL"
         ],
@@ -3169,19 +3217,19 @@
         ],
         "SKYAI": [
             "36300",
-            "BNB",
+            null,
             "SKYAI",
             "SKYAI"
         ],
         "SLP": [
             "5824",
-            "ETH",
+            null,
             "Smooth Love Potion",
             "SLP"
         ],
         "SNDK": [
             "39507",
-            "SNDK",
+            null,
             "SanDisk Corporation (Derivatives)",
             "SNDK"
         ],
@@ -3193,7 +3241,7 @@
         ],
         "SNX": [
             "2586",
-            "ETH",
+            null,
             "Synthetix",
             "SNX"
         ],
@@ -3205,7 +3253,7 @@
         ],
         "SOLV": [
             "12165",
-            "BNB",
+            null,
             "Solv Protocol",
             "SOLV"
         ],
@@ -3233,15 +3281,21 @@
             "Sophon",
             "SOPH"
         ],
+        "SOXL": [
+            "39964",
+            null,
+            "Direxion Daily Semiconductor ETF (Derivatives)",
+            "SOXL"
+        ],
         "SPACE": [
             "38136",
-            "ETH",
+            null,
             "Spacecoin",
             "SPACE"
         ],
         "SPELL": [
             "11289",
-            "ETH",
+            null,
             "Spell Token",
             "SPELL"
         ],
@@ -3259,37 +3313,43 @@
         ],
         "SPX": [
             "28081",
-            "ETH",
+            null,
             "SPX6900",
             "SPX"
         ],
         "SPY": [
             "39621",
-            "HYPE",
+            null,
             "SPDR S&P 500 ETF Trust Tokenized ETF (Hyperliquid)",
             "SPY"
         ],
         "SQD": [
             "12894",
-            "ARB",
+            null,
             "Subsquid",
             "SQD"
         ],
         "SSV": [
             "12999",
-            "ETH",
+            null,
             "ssv.network",
             "SSV"
         ],
         "STABLE": [
             "38892",
-            "STABLE",
+            null,
             "Stable",
             "STABLE"
         ],
+        "STAR": [
+            "37743",
+            null,
+            "Starpower",
+            "STAR"
+        ],
         "STBL": [
             "38359",
-            "BNB",
+            null,
             "STBL",
             "STBL"
         ],
@@ -3301,13 +3361,13 @@
         ],
         "STG": [
             "18934",
-            "ETH",
+            null,
             "Stargate Finance",
             "STG"
         ],
         "STO": [
             "32194",
-            "ETH",
+            null,
             "StakeStone",
             "STO"
         ],
@@ -3325,7 +3385,7 @@
         ],
         "STRK": [
             "22691",
-            "ETH",
+            null,
             "Starknet",
             "STRK"
         ],
@@ -3355,25 +3415,25 @@
         ],
         "SUSHI": [
             "6758",
-            "ETH",
+            null,
             "SushiSwap",
             "SUSHI"
         ],
         "SWARMS": [
             "34993",
-            "SOL",
+            null,
             "Swarms",
             "SWARMS"
         ],
         "SXT": [
             "36405",
-            "ETH",
+            null,
             "Space and Time",
             "SXT"
         ],
         "SYN": [
             "12147",
-            "ETH",
+            null,
             "Synapse",
             "SYN"
         ],
@@ -3385,7 +3445,7 @@
         ],
         "SYS": [
             "541",
-            "SYS",
+            null,
             "Syscoin",
             "SYS"
         ],
@@ -3397,19 +3457,19 @@
         ],
         "TA": [
             "37430",
-            "BNB",
+            null,
             "Trusta.AI",
             "TA"
         ],
         "TAC": [
             "37338",
-            "ETH",
+            null,
             "TAC Protocol",
             "TAC"
         ],
         "TAG": [
             "34958",
-            "BNB",
+            null,
             "Tagger",
             "TAG"
         ],
@@ -3421,7 +3481,7 @@
         ],
         "TAKE": [
             "38175",
-            "BNB",
+            null,
             "OVERTAKE",
             "TAKE"
         ],
@@ -3439,7 +3499,7 @@
         ],
         "THE": [
             "23335",
-            "BNB",
+            null,
             "THENA",
             "THE"
         ],
@@ -3457,19 +3517,19 @@
         ],
         "TKO": [
             "9020",
-            "BNB",
+            null,
             "Toko Token",
             "TKO"
         ],
         "TLM": [
             "9119",
-            "ETH",
+            null,
             "Alien Worlds",
             "TLM"
         ],
         "TNSR": [
             "30449",
-            "SOL",
+            null,
             "Tensor",
             "TNSR"
         ],
@@ -3481,7 +3541,7 @@
         ],
         "TON": [
             "11419",
-            "TON",
+            null,
             "Toncoin",
             "TON"
         ],
@@ -3493,19 +3553,19 @@
         ],
         "TOWNS": [
             "37571",
-            "ETH",
+            null,
             "Towns",
             "TOWNS"
         ],
         "TRADOOR": [
             "36737",
-            "BNB",
+            null,
             "Tradoor",
             "TRADOOR"
         ],
         "TRB": [
             "4944",
-            "ETH",
+            null,
             "Tellor",
             "TRB"
         ],
@@ -3517,7 +3577,7 @@
         ],
         "TRIA": [
             "39382",
-            "ETH",
+            null,
             "Tria",
             "TRIA"
         ],
@@ -3535,7 +3595,7 @@
         ],
         "TRUTH": [
             "38178",
-            "SUI",
+            null,
             "Swarm Network",
             "TRUTH"
         ],
@@ -3547,19 +3607,19 @@
         ],
         "TSLA": [
             "39618",
-            "HYPE",
+            null,
             "Tesla Tokenized Stock (Hyperliquid)",
             "TSLA"
         ],
         "TSM": [
             "39490",
-            "TSM",
+            null,
             "Taiwan Semiconductor Manufacturing (Derivatives)",
             "TSM"
         ],
         "TST": [
             "35647",
-            "BNB",
+            null,
             "Test",
             "TST"
         ],
@@ -3571,55 +3631,61 @@
         ],
         "TURBO": [
             "24911",
-            "ETH",
+            null,
             "Turbo",
             "TURBO"
         ],
         "TURTLE": [
             "38671",
-            "ETH",
+            null,
             "Turtle",
             "TURTLE"
         ],
         "TUSD": [
             "2563",
-            "ETH",
+            null,
             "TrueUSD",
             "TUSD"
         ],
         "TUT": [
             "35892",
-            "BNB",
+            null,
             "Tutorial",
             "TUT"
         ],
         "TWT": [
             "5964",
-            "BNB",
+            null,
             "Trust Wallet Token",
             "TWT"
         ],
         "U": [
             "39120",
-            "BNB",
+            null,
             "United Stables",
             "U"
         ],
         "UAI": [
             "38841",
-            "BNB",
+            null,
             "UnifAI Network",
             "UAI"
         ],
         "UB": [
             "38339",
-            "ETH",
+            null,
             "Unibase",
             "UB"
         ],
+        "UBER": [
+            "39997",
+            null,
+            "Uber Technologies Inc (Derivatives)",
+            "UBER"
+        ],
         "UMA": [
             "5617",
-            "ETH",
+            null,
             "UMA",
             "UMA"
         ],
@@ -3629,15 +3695,21 @@
             "Uniswap",
             "UNI"
         ],
+        "UP2": [
+            "",
+            "",
+            "UP2",
+            "UP2"
+        ],
         "US": [
             "38869",
-            "SUI",
+            null,
             "Talus",
             "US"
         ],
         "USAR": [
             "39514",
-            "USAR",
+            null,
             "USA Rare Earth Inc (Derivatives)",
             "USAR"
         ],
@@ -3661,7 +3733,7 @@
         ],
         "USDP": [
             "3330",
-            "ETH",
+            null,
             "Pax Dollar",
             "USDP"
         ],
@@ -3679,19 +3751,19 @@
         ],
         "USELESS": [
             "36828",
-            "SOL",
+            null,
             "Useless Coin",
             "USELESS"
         ],
         "USTC": [
             "7129",
-            "USTC",
+            null,
             "TerraClassicUSD",
             "USTC"
         ],
         "USUAL": [
             "33979",
-            "ETH",
+            null,
             "Usual",
             "USUAL"
         ],
@@ -3703,7 +3775,7 @@
         ],
         "VANRY": [
             "8037",
-            "ETH",
+            null,
             "Vanar Chain",
             "VANRY"
         ],
@@ -3715,7 +3787,7 @@
         ],
         "VELVET": [
             "37298",
-            "BNB",
+            null,
             "Velvet",
             "VELVET"
         ],
@@ -3727,7 +3799,7 @@
         ],
         "VIC": [
             "2570",
-            "VIC",
+            null,
             "Viction",
             "VIC"
         ],
@@ -3799,7 +3871,7 @@
         ],
         "WIN": [
             "4206",
-            "BNB",
+            null,
             "WINkLink",
             "WIN"
         ],
@@ -3817,31 +3889,31 @@
         ],
         "WOO": [
             "7501",
-            "ETH",
+            null,
             "WOO",
             "WOO"
         ],
         "XAG": [
             "39343",
-            "XAG",
+            null,
             "Silver (Derivatives)",
             "XAG"
         ],
         "XAI": [
             "28933",
-            "ARB",
+            null,
             "Xai",
             "XAI"
         ],
         "XAN": [
             "38481",
-            "ETH",
+            null,
             "Anoma",
             "XAN"
         ],
         "XAU": [
             "37470",
-            "ETH",
+            null,
             "XAU9999 Meme",
             "XAU"
         ],
@@ -3871,31 +3943,31 @@
         ],
         "XMR": [
             "328",
-            "XMR",
+            null,
             "Monero",
             "XMR"
         ],
         "XNO": [
             "1567",
-            "XNO",
+            null,
             "Nano",
             "XNO"
         ],
         "XNY": [
             "36933",
-            "BNB",
+            null,
             "Codatta",
             "XNY"
         ],
         "XPD": [
             "260",
-            "XPD",
+            null,
             "PetroDollar",
             "XPD"
         ],
         "XPIN": [
             "36238",
-            "BNB",
+            null,
             "XPIN Network",
             "XPIN"
         ],
@@ -3907,7 +3979,7 @@
         ],
         "XPT": [
             "39460",
-            "XPT",
+            null,
             "Platinum (Derivatives)",
             "XPT"
         ],
@@ -3925,31 +3997,31 @@
         ],
         "XUSD": [
             "32372",
-            "ETH",
+            null,
             "StraitsX USD",
             "XUSD"
         ],
         "XVG": [
             "693",
-            "XVG",
+            null,
             "Verge",
             "XVG"
         ],
         "XVS": [
             "7288",
-            "ETH",
+            null,
             "Venus",
             "XVS"
         ],
         "YB": [
             "38651",
-            "ETH",
+            null,
             "YieldBasis",
             "YB"
         ],
         "YFI": [
             "5864",
-            "ETH",
+            null,
             "Yearn",
             "YFI"
         ],
@@ -3973,19 +4045,19 @@
         ],
         "ZEC": [
             "1437",
-            "ZEC",
+            null,
             "Zcash",
             "ZEC"
         ],
         "ZEN": [
             "1698",
-            "ZEN",
+            null,
             "Horizen",
             "ZEN"
         ],
         "ZEREBRO": [
             "34083",
-            "SOL",
+            null,
             "Zerebro",
             "ZEREBRO"
         ],
@@ -4039,15 +4111,21 @@
         ],
         "币安人生": [
             "38590",
-            "BNB"
+            "BNB",
+            "币安人生",
+            "币安人生"
         ],
         "我踏马来了": [
             "39322",
-            "BNB"
+            "BNB",
+            "我踏马来了",
+            "我踏马来了"
         ],
         "龙虾": [
             "39671",
-            "BNB"
+            "BNB",
+            "龙虾 (Lobster)",
+            "龙虾"
         ]
     }
 }
