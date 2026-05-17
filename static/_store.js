@@ -1,5 +1,5 @@
 export const store = {
-  marketDataMap: { upbit: [], spot: [], futures: [] },
+  marketDataMap: { upbit: [], spot: [], futures: [], krw_usd_rate: 0.0 },
   allSymbols: [],
   originalTableData: [],
   currentTableData: [],
@@ -7,13 +7,14 @@ export const store = {
   visibleSymbols: new Set(),
   btcRateCache: {}, // 🚀 합성 환율 전용 메모리 캐시 엔진 추가
 
-  currentAsset: "BTC",
+  currentAsset: null,
   currentSelectedSymbol: null,
-  mcapMin: 0,                  // 🚀 시총 최소값 (기본 0)
-  mcapMax: 10000000000,        // 🚀 시총 최대값 (기본 10B)
-  useFlip: true,               // 🚀 플립 애니메이션 사용 여부
-  hideSmallCap: false,         // 🚀 시총 1M 미만 숨기기 여부
-  lang: "KR",                  // 🚀 한/영 토글 (KR, EN)
+  isEngineStarted: false, // 🚀 최초 코인 선택 시 소켓 및 차트 점화 여부 플래그
+  mcapMin: 0, // 🚀 시총 최소값 (기본 0)
+  mcapMax: 10000000000, // 🚀 시총 최대값 (기본 10B)
+  useFlip: true, // 🚀 플립 애니메이션 사용 여부
+  hideSmallCap: false, // 🚀 시총 1M 미만 숨기기 여부
+  lang: "KR", // 🚀 한/영 토글 (KR, EN)
   filterMode: "ALL", // 🚀 [추가] ALL, BINANCE, UPBIT, FUTURES, SPOT
   viewMode: "DETAILED",
   settings: {
@@ -72,6 +73,42 @@ export const store = {
   measureEnd: null,
   cachedChartTd: null,
   cachedPriceTd: null,
+
+  // 🚀 [단일 진실 공급원] 조건식 떡칠 제거용 전역 정밀도 캐시 맵 및 헬퍼
+  precisionMap: new Map(),
+  getPrecision: function (sym) {
+    if (!sym) return store.currentPrecision || 2;
+    const key = String(sym).toUpperCase();
+
+    if (store.precisionMap.has(key)) {
+      return store.precisionMap.get(key);
+    }
+
+    const allSource = store.originalTableData || store.currentTableData || [];
+    const row = allSource.find(
+      (r) =>
+        (r.Ticker || "").toUpperCase() === key ||
+        (r.DisplayTicker || "").toUpperCase() === key ||
+        (r.Symbol || "").toUpperCase() === key,
+    );
+
+    const p =
+      row && row.precision !== undefined
+        ? Number(row.precision)
+        : store.currentPrecision || 2;
+
+    if (row) {
+      if (row.Ticker) store.precisionMap.set(row.Ticker.toUpperCase(), p);
+      if (row.DisplayTicker)
+        store.precisionMap.set(row.DisplayTicker.toUpperCase(), p);
+      if (row.Symbol) store.precisionMap.set(row.Symbol.toUpperCase(), p);
+    } else {
+      store.precisionMap.set(key, p);
+    }
+
+    store.currentPrecision = p;
+    return p;
+  },
 };
 
 export const CONFIG = {
@@ -109,6 +146,6 @@ export const measureDOM = {
 };
 
 measureDOM.box.style.cssText = `position: absolute; z-index: 50; pointer-events: none; display: none; border: 1px solid; transition: background-color 0.2s, border-color 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; text-align: center; line-height: 1.4;`;
-measureDOM.startLabel.style.cssText = `position: absolute; left: 0; z-index: 98; pointer-events: none; display: none; padding: 2px 6px; font-size: 10px; font-weight: bold; color: white; border-radius: 2px 0 0 2px; white-space: nowrap;`;
-measureDOM.endLabel.style.cssText = `position: absolute; left: 0; z-index: 100; pointer-events: none; display: none; padding: 2px 6px; font-size: 10px; font-weight: bold; color: white; border-radius: 2px 0 0 2px; white-space: nowrap; transition: background-color 0.2s;`;
+measureDOM.startLabel.style.cssText = `position: absolute; left: 0; width: 100%; box-sizing: border-box; z-index: 98; pointer-events: none; display: none; padding: 2px 6px; font-size: 10px; font-weight: bold; color: white; text-align: center; opacity: 1; white-space: nowrap;`;
+measureDOM.endLabel.style.cssText = `position: absolute; left: 0; width: 100%; box-sizing: border-box; z-index: 100; pointer-events: none; display: none; padding: 2px 6px; font-size: 10px; font-weight: bold; color: white; text-align: center; opacity: 1; white-space: nowrap; transition: background-color 0.2s;`;
 measureDOM.rangeBar.style.cssText = `position: absolute; left: 0; width: 100%; z-index: 90; pointer-events: none; display: none; transition: background-color 0.2s; background-color: var(--bg-chart, #131722); opacity: 0.3;`;

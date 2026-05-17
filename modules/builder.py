@@ -41,7 +41,7 @@ def build_binance_row(
     # 1. 이름표 및 기본 정보
     raw_symbol = ticker.replace("USDT", "")
     base = utils.get_pure_base_asset(ticker).upper()
-    raw_key = REVERSE_LOOKUP.get(f"{raw_symbol.upper()}_BINANCE", base)
+    raw_key = str(REVERSE_LOOKUP.get(f"{raw_symbol.upper()}_BINANCE", base) or base)
     display_name = re.sub(
         r"_(binance|upbit|bithumb)$", "", raw_key, flags=re.IGNORECASE
     )
@@ -163,11 +163,21 @@ def build_binance_row(
     upbit_aliases = [
         v[2]
         for v in DUPLICATED_LIST.values()
-        if len(v) >= 4 and v[0] == final_ucid and v[3].upper() == "UPBIT"
+        if len(v) >= 4 and (v[0] == final_ucid or v[0] == base) and v[3].upper() == "UPBIT"
     ]
+
+    # 🚀 [수정] Upbit에 동일한 base 심볼이 있더라도, DUPLICATED_LIST 상의 UID가 서로 다르면 동명이인(META 등)으로 간주하여 분리
+    upbit_direct_match = False
+    if base in upbit_krw_set:
+        upbit_direct_match = True
+        alias_up_key = REVERSE_LOOKUP.get(f"{base}_UPBIT")
+        if alias_up_key in DUPLICATED_LIST:
+            if DUPLICATED_LIST[alias_up_key][0] != final_ucid:
+                upbit_direct_match = False
+
     target_up_base = (
         base
-        if base in upbit_krw_set
+        if upbit_direct_match
         else (
             upbit_aliases[0]
             if upbit_aliases and upbit_aliases[0] in upbit_krw_set
@@ -179,13 +189,24 @@ def build_binance_row(
     if target_up_base and target_up_base in upbit_data:
         up_price_krw = upbit_data[target_up_base].get("price", 0.0)
         listed_on.add("UPBIT")
+
+    # 🚀 [수정] Bithumb도 동일하게 UID 검증
+    bithumb_direct_match = False
     if base in bithumb_krw_set:
+        bithumb_direct_match = True
+        alias_bi_key = REVERSE_LOOKUP.get(f"{base}_BITHUMB")
+        if alias_bi_key in DUPLICATED_LIST:
+            if DUPLICATED_LIST[alias_bi_key][0] != final_ucid:
+                bithumb_direct_match = False
+
+    if bithumb_direct_match:
         listed_on.add("BITHUMB")
 
-    # 🚀 [수정] CMC 거래량 대신 우리가 직접 수집한 거래소별 거래량 합산 (VMC 정확도 향상)
+    # 🚀 [수정] 화면에 표기되는 바이낸스 단일 거래대금(binance_vol)과 웹소켓 실시간 시세(data.q)를 단일 진실 공급원으로 완벽 일치!
+    binance_vol = total_vol_spot + total_vol_futures
     up_vol_24h = upbit_data[target_up_base].get("volume_24h", 0.0) if target_up_base and target_up_base in upbit_data else 0.0
     by_vol_24h = bybit_data.get(base, {}).get("volume_24h", 0.0)
-    vol_24h = total_vol_spot + total_vol_futures + up_vol_24h + by_vol_24h
+    vol_24h = binance_vol + up_vol_24h + by_vol_24h
     change_24h = b_info.get("change_24h", 0.0)
     precision = b_info.get("precision", 2)
     utc0_open = (
@@ -235,7 +256,8 @@ def build_binance_row(
     if binance_spot_price > 0 and binance_futures_price > 0:
         basis_raw = ((binance_futures_price / binance_spot_price) - 1) * 100
 
-    vmc_raw = (vol_24h / mcap * 100) if mcap > 0 else 0.0
+    # 🚀 VMC 계산 시 화면에 표기되는 바이낸스 단일 거래대금(binance_vol)을 기준으로 계산하여 100% 완벽 일치!
+    vmc_raw = (binance_vol / mcap * 100) if mcap > 0 else 0.0
     funding_rate = b_info.get("funding_rate", 0.0)
     # 선물 거래소가 없거나 펀비가 0이면 - 처리
     funding_f = f"{funding_rate*100:.4f}%" if "FUTURES" in str(listed_on) and funding_rate != 0 else "-"
@@ -258,19 +280,19 @@ def build_binance_row(
         "Kimchi_Formatted": f"{kimchi_raw:+.2f}%" if kimchi_raw != 0 else "0.00%",
         "Kimchi_Label": kimchi_label,
         "Basis_Formatted": f"{basis_raw:+.2f}%" if basis_raw != 0 else "0.00%",
-        "Volume_Formatted": utils.format_volume_string(vol_24h),
+        "Volume_Formatted": utils.format_volume_string(binance_vol), # 🚀 화면 표기값과 일원화
         "MarketCap_Formatted": utils.format_market_cap_string(mcap),
         "VMC_Formatted": f"{vmc_raw:.2f}%",
         "Funding_Formatted": funding_f,
         # 🚀 [추가] 바이낸스 전용 거래대금 (선물 + 현물)
         "Binance_Vol_Formatted": utils.format_volume_string(
-            total_vol_futures + total_vol_spot
+            binance_vol
         ),
         # --- 3. 프론트엔드 정렬용 순수 숫자 데이터 (Raw) ---
         "Price_Raw": price,
         "Change_24h_Raw": change_24h,
         "Change_Today_Raw": change_today,
-        "Volume_Raw": vol_24h,
+        "Volume_Raw": binance_vol, # 🚀 정렬 기준값도 일원화
         "MarketCap_Raw": mcap,
         "VMC_Raw": vmc_raw,
         "Basis_Raw": basis_raw,
@@ -339,7 +361,7 @@ def build_upbit_row(
     lookup_id = asset_to_lookup_key.get(f"{base.upper()}_UPBIT")
     info = market_data_map.get(lookup_id)
     ucid = info.get("ucid", "") if info else ""
-    raw_key = REVERSE_LOOKUP.get(f"{base}_UPBIT", base)
+    raw_key = str(REVERSE_LOOKUP.get(f"{base}_UPBIT", base) or base)
     display_name = re.sub(
         r"_(binance|upbit|bithumb)$", "", raw_key, flags=re.IGNORECASE
     )
@@ -349,12 +371,6 @@ def build_upbit_row(
     name_match = re.search(r"\((.*?)\)", display_name)
     if name_match:
         explicit_name = name_match.group(1)
-
-    # 중복 UID 체크
-    if ucid and ucid in processed_uids and raw_key not in DUPLICATED_LIST:
-        return None, False
-    if ucid:
-        processed_uids.add(ucid)
 
     # 가격 데이터 추출 (여기서 변수들이 태어납니다)
     up_price_krw = float(up_info.get("price") or 0.0)
@@ -454,7 +470,7 @@ def build_upbit_row(
         b_base = utils.get_pure_base_asset(b_tick.replace("USDT", "")).upper()
         if b_base == base:
             # 🚀 [수정] 바이낸스 티커가 실제로 같은 코인인지 검증 (EDGE 등 중복 티커 충돌 방어)
-            alias_binance_raw = REVERSE_LOOKUP.get(f"{b_base}_BINANCE", b_base)
+            alias_binance_raw = str(REVERSE_LOOKUP.get(f"{b_base}_BINANCE", b_base) or b_base)
             alias_binance_clean = re.sub(
                 r"_(binance|upbit|bithumb)$", "", alias_binance_raw, flags=re.IGNORECASE
             )
@@ -552,7 +568,7 @@ def build_upbit_row(
 
 # 족보 청소기 로직 분리.
 def clean_stale_tickers(binance_data, upbit_krw_set, mapping):
-    global MAPPING_DATA
+    # global MAPPING_DATA
     is_updated = False
 
     live_bases = (
@@ -619,15 +635,16 @@ def assemble_final_dashboard(
     any_update = False
     processed_uids = set()
 
-    # 역방향 족보 생성
-    REVERSE_LOOKUP = {
-        f"{v[2].upper()}_{v[3].upper()}": k
-        for k, v in DUPLICATED_LIST.items()
-        if len(v) >= 4
-    }
+    # 역방향 족보 생성 (실제 티커명 및 매핑명 모두 대응)
+    REVERSE_LOOKUP = {}
+    for k, v in DUPLICATED_LIST.items():
+        if len(v) >= 4:
+            ex = v[3].upper()
+            REVERSE_LOOKUP[f"{v[2].upper()}_{ex}"] = k
+            REVERSE_LOOKUP[f"{k.split('(')[0].upper()}_{ex}"] = k
 
-    # 테더 환율
-    krw_usd_rate = 1450.0
+    # 테더 환율 (mapping.json의 중앙 마스터 상수 사용)
+    krw_usd_rate = float(mapping.get("DEFAULT_KRW_USD_RATE", 0.0))
     try:
         tether_res = requests.get(
             "https://api.upbit.com/v1/ticker?markets=KRW-USDT", timeout=5
@@ -663,21 +680,31 @@ def assemble_final_dashboard(
             any_update = True
 
         if row:
+            row["krw_usd_rate"] = krw_usd_rate  # 🚀 모든 행에 테더 환율 공급
             uid = str(row.get("UID", row.get("DisplayTicker", ticker)))
             final_results[uid] = row
 
     # 2. 업비트 투입
     binance_base_set = {t.replace("USDT", "") for t in binance_data.keys()}
     for base in upbit_krw_set:
-        alias_upbit_raw = REVERSE_LOOKUP.get(f"{base}_UPBIT", base)
+        alias_upbit_raw = str(REVERSE_LOOKUP.get(f"{base}_UPBIT", base) or base)
         alias_upbit = re.sub(
-            r"_(binance|upbit|bithumb)$", "", alias_upbit_raw, flags=re.IGNORECASE
-        )
+            r"_(binance|upbit|bithumb)$", "", alias_upbit_raw, flags=re.IGNORECASE)
 
-        # 🚀 [수정] 바이낸스 처리 여부 확인 시 alias 비교
+        # 🚀 [수정] 바이낸스 처리 여부 확인 시 alias 비교 (단, 동명이인 META 등은 UID까지 일치해야 동일 코인으로 인정)
+        up_key_check = REVERSE_LOOKUP.get(f"{base}_UPBIT")
+        up_expected_uid = DUPLICATED_LIST[up_key_check][0] if up_key_check in DUPLICATED_LIST else None
+
         already_processed = False
         for r in final_results.values():
-            if r.get("Symbol") == base or r.get("DisplayTicker") == alias_upbit:
+            # 1. DisplayTicker가 일치하면 무조건 동일 코인 (UP 등)
+            if r.get("DisplayTicker") == alias_upbit:
+                already_processed = True
+                break
+            # 2. Symbol이 일치할 때, 만약 족보에 기대 UID가 명시되어 있다면 UID까지 같아야 인정
+            if r.get("Symbol") == base:
+                if up_expected_uid and r.get("UID") != up_expected_uid:
+                    continue
                 already_processed = True
                 break
 
@@ -738,6 +765,7 @@ def assemble_final_dashboard(
                     row["Listed_Exchanges"] = list(
                         set(row.get("Listed_Exchanges", []) + ["BYBIT"])
                     )
+                row["krw_usd_rate"] = krw_usd_rate  # 🚀 모든 행에 테더 환율 공급
                 final_results[uid] = row
         if updated:
             any_update = True

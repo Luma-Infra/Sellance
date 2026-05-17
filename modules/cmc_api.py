@@ -36,7 +36,12 @@ def build_cmc_lookup_lists(binance_base_set, upbit_krw_set, MAPPING_DATA):
      SYMBOL_TO_ID_MAP, MANUAL_SUPPLY_MAP, SPECIAL_SYMBOL_MAP, HARDCODE_VERIFY_SKIP_LIST
     ) = config_manager.get_mapping_parts(MAPPING_DATA)
 
-    REVERSE_LOOKUP = {f"{v[2].upper()}_{v[3].upper()}": k for k, v in DUPLICATED_LIST.items() if len(v) >= 4}
+    REVERSE_LOOKUP = {}
+    for k, v in DUPLICATED_LIST.items():
+        if len(v) >= 4:
+            ex = v[3].upper()
+            REVERSE_LOOKUP[f"{v[2].upper()}_{ex}"] = k
+            REVERSE_LOOKUP[f"{k.split('(')[0].upper()}_{ex}"] = k
 
    # 🚀 공통 처리기 (귀빈 대접 버전)
     def process_asset(a, exchange_tag):

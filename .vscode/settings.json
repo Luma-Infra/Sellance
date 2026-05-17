@@ -2,5 +2,8 @@
   "liveServer.settings.port": 5501,
   "python.defaultInterpreterPath": "c:\\Users\\78831\\Sellnance\\.venv\\Scripts\\python.exe",
   "python.terminal.activateEnvInSelectedTerminal": true,
-  "python.analysis.typeCheckingMode": "basic"
+  "python.analysis.typeCheckingMode": "basic",
+  "terminal.integrated.env.windows": {
+    "PYTHON_BASIC_REPL": "1"
+  }
 }

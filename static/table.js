@@ -99,7 +99,7 @@ function sortTable(colKey) {
 function createRowElement(row) {
   const tr = document.createElement("tr");
   const ticker = row.Ticker; // 🚀 중복 없는 유니크 티커 사용 (BTCKRW != BTCUSDT)
-  tr.dataset.sym = ticker; 
+  tr.dataset.sym = ticker;
 
   // 껍데기 만들고 알맹이 채우는 함수 재활용
   updateRowInnerHTML(tr, row);
@@ -117,7 +117,9 @@ function getFilteredData() {
 
   // 1. 탭 필터링 (ALL, FAV)
   if (store.currentTab === "FAV") {
-    const favorites = JSON.parse(localStorage.getItem("sellnance_favs") || "[]");
+    const favorites = JSON.parse(
+      localStorage.getItem("sellnance_favs") || "[]",
+    );
     filteredData = filteredData.filter((d) =>
       favorites.includes(d.DisplayTicker || d.Symbol),
     );
@@ -125,18 +127,22 @@ function getFilteredData() {
 
   // 2. 마켓 필터링 (ALL / BINANCE / UPBIT)
   if (store.filterMode === "UPBIT") {
-    filteredData = filteredData.filter((d) => 
-      d.Listed_Exchanges?.includes("UPBIT") || d.Listed_Exchanges?.includes("BITHUMB")
+    filteredData = filteredData.filter(
+      (d) =>
+        d.Listed_Exchanges?.includes("UPBIT") ||
+        d.Listed_Exchanges?.includes("BITHUMB"),
     );
   } else if (store.filterMode === "BINANCE") {
     filteredData = filteredData.filter((d) =>
-      d.Listed_Exchanges?.some((ex) => ex.startsWith("BINANCE"))
+      d.Listed_Exchanges?.some((ex) => ex.startsWith("BINANCE")),
     );
   }
 
   // 3. 시총 필터링 (1M 미만 숨기기 토글)
   if (store.hideSmallCap) {
-    filteredData = filteredData.filter((d) => (d.MarketCap_Raw || 0) >= 1000000);
+    filteredData = filteredData.filter(
+      (d) => (d.MarketCap_Raw || 0) >= 1000000,
+    );
   }
 
   // 4. 바운더리 필터링
@@ -193,7 +199,7 @@ function renderTable() {
 
   if (typeof window.refreshSniperTarget === "function") {
     setTimeout(() => {
-        window.refreshSniperTarget();
+      window.refreshSniperTarget();
     }, 10);
   }
 }
@@ -208,10 +214,8 @@ function updateVisibleSymbols() {
 
   rows.forEach((row) => {
     const rect = row.getBoundingClientRect();
-    const isVisible = (
-      rect.top < containerRect.bottom &&
-      rect.bottom > containerRect.top
-    );
+    const isVisible =
+      rect.top < containerRect.bottom && rect.bottom > containerRect.top;
     const sym = row.dataset.sym;
     if (isVisible) {
       store.visibleSymbols.add(sym);
@@ -265,7 +269,7 @@ function applyRealtimeSort() {
 
   // 🚀 [수정] 무조건 필터링 먼저 진행! (그래야 즐겨찾기/업비트 전용이 유지됨)
   const filteredData = getFilteredData();
-  
+
   // 🚀 [수정] 필터링된 결과물 내에서만 정렬을 진행해야 함
   const sortKeyMap = {
     MarketCap: "MarketCap_Raw",
@@ -355,7 +359,7 @@ function applyRealtimeSort() {
 
   // 🚀 [최적화] FLIP Last & Play: "보이는 화면만" 정밀 타격 애니메이션
   const finalRows = Array.from(tbody.children);
-  
+
   if (store.useFlip) {
     // 1단계: 모든 행의 새로운 위치(Last) 측정 (가시성 체크 완화)
     const lastRects = new Map();
@@ -381,17 +385,23 @@ function applyRealtimeSort() {
 
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            row.style.transition = "transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)"; // 0.3s로 단축 (400ms 주기와 간섭 방지)
+            row.style.transition =
+              "transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)"; // 0.3s로 단축 (400ms 주기와 간섭 방지)
             row.style.transform = "";
             // 애니메이션 완료 후 최적화 레이어 해제
-            setTimeout(() => { if(row) row.style.willChange = "auto"; }, 350);
+            setTimeout(() => {
+              if (row) row.style.willChange = "auto";
+            }, 350);
           });
         });
       }
     });
   } else {
     // 🚀 애니메이션 OFF: 모든 행의 transform을 깨끗이 비워 즉시 위치 반영
-    finalRows.forEach(row => { row.style.transform = ""; row.style.transition = "none"; });
+    finalRows.forEach((row) => {
+      row.style.transform = "";
+      row.style.transition = "none";
+    });
   }
   // 🚀 안전장치 장착 (스크롤 쪽이랑 똑같이!)
   if (typeof refreshSniperTarget === "function") {
@@ -450,14 +460,19 @@ function updateRowInnerHTML(tr, row) {
 
   const isDetailed = store.viewMode === "detailed";
   const nDay = row.Change_Today_Raw ?? 0;
-  const colorDay = nDay > 0 ? "text-theme-up" : nDay < 0 ? "text-theme-down" : "text-theme-text";
+  const colorDay =
+    nDay > 0
+      ? "text-theme-up"
+      : nDay < 0
+        ? "text-theme-down"
+        : "text-theme-text";
 
-  // 🚀 [신규] 2층 구조 레이아웃 (디자인 가이드 준수 + 스트리밍 ID 추가)
+  // 🚀 [신규] 2층 구조 레이아웃 (디자인 가이드 준수 + z_style.css 단일 관리소에서 100% 완벽 일치하는 너비 강제 종속)
   tr.innerHTML = `
-  <td class="p-2">
-    <div class="flex items-center gap-2">
+  <td class="p-2 col-asset overflow-hidden">
+    <div class="flex items-center gap-2 min-w-0">
       <!-- 1. 별 버튼 (완전 분리) -->
-      <button onclick="toggleFavorite('${pureSymbol}', event)" class="star-btn text-[14px] transition-all hover:scale-125 ${isFav ? "active" : ""}" style="color: ${isFav ? "var(--accent)" : "gray"}">
+      <button onclick="toggleFavorite('${pureSymbol}', event)" class="star-btn text-[14px] transition-all hover:scale-125 flex-shrink-0 ${isFav ? "active" : ""}" style="color: ${isFav ? "var(--accent)" : "gray"}">
         ${isFav ? "⭐" : "☆"}
       </button>
       
@@ -467,74 +482,81 @@ function updateRowInnerHTML(tr, row) {
       </div>
       
       <!-- 3. 티커 & 이름 묶음 -->
-      <div class="flex flex-col leading-[1.1] min-w-0">
+      <div class="flex flex-col leading-[1.1] min-w-0 flex-1">
         <b class="text-[12px] text-theme-text truncate font-black tracking-tighter">${row.DisplayTicker || row.Symbol}</b>
-        <span class="text-[9px] text-theme-text opacity-60 truncate uppercase font-bold tracking-tighter">
+        <span class="text-[9px] text-theme-text opacity-60 truncate font-bold tracking-tighter">
           ${(() => {
-            const n = store.lang === "KR" ? (row.Name_KR || row.Name || "") : (row.Name || "");
+            const n =
+              store.lang === "KR"
+                ? row.Name_KR || row.Name || ""
+                : row.Name || "";
             return n.length > 8 ? n.substring(0, 8) + ".." : n;
           })()}
         </span>
       </div>
     </div>
   </td>
-  <td class="p-2">
-    <div class="flex flex-col leading-tight">
-      <span id="price-${tId}" data-raw-price="${nPrice}" class="font-black text-[14px] text-theme-text price-cell tracking-tighter">
+  <td class="p-2 col-price overflow-hidden">
+    <div class="flex flex-col leading-tight min-w-0">
+      <span id="price-${tId}" data-raw-price="${nPrice}" class="font-black text-[14px] text-theme-text price-cell tracking-tighter truncate">
         ${formattedPrice}
         ${row.Price_KRW ? `<span class="text-[12px] text-theme-text opacity-70 ml-1"> ( ${Number(row.Price_KRW).toLocaleString()} 원 )</span>` : ""}
       </span>
-      <div class="flex gap-2 text-[10px] font-black">
-        <span id="change-${tId}" class="${color24h} ${store.currentSortCol === "Change_Today" ? "opacity-40" : "opacity-100"}">${n24h > 0 ? "+" : ""}${Number(n24h).toFixed(2)}%</span>
-        <span id="today-${tId}" class="${colorDay} ${store.currentSortCol === "Change_Today" ? "opacity-100" : "opacity-40"}">${nDay > 0 ? "+" : ""}${Number(nDay).toFixed(2)}%</span>
+      <div class="flex items-center justify-between gap-2 text-[10px] font-black text-left mt-0.5 w-full min-w-0">
+        <span id="change-${tId}" class="${color24h} ${store.currentSortCol === "Change_Today" ? "opacity-40" : "opacity-100"} flex-1 text-left truncate">${n24h > 0 ? "+" : ""}${Number(n24h).toFixed(2)}%</span>
+        <span id="today-${tId}" class="${colorDay} ${store.currentSortCol === "Change_Today" ? "opacity-100" : "opacity-40"} flex-1 text-left truncate">${nDay > 0 ? "+" : ""}${Number(nDay).toFixed(2)}%</span>
       </div>
     </div>
   </td>
-  <td class="p-2">
-    <div class="flex flex-col leading-tight">
-      <span class="text-[12px] font-black text-theme-text opacity-90 tracking-tighter">${row.MarketCap_Formatted || "0"}</span>
-      <div class="flex items-center gap-2 text-[10px] font-black opacity-60">
-        <span id="vol-binance-${tId}">${row.Volume_Formatted || "0"}</span>
-        <span class="text-theme-accent">${row.VMC_Formatted || "0.0%"}</span>
+  <td class="p-2 col-mcap overflow-hidden">
+    <div class="flex flex-col leading-tight min-w-0">
+      <span class="text-[12px] font-black text-theme-text opacity-90 tracking-tighter truncate">${row.MarketCap_Formatted || "0"}</span>
+      <div class="flex items-center justify-between gap-2 text-[10px] font-black opacity-60 text-left mt-0.5 w-full min-w-0">
+        <span id="vol-binance-${tId}" class="flex-1 text-left truncate">${row.Volume_Formatted || "0"}</span>
+        <span class="text-theme-accent flex-1 text-left truncate">${row.VMC_Formatted || "0.0%"}</span>
       </div>
     </div>
   </td>
-  <td class="p-2 text-right pr-3">
-    <div class="flex flex-col leading-tight items-end">
-      <div class="flex items-center justify-end gap-1">
-         <span class="text-[12px] font-black ${row.Kimchi_Raw > 0 ? "text-theme-up" : "text-theme-down"}">${row.Kimchi_Formatted || "0.0%"}</span>
-         <span class="text-[9px] font-black opacity-40 uppercase tracking-tighter">(${row.Kimchi_Label || "-"})</span>
+  <td class="p-2 text-left col-kimch overflow-hidden">
+    <div class="flex flex-col leading-tight items-start min-w-0">
+      <div class="flex items-center justify-start gap-1 min-w-0 max-w-full">
+         <span class="text-[12px] font-black truncate ${row.Kimchi_Raw > 0 ? "text-theme-up" : "text-theme-down"}">${row.Kimchi_Formatted || "0.0%"}</span>
+         <span class="text-[9px] font-black opacity-40 uppercase tracking-tighter truncate">(${row.Kimchi_Label || "-"})</span>
       </div>
-      <div class="flex items-center justify-end gap-2 text-[10px] font-black">
-         <span class="text-theme-accent opacity-70">${row.Funding_Formatted || "-"}</span>
+      <div class="flex items-center justify-start gap-2 text-[10px] font-black mt-0.5 min-w-0 max-w-full">
+         <span class="text-theme-accent opacity-70 truncate">${row.Funding_Formatted || "-"}</span>
       </div>
     </div>
   </td>
-  <td class="p-2">
+  <td class="p-2 col-exch overflow-hidden">
     <!-- 🚀 8대 거래소 4x2 그리드 로고 (CMC 이미지 활용) -->
-    <div class="grid grid-cols-4 gap-[2px] w-fit">
+    <div class="grid grid-cols-4 gap-[2px] w-fit text-left min-w-0">
       ${(() => {
         const exchanges = row.Listed_Exchanges || [];
         const list = [
-          { id: 'BINANCE', cmcId: 270 },
-          { id: 'UPBIT', cmcId: 351 },
-          { id: 'BITHUMB', cmcId: 200 },
-          { id: 'BYBIT', cmcId: 521 },
-          { id: 'OKX', cmcId: 294 },
-          { id: 'BITGET', cmcId: 513 },
-          { id: 'GATEIO', cmcId: 302 },
-          { id: 'COINBASE', cmcId: 89 }
+          { id: "BINANCE", cmcId: 270 },
+          { id: "UPBIT", cmcId: 351 },
+          { id: "BITHUMB", cmcId: 200 },
+          { id: "BYBIT", cmcId: 521 },
+          { id: "OKX", cmcId: 294 },
+          { id: "BITGET", cmcId: 513 },
+          { id: "GATEIO", cmcId: 302 },
+          { id: "COINBASE", cmcId: 89 },
         ];
-        return list.map(ex => {
-          const isListed = exchanges.some(e => e.includes(ex.id)) || (ex.id === 'UPBIT' && row.Upbit === 'O');
-          const imgUrl = `https://s2.coinmarketcap.com/static/img/exchanges/64x64/${ex.cmcId}.png`;
-          return `
-            <div class="w-[14px] h-[14px] flex items-center justify-center rounded-[2px] overflow-hidden bg-white/5 transition-all"
-                 style="${isListed ? 'filter: none; opacity: 1;' : 'filter: grayscale(1); opacity: 0.1;'}">
+        return list
+          .map((ex) => {
+            const isListed =
+              exchanges.some((e) => e.includes(ex.id)) ||
+              (ex.id === "UPBIT" && row.Upbit === "O");
+            const imgUrl = `https://s2.coinmarketcap.com/static/img/exchanges/64x64/${ex.cmcId}.png`;
+            return `
+            <div class="w-[14px] h-[14px] flex items-center justify-center rounded-[2px] overflow-hidden bg-white/5 transition-all flex-shrink-0"
+                 style="${isListed ? "filter: none; opacity: 1;" : "filter: grayscale(1); opacity: 0.1;"}">
               <img src="${imgUrl}" alt="${ex.id}" class="w-full h-full object-contain" />
             </div>
           `;
-        }).join('');
+          })
+          .join("");
       })()}
     </div>
   </td>
@@ -805,9 +827,6 @@ function switchView(mode) {
   renderTable();
 }
 
-
-
-
 // 🚀 [신규] 상단 제어기 함수들
 window.toggleLang = () => {
   store.lang = store.lang === "KR" ? "EN" : "KR";
@@ -818,17 +837,33 @@ window.toggleLang = () => {
 
 window.toggleSmallCap = () => {
   store.hideSmallCap = !store.hideSmallCap;
-  
+
   // UI 상태 업데이트
   const btn = document.getElementById("btn-small-cap");
   if (btn) {
     if (store.hideSmallCap) {
-      btn.classList.remove("text-theme-text", "opacity-50", "border-theme-border");
-      btn.classList.add("bg-theme-down", "text-white", "border-theme-down", "shadow-md", "opacity-100");
+      btn.classList.remove(
+        "text-theme-text",
+        "opacity-50",
+        "border-theme-border",
+      );
+      btn.classList.add(
+        "bg-theme-down",
+        "text-white",
+        "border-theme-down",
+        "shadow-md",
+        "opacity-100",
+      );
       btn.innerText = "🚫 Hiding Mcap < 1M";
     } else {
       btn.classList.add("text-theme-text", "opacity-50", "border-theme-border");
-      btn.classList.remove("bg-theme-down", "text-white", "border-theme-down", "shadow-md", "opacity-100");
+      btn.classList.remove(
+        "bg-theme-down",
+        "text-white",
+        "border-theme-down",
+        "shadow-md",
+        "opacity-100",
+      );
       btn.innerText = "🚫 Hiding Mcap < 1M";
     }
   }
@@ -888,7 +923,7 @@ async function saveSettings() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        CMC_API_KEY: newKey
+        CMC_API_KEY: newKey,
       }),
     });
 
@@ -920,7 +955,6 @@ function togglePasswordVisibility(id) {
     if (btn) btn.innerText = "🙈";
   }
 }
-
 
 // 🚀 [HTS급 실시간 정렬 엔진] 0.4초마다 순위 재배치 및 고속 FLIP 실행
 setInterval(() => {

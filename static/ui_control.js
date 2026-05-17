@@ -240,7 +240,12 @@ export function searchSymbols(v) {
       const name = (r.Name || "").toUpperCase();
       const sym = (r.Symbol || "").toUpperCase();
       const raw = (r.Ticker || "").toUpperCase();
-      return disp.includes(query) || name.includes(query) || sym.includes(query) || raw.includes(query);
+      return (
+        disp.includes(query) ||
+        name.includes(query) ||
+        sym.includes(query) ||
+        raw.includes(query)
+      );
     })
     .slice(0, 20);
 
@@ -300,6 +305,18 @@ export async function selectSymbol(s, forceMarket = null) {
   store.currentAsset = s;
   store.currentSelectedSymbol = s; // 🚀 전역 선택자 동기화
 
+  // 🚀 최초 코인 선택 시 보류되었던 차트 엔진 및 호가창(Sniper) 소켓 점화! (테이블 레이더는 이미 서버 시작 시 가동됨)
+  if (!store.isEngineStarted) {
+    console.log(
+      "🚀 최초 코인 선택 감지: 보류되었던 차트 엔진 및 호가창 소켓 점화 시작!",
+    );
+    store.isEngineStarted = true;
+    if (typeof window.initChart === "function") window.initChart();
+    else if (typeof initChart === "function") initChart();
+    if (typeof window.initSniperSocket === "function")
+      window.initSniperSocket();
+  }
+
   // [중요] 검색창에 티커명 즉시 반영 (기존 기능 유지)
   const symInput = document.getElementById("symbol-input");
   if (symInput) symInput.value = s;
@@ -307,8 +324,11 @@ export async function selectSymbol(s, forceMarket = null) {
   const searchRes = document.getElementById("search-results");
   if (searchRes) searchRes.style.display = "none";
 
-  // 🚀 [수정] s가 DisplayTicker(BTC)일 수도, 고유 Ticker(BTCUSDT)일 수도 있으므로 둘 다 체크
-  const rowInfo = store.currentTableData.find((c) => c.DisplayTicker === s || c.Ticker === s);
+  // 🚀 [수정] currentTableData뿐만 아니라 originalTableData(전체 장부)까지 샅샅이 뒤져서 정밀도(precision) 누락 방지!
+  const allSourceData = store.originalTableData || store.currentTableData || [];
+  const rowInfo = allSourceData.find(
+    (c) => c.DisplayTicker === s || c.Ticker === s,
+  );
 
   // 마켓 우선순위 결정 (기본: 선물 > 현물 > 업비트)
   if (forceMarket) {
@@ -329,10 +349,10 @@ export async function selectSymbol(s, forceMarket = null) {
       }
     }
   }
-  // 🚀 [수정] 헤더 및 타이틀 Precision(정밀도) 반영
-  const p = rowInfo && rowInfo.precision !== undefined ? rowInfo.precision : 2;
+  // 🚀 [수정] 헤더 및 타이틀 Precision(정밀도) 반영 (단일 진실 공급원 O(1) 광속 탐색!)
+  const p = store.getPrecision(s);
   const headAssetName = document.getElementById("head-asset-name");
-  
+
   if (rowInfo) {
     if (headAssetName) {
       headAssetName.innerText = `${rowInfo.Symbol} (${rowInfo.Name || ""})`;
@@ -344,10 +364,37 @@ export async function selectSymbol(s, forceMarket = null) {
     const headMcap = document.getElementById("head-mcap");
     const headVolB = document.getElementById("head-vol-binance");
     const headVolU = document.getElementById("head-vol-upbit");
+    const headPriceEl = document.getElementById("head-price");
+    const headChg24h = document.getElementById("head-chg-24h");
+    const headChgDay = document.getElementById("head-chg-day");
 
     if (headMcap) headMcap.innerText = rowInfo.MarketCap_Formatted || "-";
-    if (headVolB) headVolB.innerText = rowInfo.Binance_Vol_Formatted || "-";
+    if (headVolB) headVolB.innerText = rowInfo.Volume_Formatted || "-";
     if (headVolU) headVolU.innerText = rowInfo.Upbit_Vol_Formatted || "-";
+    if (headPriceEl) headPriceEl.innerText = titlePrice;
+
+    if (headChg24h) {
+      const n24 = rowInfo.Change_24h_Raw ?? 0;
+      const c24 =
+        n24 > 0
+          ? "text-theme-up"
+          : n24 < 0
+            ? "text-theme-down"
+            : "text-theme-text";
+      headChg24h.className = `text-[13px] md:text-[15px] font-mono mt-0.5 ${c24}`;
+      headChg24h.innerText = `${n24 > 0 ? "+" : ""}${Number(n24).toFixed(2)}%`;
+    }
+    if (headChgDay) {
+      const nDay = rowInfo.Change_Today_Raw ?? 0;
+      const cDay =
+        nDay > 0
+          ? "text-theme-up"
+          : nDay < 0
+            ? "text-theme-down"
+            : "text-theme-text";
+      headChgDay.className = `text-[13px] md:text-[15px] font-mono mt-0.5 ${cDay}`;
+      headChgDay.innerText = `${nDay > 0 ? "+" : ""}${Number(nDay).toFixed(2)}%`;
+    }
   }
 
   // 배지 업데이트
@@ -355,10 +402,13 @@ export async function selectSymbol(s, forceMarket = null) {
 
   // 🚀 [핵심] 코인 이름 가져와서 "티커 (이름)" 형태로 덮어쓰기
   try {
-    const infoRes = await fetch(`/api/coin-info/${s}`);
+    const querySym = rowInfo ? rowInfo.DisplayTicker : s;
+    const infoRes = await fetch(`/api/coin-info/${querySym}`);
     const infoData = await infoRes.json();
     if (headAssetName && infoData.name) {
-      headAssetName.innerText = `${s} (${infoData.name})`;
+      const displaySym =
+        infoData.symbol || (rowInfo ? rowInfo.Symbol : querySym.split("(")[0]);
+      headAssetName.innerText = `${displaySym} (${infoData.name})`;
     }
   } catch (e) {
     console.error("이름 로드 실패", e);
@@ -366,7 +416,9 @@ export async function selectSymbol(s, forceMarket = null) {
 
   // 🚀 [추가] 검색한 코인이 현재 테이블 렌더링 범위(50개) 밖에 있을 경우 대응
   const sortedList = store.currentTableData;
-  const targetIdx = sortedList.findIndex((item) => item.DisplayTicker === s || item.Ticker === s);
+  const targetIdx = sortedList.findIndex(
+    (item) => item.DisplayTicker === s || item.Ticker === s,
+  );
 
   if (targetIdx !== -1) {
     // 1. 만약 현재 렌더링 한도보다 뒤에 있다면 한도를 늘리고 재렌더링
@@ -378,10 +430,13 @@ export async function selectSymbol(s, forceMarket = null) {
     // 2. 해당 행으로 스크롤 이동 및 하이라이트
     setTimeout(() => {
       store.currentSelectedSymbol = s; // 선택자 동기화
-      const targetRow = document.querySelector(`#table-body tr[data-sym="${s}"]`);
+      const targetRow = document.querySelector(
+        `#table-body tr[data-sym="${s}"]`,
+      );
       if (targetRow) {
         targetRow.scrollIntoView({ block: "center", behavior: "smooth" });
-        if (typeof applySelectedHighlight === "function") applySelectedHighlight();
+        if (typeof applySelectedHighlight === "function")
+          applySelectedHighlight();
       }
     }, 100);
   }
@@ -394,7 +449,9 @@ export async function selectSymbol(s, forceMarket = null) {
 
 // 배지 UI 업데이트 헬퍼
 export function updateExchangeBadges(s) {
-  const rowInfo = store.currentTableData.find((c) => c.DisplayTicker === s || c.Ticker === s);
+  const rowInfo = store.currentTableData.find(
+    (c) => c.DisplayTicker === s || c.Ticker === s,
+  );
   let badges = "";
   if (rowInfo) {
     if (rowInfo.Listed_Exchanges?.includes("UPBIT") || rowInfo.Upbit === "O")
@@ -414,6 +471,9 @@ export function updateExchangeBadges(s) {
 // executeSetTF나 코인 클릭 함수(selectSymbol) 등 마켓이 바뀌는 모든 시점에 이 '세척기'를 돌려야 합니다.
 // ================== chart.js에서 이동됨 ==================
 export function setTF(tf) {
+  // 🚀 [추가] 같은 프레임 봉이면 API 중복 호출 방지를 위해 즉시 튕겨냄!
+  if (store.currentTF === tf) return;
+
   const btnSim = document.getElementById("tab-btn-sim");
   const isSimMode = btnSim ? btnSim.classList.contains("active") : false;
 

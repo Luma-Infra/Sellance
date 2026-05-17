@@ -51,13 +51,37 @@ export function formatSmartPrice(price, p) {
   }
 }
 
+// 🚀 크로스헤어 전용 가격표 포맷팅 (플마 퍼센트 및 가격차이 표시)
+export function formatCrosshairPrice(price, p, isLeftScale = false) {
+  if (!isLeftScale) {
+    return formatSmartPrice(price, p);
+  }
+
+  if (store.crosshairLeftPrice !== null && store.crosshairLeftPrice !== undefined && store.mainData && store.mainData.length > 0) {
+    const minMove = p > 0 ? 1 / Math.pow(10, p) : 1;
+    // 좌측 스케일 십자선 가격(crosshairLeftPrice)과 일치하는지 확인
+    if (Math.abs(price - store.crosshairLeftPrice) < minMove * 0.51) {
+      // 실제 계산은 우측 캔들의 정확한 십자선 가격(store.crosshairPrice)을 기준으로 수행!
+      const targetPrice = store.crosshairPrice !== null ? store.crosshairPrice : price;
+      const currentPrice = store.mainData[store.mainData.length - 1].close;
+      if (currentPrice && currentPrice > 0) {
+        const diff = targetPrice - currentPrice;
+        const pct = (diff / currentPrice) * 100;
+        return (pct >= 0 ? "+" : "") + pct.toFixed(1) + "%";
+      }
+    }
+  }
+  return ""; // 좌측 스케일의 평소 눈금 라벨은 깔끔하게 투명 처리!
+}
+window.formatCrosshairPrice = formatCrosshairPrice;
+
 // 🚀 달러/원화 거래대금 포맷팅 (실시간 소켓용)
 export function formatVolumeDollar(vol) {
   if (!vol || isNaN(vol)) return "0";
-  if (vol >= 1_000_000_000) return "$" + (vol / 1_000_000_000).toFixed(2) + "B";
-  if (vol >= 1_000_000) return "$" + (vol / 1_000_000).toFixed(2) + "M";
-  if (vol >= 1_000) return "$" + (vol / 1_000).toFixed(2) + "K";
-  return "$" + vol.toFixed(2);
+  if (vol >= 1_000_000_000) return (vol / 1_000_000_000).toFixed(2) + " B";
+  if (vol >= 1_000_000) return (vol / 1_000_000).toFixed(2) + " M";
+  if (vol >= 1_000) return (vol / 1_000).toFixed(2) + " K";
+  return vol.toFixed(2);
 }
 
 export function formatVolumeKRW(vol) {
@@ -72,14 +96,8 @@ function updateLegend(d, v, k) {
   const leg = document.getElementById("ohlc-legend");
   if (!leg || !d) return;
 
-  // 🚀 p값 안전장치 (currentAsset이나 데이터가 없을 때 대비)
-  const coin =
-    typeof store.currentTableData !== "undefined"
-      ? store.currentTableData.find(
-          (c) => c.DisplayTicker === store.currentAsset,
-        ) // 🚀 [수정]
-      : null;
-  const p = coin?.precision ?? 2;
+  // 🚀 [수정] 단일 진실 공급원(Single Source of Truth)인 store.getPrecision 사용! (O(1) 초광속 참조)
+  const p = store.getPrecision(store.currentAsset);
 
   // 🚀 0일 때를 위한 삼항 연산자 (보합색 추가)
   const cls =
@@ -147,8 +165,8 @@ function updateStatus(d, p) {
 
   if (!last) return;
 
-  // 🚀 [수정] 정밀도(p)가 있으면 사용하고, 없으면 store나 기본값에서 가져옴
-  const precision = p !== undefined ? p : (store.currentPrecision || 2);
+  // 🚀 [수정] 정밀도(p)가 있으면 사용하고, 없으면 단일 진실 공급원인 store.getPrecision에서 가져옴!
+  const precision = p !== undefined ? p : store.getPrecision(store.currentAsset);
 
   // 가격 업데이트
   const priceEl = document.getElementById("head-price");

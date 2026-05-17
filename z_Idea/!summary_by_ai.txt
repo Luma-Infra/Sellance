@@ -5,7 +5,7 @@ if (Test-Path context_for_ai.txt) { Remove-Item context_for_ai.txt }
 "=== [1] PROJECT STRUCTURE ===" | Out-File -FilePath context_for_ai.txt -Encoding UTF8
 Get-ChildItem -Path "." -Depth 0 | Where-Object { !$_.PSIsContainer } | Select-Object -ExpandProperty Name | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
 
-@("modules", "static", "templates", "public") | ForEach-Object {
+@("modules", "static", "templates", "public", "z_Idea") | ForEach-Object {
     if (Test-Path $_) {
         "`n+---$_" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
         Get-ChildItem -Path "./$_" -Depth 0 | ForEach-Object { "|   $($_.Name)" } | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
@@ -51,6 +51,16 @@ if (Test-Path "./templates") {
         "`n--- File: $($_.Name) ---" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
         # ID, 주요 스크립트 연결, 주석만 남기고 싹 다 쳐냄
         Get-Content $_.FullName -Encoding UTF8 | Select-String "id=","<script","<!--" | ForEach-Object { $_.ToString().Trim() } | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+    }
+}
+
+# 6. [섹션 5] z_Idea 기획 및 아이디어 문서 요약
+"`n=== [5] Z_IDEA (PLANNING & IDEAS) ===" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+if (Test-Path "./z_Idea") {
+    Get-ChildItem -Path "./z_Idea" -Filter *.* -Depth 0 | Where-Object { $_.Name -notmatch "context_for_ai|\!summary_by_ai" } | ForEach-Object {
+        "`n--- File: $($_.Name) ---" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
+        # 기획/아이디어 문서의 핵심 헤딩, 목록, 주요 강조 아이콘 등 추출
+        Get-Content $_.FullName -Encoding UTF8 | Select-String "^#","^===","^---","^[0-9]\.","💡","🚀","🎯","📌","✅","@" | Out-File -FilePath context_for_ai.txt -Append -Encoding UTF8
     }
 }
 

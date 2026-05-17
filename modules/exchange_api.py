@@ -161,6 +161,7 @@ def fetch_global_listings():
 
 
 def fetch_exchange_market_data(mapping):
+    load_utc0_cache()
     (
         NOTE_MAP,
         TICKER_DATA,
@@ -183,11 +184,12 @@ def fetch_exchange_market_data(mapping):
     binance_pure = {utils.get_pure_base_asset(a) for a in binance_base_assets}
 
     # 3. 족보 생성 및 업비트 전용 자산 필터링
-    REVERSE_LOOKUP = {
-        f"{v[2].upper()}_{v[3].upper()}": k
-        for k, v in DUPLICATED_LIST.items()
-        if len(v) >= 4
-    }
+    REVERSE_LOOKUP = {}
+    for k, v in DUPLICATED_LIST.items():
+        if len(v) >= 4:
+            ex = v[3].upper()
+            REVERSE_LOOKUP[f"{v[2].upper()}_{ex}"] = k
+            REVERSE_LOOKUP[f"{k.split('(')[0].upper()}_{ex}"] = k
 
     upbit_only_assets = set()
     for k in upbit_krw_set:
@@ -237,12 +239,19 @@ def capture_utc0_prices_bulk():
         if today_str not in UTC0_OPEN_CACHE:
             UTC0_OPEN_CACHE[today_str] = {}
 
-        # 데이터 매핑
-        for item in (res_f + res_s):
-            sym = item['symbol'].replace('USDT', '')
-            if is_valid_ticker(sym):
-                # 현재 시점의 가격을 오늘의 시가로 고정!
-                UTC0_OPEN_CACHE[today_str][sym] = float(item['lastPrice'])
+        # 🚀 [FIX] 선물(res_f) 가격을 우선 저장하고, 현물(res_s)은 선물이 없을 때만 저장하여
+        # 현물 상폐/거래중지 코인(예: XMR)의 과거 고정 가격이 선물 활성 가격을 덮어쓰는 오류 원천 차단!
+        if isinstance(res_f, list):
+            for item in res_f:
+                sym = item['symbol'].replace('USDT', '')
+                if is_valid_ticker(sym):
+                    UTC0_OPEN_CACHE[today_str][sym] = float(item['lastPrice'])
+        
+        if isinstance(res_s, list):
+            for item in res_s:
+                sym = item['symbol'].replace('USDT', '')
+                if is_valid_ticker(sym) and sym not in UTC0_OPEN_CACHE[today_str]:
+                    UTC0_OPEN_CACHE[today_str][sym] = float(item['lastPrice'])
         
         save_utc0_cache()
         print(f"✅ [SUCCESS] {today_str} 시가 벌크 저장 완료 ({len(UTC0_OPEN_CACHE[today_str])}개)")

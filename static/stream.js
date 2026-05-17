@@ -16,13 +16,14 @@ function renderRealtimeRow(tId, data) {
   // 🚀 [해결] PEPE vs 1000PEPE, XRP vs XRPDOWN 등 심볼 헷갈림 방지 (널뛰기 버그 컷)
   const dataSym = (data.s || tId).toUpperCase();
   
-  // 1. 최우선: Ticker(BTCUSDT, BTCKRW 등)가 완벽히 일치하는 행 찾기
-  let row = store.currentTableData.find((r) => r.Ticker === dataSym);
+  // 1. 최우선: Ticker(BTCUSDT, BTCKRW 등)가 완벽히 일치하는 행 찾기 (originalTableData 전체 장부까지 샅샅이 탐색!)
+  const allSource = store.originalTableData || store.currentTableData || [];
+  let row = allSource.find((r) => r.Ticker === dataSym);
 
   // 2. [수정] 차선: 업비트 규격 변환 매칭 (KRW-BTC -> BTCKRW)
-  if (!row && dataSym.includes("KRW-")) {
-    const upbitTicker = dataSym.replace("KRW-", "") + "KRW";
-    row = store.currentTableData.find((r) => r.Ticker === upbitTicker);
+  if (!row && (dataSym.includes("KRW-") || tId.includes("KRW-"))) {
+    const upbitTicker = tId.replace("KRW-", "") + "KRW";
+    row = allSource.find((r) => r.Ticker === upbitTicker);
   }
   
   if (!row) return;
@@ -56,7 +57,7 @@ function renderRealtimeRow(tId, data) {
   const priceCell = document.getElementById(`price-${row.Ticker}`);
   if (!priceCell) return;
 
-  const p = row.precision || 2;
+  const p = store.getPrecision(row.Ticker);
   const oldPrice = parseFloat(priceCell.getAttribute("data-raw-price")) || 0;
 
   // 가격 및 반짝이 효과
@@ -97,8 +98,31 @@ function renderRealtimeRow(tId, data) {
 
   // 거래량 UI
   const binanceVolCell = document.getElementById(`vol-binance-${row.Ticker}`);
-  if (binanceVolCell && data.q) {
-    binanceVolCell.innerText = `B: ${window.formatVolumeDollar(parseFloat(data.q))}`;
+  if (binanceVolCell && data.q && data.e !== "aggTrade") {
+    binanceVolCell.innerText = `${window.formatVolumeDollar(parseFloat(data.q))}`;
+  }
+
+  // 🚀 [추가] 만약 이 코인이 현재 탭에 띄워진 활성 코인이라면, 차트 상단 헤더 전광판도 테이블과 100% 동일하게 실시간 동기화!
+  if (row.Ticker === store.currentSelectedSymbol || row.DisplayTicker === store.currentAsset) {
+    const headPriceEl = document.getElementById("head-price");
+    const headChg24h = document.getElementById("head-chg-24h");
+    const headChgDay = document.getElementById("head-chg-day");
+
+    if (headPriceEl) {
+      headPriceEl.innerText = window.formatSmartPrice(newPrice, p);
+    }
+    if (headChg24h) {
+      const n24 = row.Change_24h_Raw ?? 0;
+      const c24 = n24 > 0 ? "text-theme-up" : n24 < 0 ? "text-theme-down" : "text-theme-text";
+      headChg24h.className = `text-[13px] md:text-[15px] font-mono mt-0.5 ${c24}`;
+      headChg24h.innerText = `${n24 > 0 ? "+" : ""}${Number(n24).toFixed(2)}%`;
+    }
+    if (headChgDay) {
+      const nDay = row.Change_Today_Raw ?? 0;
+      const cDay = nDay > 0 ? "text-theme-up" : nDay < 0 ? "text-theme-down" : "text-theme-text";
+      headChgDay.className = `text-[13px] md:text-[15px] font-mono mt-0.5 ${cDay}`;
+      headChgDay.innerText = `${nDay > 0 ? "+" : ""}${Number(nDay).toFixed(2)}%`;
+    }
   }
 }
 
@@ -174,7 +198,7 @@ store.radarIntervalId = setInterval(() => {
     if (!ticker) return;
 
     if (row.Ticker.endsWith("KRW")) {
-      const rate = store.marketDataMap?.krw_usd_rate || 1450.0;
+      const rate = store.marketDataMap?.krw_usd_rate;
       row.Price_KRW = parseFloat(ticker.c);
       row.Price_Raw = row.Price_KRW / rate;
     } else {

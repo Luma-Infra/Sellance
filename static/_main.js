@@ -37,16 +37,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // 2️⃣ [엔진 준비] 이제 장부가 확실히 있으니 차트를 그린다
     if (store.currentTableData && store.currentTableData.length > 0) {
-      initChart();
       initMeasureEvents();
       initInfiniteScroll();
-      console.log("✅ 2. 차트 및 인터페이스 준비 완료");
+      // 🚀 [추가] 사령관님 요청: 서버 시작 시 테이블 코인들의 실시간 등락 움직임(Market Radar)은 즉시 점화!!!
+      if (typeof window.startBinanceMarketRadar === "function") window.startBinanceMarketRadar();
+      if (typeof window.startUpbitMarketRadar === "function") window.startUpbitMarketRadar();
 
-      // 3️⃣ [소켓 점화]
-      initSniperSocket();
-      if (typeof startBinanceMarketRadar === "function") startBinanceMarketRadar();
-      if (typeof startUpbitMarketRadar === "function") startUpbitMarketRadar();
-      console.log("✅ 3. 실시간 소켓 연결 성공!");
+      console.log("✅ 2. 테이블 실시간 시세 점화 완료! (차트 및 스나이퍼 소켓은 사용자 최초 선택 시 점화 대기 중...)");
     } else {
       // 🚀 [수정] 성급하게 에러 던지지 말고 재시도 유도
       console.warn("⚠️ 장부가 아직 비어있습니다. 수집 완료를 기다리는 중...");
@@ -141,16 +138,33 @@ document.addEventListener("visibilitychange", () => {
     // 1. 잠든 사이 폭주해서 쌓인 찌꺼기 버퍼 즉시 소각
     for (let key in store.tickerBuffer) delete store.tickerBuffer[key];
 
-    // 2. 다른 탭에 10초 이상 자리를 비웠을 때만 차트를 아예 새로고침 (유령 캔들, 끊김 방지)
-    if (
-      tabHiddenTime > 0 &&
-      Date.now() - tabHiddenTime > 30000 &&
-      store.currentAsset
-    ) {
-      console.log("🔄 장시간 부재 감지: 차트를 재동기화합니다.");
-      if (typeof fetchHistory === "function") fetchHistory(store.currentAsset);
+    // 2. 🚀 [수정] 다른 탭에 30초 이상 자리를 비웠을 때, 죽어있는 반쪽짜리 소켓들을 전부 강제 종료하고 새 소켓으로 깔끔하게 재점화!
+    if (tabHiddenTime > 0 && Date.now() - tabHiddenTime > 30000) {
+      console.log("🔄 장시간 부재 감지: 모든 소켓 연결을 초기화하고 차트를 재동기화합니다.");
+      
+      // 기존 소켓들 확실하게 처단
+      [store.binanceChartWs, store.upbitChartWs, store.sniperWs, store.binanceRadarWs, store.upbitRadarWs].forEach((ws) => {
+        if (ws) {
+          ws.onmessage = null;
+          ws.onclose = null;
+          ws.close();
+        }
+      });
+      store.binanceChartWs = null;
+      store.upbitChartWs = null;
+      store.sniperWs = null;
+      store.binanceRadarWs = null;
+      store.upbitRadarWs = null;
+
+      // 소켓 재점화
+      if (typeof initSniperSocket === "function") initSniperSocket();
+      if (typeof startBinanceMarketRadar === "function") startBinanceMarketRadar();
+      if (typeof startUpbitMarketRadar === "function") startUpbitMarketRadar();
+
+      if (store.currentAsset && typeof fetchHistory === "function") {
+        fetchHistory(store.currentAsset);
+      }
     }
-    // 복귀했으므로 타이머 초기화
     tabHiddenTime = 0;
   }
 });

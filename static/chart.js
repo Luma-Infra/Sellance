@@ -1,7 +1,82 @@
 // chart.js - 순수 차트 엔진 코어
-import { store, tfSec, measureDOM } from './_store.js';
-import { fetchHistory } from './chart_data.js';
-import { getUnixSeconds } from './chart_utils.js';
+import { store, tfSec, measureDOM } from "./_store.js";
+import { fetchHistory } from "./chart_data.js";
+import { getUnixSeconds, formatCrosshairPrice } from "./chart_utils.js";
+
+// 🚀 [메인 & 거래량 차트 양방향 100% 대칭 60fps 네이티브 캔버스 십자선 플러그인]
+class CanvasCrosshairPrimitive {
+  constructor() {
+    this._chart = null;
+    this._series = null;
+    this._requestUpdate = null;
+    this._x = null;
+    this._paneViews = [new CanvasCrosshairPaneView(this)];
+  }
+  attached({ chart, series, requestUpdate }) {
+    this._chart = chart;
+    this._series = series;
+    this._requestUpdate = requestUpdate;
+  }
+  detached() {
+    this._chart = null;
+    this._series = null;
+    this._requestUpdate = null;
+  }
+  paneViews() {
+    return this._x !== null ? this._paneViews : [];
+  }
+  setX(x) {
+    this._x = x;
+    if (this._requestUpdate) this._requestUpdate();
+  }
+}
+
+class CanvasCrosshairPaneView {
+  constructor(source) {
+    this._source = source;
+  }
+  renderer() {
+    return new CanvasCrosshairPaneRenderer(this._source);
+  }
+}
+
+class CanvasCrosshairPaneRenderer {
+  constructor(source) {
+    this._source = source;
+  }
+  draw(target) {
+    if (this._source._x === null) return;
+    const x = this._source._x;
+
+    const renderFn = (scope) => {
+      const ctx = scope.context || scope.ctx || scope;
+      ctx.save();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "#758696";
+      ctx.lineCap = "butt"; // 🚀 round의 삐져나옴/뭉침 현상을 제거하고 칼각 도트로 복원!
+      if (typeof ctx.setLineDash === "function") {
+        ctx.setLineDash([1, 2]); // 🚀 1픽셀 찍고 2픽셀 쉬는 가장 또렷하고 촘촘한 도트 비율!
+      }
+      ctx.beginPath();
+      // 🚀 x 좌표를 픽셀 경계 중앙(+0.5)으로 강제 정렬
+      const exactX = Math.round(x) + 0.5;
+      // 🚀 위아래 패널 경계선(Border/Gap)의 미세한 틈새 단절을 없애기 위해 무자비하게 팽창 렌더링!!!
+      ctx.moveTo(exactX, -100);
+      ctx.lineTo(
+        exactX,
+        (scope.mediaSize ? scope.mediaSize.height : 500) + 100,
+      );
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    if (typeof target.useMediaCoordinateSpace === "function") {
+      target.useMediaCoordinateSpace(renderFn);
+    } else {
+      renderFn(target);
+    }
+  }
+}
 
 // 🚀 3. 차트 생성
 export function initChart() {
@@ -35,7 +110,23 @@ export function initChart() {
       attributionLogo: false, // 🚀 트레이딩뷰 워터마크 끄기
     },
     grid: { vertLines: { color: gridColor }, horzLines: { color: gridColor } },
-    crosshair: { mode: window.LightweightCharts.CrosshairMode.Normal },
+    crosshair: {
+      mode: window.LightweightCharts.CrosshairMode.Normal,
+      vertLine: {
+        color: "#758696",
+        width: 1,
+        style: window.LightweightCharts.LineStyle.Dotted, // 도트 점선 촘촘 모드
+        visible: true,
+        labelVisible: true,
+      },
+      horzLine: {
+        color: "#758696",
+        width: 1,
+        style: window.LightweightCharts.LineStyle.Dotted, // 도트 점선 촘촘 모드
+        visible: true,
+        labelVisible: true,
+      },
+    },
     handleScale: { axisPressedMouseMove: { time: true, price: true } },
     handleScroll: { vertTouchDrag: true },
     timeScale: {
@@ -91,6 +182,7 @@ export function initChart() {
       autoScale: true,
       visible: true, // 🚀 시간축 동기화를 위해 보이지 않는 축 유지
       borderColor: "transparent",
+      // entireTextOnly: true,
     },
   });
 
@@ -111,12 +203,21 @@ export function initChart() {
     },
   });
 
-  // 🚀 무한 재귀 방지용 실제 마우스 위치 추적
-  elMain.addEventListener('mouseenter', () => store.activeChart = store.chart);
-  elVol.addEventListener('mouseenter', () => store.activeChart = store.chartVol);
+  // 🚀 DOM 이벤트 기반 activeChart 제어 제거 (라이브러리 내부 이벤트로 100% 통합 제어)
 
-  elMain.addEventListener('mouseleave', () => { if (store.activeChart === store.chart) store.activeChart = null; });
-  elVol.addEventListener('mouseleave', () => { if (store.activeChart === store.chartVol) store.activeChart = null; });
+  const p = store.getPrecision(store.currentAsset);
+  const customPriceFormat = {
+    type: "custom",
+    precision: p,
+    minMove: p > 0 ? Number((1 / Math.pow(10, p)).toFixed(p)) : 1,
+    formatter: (price) => formatCrosshairPrice(price, p, false),
+  };
+  const leftPriceFormat = {
+    type: "custom",
+    precision: p,
+    minMove: p > 0 ? Number((1 / Math.pow(10, p)).toFixed(p)) : 1,
+    formatter: (price) => formatCrosshairPrice(price, p, true),
+  };
 
   store.candleSeries = store.chart.addSeries(
     window.LightweightCharts.CandlestickSeries,
@@ -128,6 +229,20 @@ export function initChart() {
       wickDownColor: downColor,
       lastValueVisible: false, // 🚀 기본 가격 라벨 숨기기
       priceLineVisible: false, // 🚀 기본 가격선 숨기기
+      priceFormat: customPriceFormat,
+    },
+  );
+
+  // 🚀 좌측 스케일 전용 등락률 및 가격차이 표시 보조 시리즈
+  store.leftScaleSeries = store.chart.addSeries(
+    window.LightweightCharts.LineSeries,
+    {
+      priceScaleId: "left",
+      color: "transparent",
+      crosshairMarkerVisible: false,
+      lastValueVisible: false,
+      priceLineVisible: false,
+      priceFormat: leftPriceFormat,
     },
   );
 
@@ -139,6 +254,7 @@ export function initChart() {
       downColor: downColor + "4D",
       borderVisible: false,
       wickVisible: false,
+      priceFormat: customPriceFormat,
     },
   );
 
@@ -163,8 +279,18 @@ export function initChart() {
         minMove: 0.01,
         formatter: (p) => (p > 0 ? "+" : "") + p.toFixed(2) + "%",
       },
-    }
+    },
   );
+
+  // 🚀 [메인 & 거래량 차트 양방향 대칭 십자선 플러그인 초기화 및 부착]
+  if (store.candleSeries && !store._mainCrosshair) {
+    store._mainCrosshair = new CanvasCrosshairPrimitive();
+    store.candleSeries.attachPrimitive(store._mainCrosshair);
+  }
+  if (store.volumeSeries && !store._volCrosshair) {
+    store._volCrosshair = new CanvasCrosshairPrimitive();
+    store.volumeSeries.attachPrimitive(store._volCrosshair);
+  }
 
   // 🌊 시간축 스크롤 완벽 동기화 엔진
   const syncTimeScales = (sourceChart, targetCharts) => {
@@ -180,70 +306,165 @@ export function initChart() {
   syncTimeScales(store.chart, [store.chartVol]);
   syncTimeScales(store.chartVol, [store.chart]);
 
-  // 🎯 십자선 크로스헤어 완벽 동기화 엔진
+  // 🎯 십자선 크로스헤어 완벽 동기화 엔진 (레이스 컨디션 원천 차단 무적 알고리즘)
   const syncCrosshair = (sourceChart, targetCharts) => {
     sourceChart.subscribeCrosshairMove((param) => {
-      if (store.activeChart !== sourceChart) return;
-
       try {
-        const isHover = param.point !== undefined && param.time !== undefined && param.point.x >= 0 && param.point.y >= 0;
+        const isHover =
+          param.point !== undefined && param.point.x >= 0 && param.point.y >= 0;
 
         if (isHover) {
-          if (sourceChart._horzVisible !== true) {
-            sourceChart.applyOptions({ crosshair: { horzLine: { visible: true, labelVisible: true } } });
-            sourceChart._horzVisible = true;
+          // 🚀 1. 현재 마우스가 올라간 차트를 무조건 activeChart로 강제 승격!
+          store.activeChart = sourceChart;
+
+          // 🚀 2. 내 차트(sourceChart)의 가로선(horzLine) 및 라벨은 켜되, 내장 세로선(vertLine)은 투명하게 끈다! (캔버스 플러그인이 대체)
+          if (sourceChart._isSource !== true) {
+            sourceChart.applyOptions({
+              crosshair: {
+                vertLine: {
+                  visible: false, // 🚨 내장 세로선 은폐 (세로선 2개 겹침 방지!)
+                  labelVisible: true, // ⏰ 하단 시간축 라벨은 유지!
+                  style: window.LightweightCharts.LineStyle.Dotted,
+                },
+                horzLine: {
+                  visible: true, // 👈 마우스가 있는 곳의 가로선은 켠다!
+                  labelVisible: true,
+                  style: window.LightweightCharts.LineStyle.Dotted,
+                },
+              },
+            });
+            sourceChart._isSource = true;
+            sourceChart._isTarget = false;
+          }
+
+          // 🚀 3. 자석 마그넷 효과 계산 (과거 캔들 + 미래 허공 완벽 통합 스냅)
+          let magnetX = param.point.x;
+          if (
+            param.time !== undefined &&
+            typeof sourceChart.timeScale().timeToCoordinate === "function"
+          ) {
+            const cx = sourceChart.timeScale().timeToCoordinate(param.time);
+            if (cx !== null) magnetX = cx;
+          } else if (
+            typeof sourceChart.timeScale().coordinateToLogical === "function" &&
+            typeof sourceChart.timeScale().logicalToCoordinate === "function"
+          ) {
+            const logical = sourceChart.timeScale().coordinateToLogical(param.point.x);
+            if (logical !== null) {
+              const snapX = sourceChart.timeScale().logicalToCoordinate(Math.round(logical));
+              if (snapX !== null) magnetX = snapX;
+            }
+          }
+
+          // 🚀 4. [핵심] 원본 차트(sourceChart) 캔버스 플러그인 세로선 다이렉트 렌더링! (메인 차트 세로선 누락 원천 차단!!!)
+          if (sourceChart === store.chart && store._mainCrosshair) {
+            store._mainCrosshair.setX(magnetX);
+          } else if (sourceChart === store.chartVol && store._volCrosshair) {
+            store._volCrosshair.setX(magnetX);
+          }
+
+          // 🚀 5. 타겟 차트들 처리 (내장 세로선/가로선 은폐, 하단 시간축 라벨 유지, 캔버스 플러그인 단독 렌더링!)
+          let targetTime = param.time;
+          if (targetTime === undefined && typeof sourceChart.timeScale().coordinateToTime === "function") {
+            targetTime = sourceChart.timeScale().coordinateToTime(param.point.x);
           }
 
           targetCharts.forEach((targetObj) => {
             const { chart: tChart, series: tSeries } = targetObj;
             if (tChart) {
-              if (tChart._horzVisible !== false) {
-                tChart.applyOptions({ crosshair: { horzLine: { visible: false, labelVisible: false } } });
-                tChart._horzVisible = false;
+              if (tChart !== sourceChart && tChart._isTarget !== true) {
+                tChart.applyOptions({
+                  crosshair: {
+                    horzLine: { visible: false, labelVisible: false }, // 타겟 차트 가로선 끔
+                    vertLine: { visible: false, labelVisible: true }, // 내장 세로선 끔, 하단 시간 라벨 켬
+                  },
+                });
+                tChart._isTarget = true;
+                tChart._isSource = false;
               }
-              let price = 0;
-              if (tSeries) {
-                const data = param.seriesData.get(tSeries);
-                if (data) price = data.value !== undefined ? data.value : data.close;
+
+              // 🚀 1. 먼저 원격 십자선 이동 API를 호출하여 라이브러리 내부 상태 및 하단 타임스탬프 라벨 위치를 확정 짓는다!
+              if (tChart !== sourceChart && targetTime !== undefined && targetTime !== null && tSeries) {
+                try {
+                  tChart.setCrosshairPosition(NaN, targetTime, tSeries);
+                } catch (e) {}
               }
-              if (typeof tChart.setCrosshairPosition === 'function' && tSeries) {
-                try { tChart.setCrosshairPosition(price || 0, param.time, tSeries); } catch (e) { }
+
+              // 🚀 2. [핵심] 타겟 차트(tChart) 캔버스 플러그인 점선 최종 렌더링! (거래량 차트 세로선 누락 원천 차단!!!)
+              if (tChart === store.chartVol && store._volCrosshair) {
+                store._volCrosshair.setX(magnetX);
+              } else if (tChart === store.chart && store._mainCrosshair) {
+                store._mainCrosshair.setX(magnetX);
               }
             }
           });
-        } else {
-          targetCharts.forEach((targetObj) => {
-            if (targetObj.chart) targetObj.chart.clearCrosshairPosition();
-          });
-        }
 
-        if (isHover) {
+          // 🚀 5. 레전드 업데이트 등 기존 로직 유지
+          if (
+            sourceChart === store.chart &&
+            store.candleSeries &&
+            typeof store.candleSeries.coordinateToPrice === "function"
+          ) {
+            store.crosshairPrice = store.candleSeries.coordinateToPrice(
+              param.point.y,
+            );
+            if (
+              store.leftScaleSeries &&
+              typeof store.leftScaleSeries.coordinateToPrice === "function"
+            ) {
+              store.crosshairLeftPrice =
+                store.leftScaleSeries.coordinateToPrice(param.point.y);
+            }
+          }
           store.isCrosshairActive = true;
           const pTime = getUnixSeconds(param.time);
-
           let d = null;
-          if (sourceChart === store.chart) d = param.seriesData.get(store.candleSeries);
-          else d = store.mainData?.find(item => item.time === pTime) || null;
-
-          const v = store.volumeData?.find(item => item.time === pTime) || null;
-          const k = store.kimchiData?.find(item => item.time === pTime) || null;
-
-          if (d && typeof window.updateLegend === "function") window.updateLegend(d, v, k);
+          if (sourceChart === store.chart)
+            d = param.seriesData.get(store.candleSeries);
+          else d = store.mainData?.find((item) => item.time === pTime) || null;
+          const v =
+            store.volumeData?.find((item) => item.time === pTime) || null;
+          const k =
+            store.kimchiData?.find((item) => item.time === pTime) || null;
+          if (d && typeof window.updateLegend === "function")
+            window.updateLegend(d, v, k);
         } else {
-          store.isCrosshairActive = false;
-          if (store.mainData && store.mainData.length > 0 && typeof window.updateLegend === "function") {
-            const lastIdx = store.mainData.length - 1;
-            const v = store.volumeData ? store.volumeData[lastIdx] : null;
-            const k = store.kimchiData ? store.kimchiData[lastIdx] : null;
-            window.updateLegend(store.mainData[lastIdx], v, k);
+          // 🚀 [핵심 방어책] isHover === false 일 때, 현재 activeChart가 내 차트(sourceChart)인 경우에만 초기화 실행!!!
+          // (즉, 마우스가 다른 차트로 넘어갔을 때는 이전 차트의 else 블록이 방해하지 못하도록 원천 차단!!!)
+          if (store.activeChart === sourceChart) {
+            store.activeChart = null;
+            if (sourceChart === store.chart) {
+              store.crosshairPrice = null;
+              store.crosshairLeftPrice = null;
+            }
+            targetCharts.forEach((targetObj) => {
+              if (targetObj.chart) targetObj.chart.clearCrosshairPosition();
+              if (store._volCrosshair) store._volCrosshair.setX(null);
+              if (store._mainCrosshair) store._mainCrosshair.setX(null);
+            });
+            store.isCrosshairActive = false;
+            if (
+              store.mainData &&
+              store.mainData.length > 0 &&
+              typeof window.updateLegend === "function"
+            ) {
+              const lastIdx = store.mainData.length - 1;
+              const v = store.volumeData ? store.volumeData[lastIdx] : null;
+              const k = store.kimchiData ? store.kimchiData[lastIdx] : null;
+              window.updateLegend(store.mainData[lastIdx], v, k);
+            }
           }
         }
-      } catch (err) { }
+      } catch (err) {}
     });
   };
 
-  syncCrosshair(store.chart, [{ chart: store.chartVol, series: store.volumeSeries }]);
-  syncCrosshair(store.chartVol, [{ chart: store.chart, series: store.candleSeries }]);
+  syncCrosshair(store.chart, [
+    { chart: store.chartVol, series: store.volumeSeries },
+  ]);
+  syncCrosshair(store.chartVol, [
+    { chart: store.chart, series: store.candleSeries },
+  ]);
 
   // 🚀 Y축(Price Scale) 가로폭 완벽 동기화 엔진 (좌/우측 스케일 동시 관리)
   const allCharts = [store.chart, store.chartVol].filter(Boolean);
@@ -268,14 +489,20 @@ export function initChart() {
     if (maxRight > 0 && maxRight > maxPriceScaleWidth) {
       maxPriceScaleWidth = maxRight + 12;
       allCharts.forEach((c) => {
-        if (c) c.priceScale("right").applyOptions({ minimumWidth: maxPriceScaleWidth });
+        if (c)
+          c.priceScale("right").applyOptions({
+            minimumWidth: maxPriceScaleWidth,
+          });
       });
     }
 
     if (maxLeft > 0 && maxLeft > maxLeftPriceScaleWidth) {
       maxLeftPriceScaleWidth = maxLeft + 12;
       allCharts.forEach((c) => {
-        if (c) c.priceScale("left").applyOptions({ minimumWidth: maxLeftPriceScaleWidth });
+        if (c)
+          c.priceScale("left").applyOptions({
+            minimumWidth: maxLeftPriceScaleWidth,
+          });
       });
     }
 
@@ -292,7 +519,7 @@ export function initChart() {
   window.resetPriceScaleWidthSync = () => {
     isSyncingWidth = true;
     maxPriceScaleWidth = 0;
-    maxLeftPriceScaleWidth = 0;
+    maxLeftPriceScaleWidth = 110; // 🚀 좌측 스케일은 십자선 라벨이 절대 잘리지 않도록 기본 최소 너비 110px 고정!
 
     allCharts.forEach((c) => {
       if (c) {

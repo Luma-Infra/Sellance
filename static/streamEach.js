@@ -39,13 +39,20 @@ function syncSniperSubscriptions() {
 
   // 🚀 [해결] visibleSymbols에는 업비트 전용 코인도 섞여있음. 바이낸스에서 스나이핑 가능한 놈만 골라내야 함!
   const currentVisible = [];
+  const allSource = store.originalTableData || store.currentTableData || [];
   store.visibleSymbols.forEach((sym) => {
-    const row = store.currentTableData.find((r) => r.DisplayTicker === sym || r.Symbol === sym);
+    const row = allSource.find(
+      (r) => r.Ticker === sym || r.DisplayTicker === sym || r.Symbol === sym,
+    );
     if (!row) return;
 
     // 1. 선물 티커가 있으면 최우선 (HTS의 꽃은 선물 실시간)
-    let bTicker = row.Exact_Futures || (row.Ticker && !row.Ticker.endsWith("KRW") ? row.Ticker.replace("USDT", "") : null);
-    
+    let bTicker =
+      row.Exact_Futures ||
+      (row.Ticker && !row.Ticker.endsWith("KRW")
+        ? row.Ticker.replace("USDT", "")
+        : null);
+
     // 2. 선물은 없지만 현물이 바이낸스에 있다면 현물이라도 스나이핑
     if (!bTicker && row.Exact_Spot) bTicker = row.Exact_Spot;
 
@@ -128,7 +135,8 @@ function refreshSniperTarget() {
 function updateRealtimeKimchi(liveData, symbol, chartTime) {
   if (!store.kimchiSeries || !store.paneConfig.kimchi) return;
 
-  const usdtPrice = store.tickerBuffer["KRW-USDT"]?.c || store.tickerBuffer["USDT_KRW"]?.c;
+  const usdtPrice =
+    store.tickerBuffer["KRW-USDT"]?.c || store.tickerBuffer["USDT_KRW"]?.c;
   const rate = usdtPrice || store.marketDataMap?.krw_usd_rate || 0;
 
   if (rate === 0) return;
@@ -144,9 +152,16 @@ function updateRealtimeKimchi(liveData, symbol, chartTime) {
 
   if (isKor) {
     let glbSym = row && row.Exact_Spot ? row.Exact_Spot : pureSymbol;
-    if (store.currentMarket === "FUTURES" && row && row.Exact_Futures) glbSym = row.Exact_Futures;
+    if (store.currentMarket === "FUTURES" && row && row.Exact_Futures)
+      glbSym = row.Exact_Futures;
 
-    let glbPrice = store.tickerBuffer[`${glbSym}USDT`]?.c;
+    let glbPrice = null;
+    const hasBinance = row?.Listed_Exchanges?.some((ex) =>
+      ex.includes("BINANCE"),
+    );
+    if (hasBinance) {
+      glbPrice = store.tickerBuffer[`${glbSym}USDT`]?.c;
+    }
     if (!glbPrice && row && row.Price_Raw) glbPrice = row.Price_Raw * mainMulti;
 
     if (glbPrice) {
@@ -176,7 +191,10 @@ function updateRealtimeKimchi(liveData, symbol, chartTime) {
       store.kimchiSeries.update({
         time: chartTime,
         value: kimchiPct,
-        color: typeof window.getKimchiColor === "function" ? window.getKimchiColor(kimchiPct) : "#57a4fc",
+        color:
+          typeof window.getKimchiColor === "function"
+            ? window.getKimchiColor(kimchiPct)
+            : "#57a4fc",
       });
     }
   }
@@ -187,20 +205,32 @@ const updateTabTitle = (price, sym, prec) => {
   document.title = `${formatted} ${sym.toUpperCase()} | Xsellance`;
 };
 
-export function startRealtimeCandle(symbol, interval, isFutures, isSpot, isUpbit, isBithumb) {
+export function startRealtimeCandle(
+  symbol,
+  interval,
+  isFutures,
+  isSpot,
+  isUpbit,
+  isBithumb,
+) {
   // 🚀 [궁극의 정밀 하이브리드] 00초 마감/생성은 kline 독점, 봉 내부 파닥거림은 aggTrade 전담!
   const aggStream = `${symbol.toLowerCase()}usdt@aggTrade`;
   const klineStream = `${symbol.toLowerCase()}usdt@kline_${interval}`;
-  const wsBase = isFutures ? "wss://fstream.binance.com/market/ws" : "wss://stream.binance.com:9443/ws";
+  const wsBase = isFutures
+    ? "wss://fstream.binance.com/market/ws"
+    : "wss://stream.binance.com:9443/ws";
 
-  if ((isFutures || isSpot) && store.currentKlineStream === `${aggStream}/${klineStream}` && store.binanceChartWs && store.binanceChartWs.readyState === WebSocket.OPEN) return;
+  if (
+    (isFutures || isSpot) &&
+    store.currentKlineStream === `${aggStream}/${klineStream}` &&
+    store.binanceChartWs &&
+    store.binanceChartWs.readyState === WebSocket.OPEN
+  )
+    return;
 
   const getWsId = () => Math.floor(Date.now() + Math.random() * 1000);
 
-  // 🚀 [추가] 거래량 컬러 동적 추출 (차트 데이터 초기화부와 완벽 연동)
-  const style = getComputedStyle(document.body);
-  const upColorVol = (style.getPropertyValue("--up").trim() || "#26a69a") + "80";
-  const downColorVol = (style.getPropertyValue("--down").trim() || "#ef5350") + "80";
+  // 🚀 [수정] 고정 변수 삭제 (실시간 메시지 수신 시점에 동적으로 참조하여 테마 즉각 연동)
 
   const handleBinanceMessage = (e) => {
     if (store.isFetchingChart || window.isFetchingChart) return;
@@ -240,7 +270,7 @@ export function startRealtimeCandle(symbol, interval, isFutures, isSpot, isUpbit
         activeCandle = lastCandle;
         chartUpdateNeeded = true;
       }
-    } 
+    }
     // 🛡️ 2. [kline 수신] 00초 정각 봉 마감 및 공식 새 봉 생성 전권 독점 (정합성 100% 수문장)
     else if (res.e === "kline" && res.k.i === store.currentTF) {
       store.lastServerMs = res.E;
@@ -270,7 +300,7 @@ export function startRealtimeCandle(symbol, interval, isFutures, isSpot, isUpbit
           high: Number(k.h),
           low: Number(k.l),
           close: Number(k.c),
-          volume: kVol
+          volume: kVol,
         };
         store.mainData.push(activeCandle);
       }
@@ -280,30 +310,58 @@ export function startRealtimeCandle(symbol, interval, isFutures, isSpot, isUpbit
     if (!chartUpdateNeeded) return;
 
     const isDayUnit = !(store.currentTF || "1h").match(/[hm]/);
-    const chartTime = isDayUnit ? (() => {
-      const dt = new Date(activeCandle.time * 1000);
-      return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}-${String(dt.getUTCDate()).padStart(2, "0")}`;
-    })() : activeCandle.time;
+    const chartTime = isDayUnit
+      ? (() => {
+          const dt = new Date(activeCandle.time * 1000);
+          return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}-${String(dt.getUTCDate()).padStart(2, "0")}`;
+        })()
+      : activeCandle.time;
 
     if (store.candleSeries) {
       store.candleSeries.update({ ...activeCandle, time: chartTime });
+      if (store.leftScaleSeries) {
+        store.leftScaleSeries.update({
+          time: chartTime,
+          value: activeCandle.close,
+        });
+      }
+      // 🚀 [핵심] 캔들 시리즈가 업데이트되는 즉시, 우측 스케일 카운트다운 가격표 라벨도 다이렉트로 동기화 갱신! (0.1초 늦게 따라붙는 타이머 딜레이 원천 차단)
+      if (typeof window.updateRealtimeCountdown === "function") {
+        window.updateRealtimeCountdown(store.lastServerMs);
+      }
     }
-    // 🚀 [추가] 실시간 거래량 시리즈 동기화 업데이트! (차트 막대가 실시간 쑥쑥 자람)
+    // 🚀 [추가] 실시간 거래량 시리즈 동기화 업데이트 및 테마 라이브 연동!
     if (store.volumeSeries && activeCandle.volume !== undefined) {
-      store.volumeSeries.update({
+      const curStyle = getComputedStyle(document.body);
+      const curUpVol =
+        (curStyle.getPropertyValue("--up").trim() || "#26a69a") + "80";
+      const curDownVol =
+        (curStyle.getPropertyValue("--down").trim() || "#ef5350") + "80";
+      const curVolColor =
+        activeCandle.close >= activeCandle.open ? curUpVol : curDownVol;
+
+      const volObj = {
         time: chartTime,
         value: activeCandle.volume,
-        color: activeCandle.close >= activeCandle.open ? upColorVol : downColorVol
-      });
+        color: curVolColor,
+      };
+      store.volumeSeries.update(volObj);
+
+      // 🚀 원본 volumeData 배열의 마지막 항목도 완벽 동기화! (테마 변경 시 덮어쓰기 방어)
+      if (store.volumeData && store.volumeData.length > 0) {
+        store.volumeData[store.volumeData.length - 1] = volObj;
+      }
     }
     updateRealtimeKimchi(activeCandle, symbol, chartTime);
 
-    const selectedRow = store.currentTableData.find((c) => c.Ticker === store.currentSelectedSymbol);
-    const p = selectedRow?.precision || 2;
+    const selectedRow = store.currentTableData.find(
+      (c) => c.Ticker === store.currentSelectedSymbol,
+    );
+    const p = store.getPrecision(store.currentSelectedSymbol || symbol);
     if (livePrice > 0) {
       updateTabTitle(livePrice, selectedRow?.Symbol || symbol, p);
     }
-    
+
     if (typeof window.updateStatus === "function") {
       window.updateStatus(activeCandle, p);
     }
@@ -313,10 +371,23 @@ export function startRealtimeCandle(symbol, interval, isFutures, isSpot, isUpbit
     if (store.binanceChartWs) store.binanceChartWs.close();
     store.binanceChartWs = new WebSocket(wsBase);
     store.binanceChartWs.onopen = () => {
-      store.binanceChartWs.send(JSON.stringify({ method: "SUBSCRIBE", params: [aggStream, klineStream], id: getWsId() }));
+      store.binanceChartWs.send(
+        JSON.stringify({
+          method: "SUBSCRIBE",
+          params: [aggStream, klineStream],
+          id: getWsId(),
+        }),
+      );
       store.currentKlineStream = `${aggStream}/${klineStream}`;
     };
     store.binanceChartWs.onmessage = handleBinanceMessage;
+  } else {
+    // 🚀 [해결] 업비트/빗썸/바이비트 등 타 마켓 조회 시, 기존에 열려있던 바이낸스 웹소켓이 닫히지 않고 계속 살아있어 동명 이인(EDGE 등)의 달러 가격이 원화 차트를 침범해 수직 낙하하는 치명적 버그 완벽 차단!
+    if (store.binanceChartWs) {
+      store.binanceChartWs.close();
+      store.binanceChartWs = null;
+    }
+    store.currentKlineStream = null;
   }
 }
 
