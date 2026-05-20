@@ -358,9 +358,13 @@ export function initChart() {
             typeof sourceChart.timeScale().coordinateToLogical === "function" &&
             typeof sourceChart.timeScale().logicalToCoordinate === "function"
           ) {
-            const logical = sourceChart.timeScale().coordinateToLogical(param.point.x);
+            const logical = sourceChart
+              .timeScale()
+              .coordinateToLogical(param.point.x);
             if (logical !== null) {
-              const snapX = sourceChart.timeScale().logicalToCoordinate(Math.round(logical));
+              const snapX = sourceChart
+                .timeScale()
+                .logicalToCoordinate(Math.round(logical));
               if (snapX !== null) magnetX = snapX;
             }
           }
@@ -374,8 +378,39 @@ export function initChart() {
 
           // 🚀 5. 타겟 차트들 처리 (내장 세로선/가로선 은폐, 하단 시간축 라벨 유지, 캔버스 플러그인 단독 렌더링!)
           let targetTime = param.time;
-          if (targetTime === undefined && typeof sourceChart.timeScale().coordinateToTime === "function") {
-            targetTime = sourceChart.timeScale().coordinateToTime(param.point.x);
+
+          // 🚀 [원인 완벽 규명 및 해결: 미래 캔들 영역 타임스탬프 증발 방어]
+          // 미래 허공(우측 여백)에 마우스를 올렸을 때 param.time은 undefined가 떨어집니다.
+          // 기존에는 coordinateToTime(x)만 시도했으나, 미래 영역에서는 이것도 null을 반환합니다.
+          // 이제 마우스 좌표를 논리적 인덱스(logical)로 변환한 뒤 미래 시간을 직접 역산(Extrapolation)하여 하단 라벨을 완벽히 살려냅니다!
+          if (targetTime === undefined) {
+            let logicalIndex = null;
+            if (
+              typeof sourceChart.timeScale().coordinateToLogical === "function"
+            ) {
+              logicalIndex = sourceChart
+                .timeScale()
+                .coordinateToLogical(param.point.x);
+            }
+            if (logicalIndex !== null) {
+              const roundedLogical = Math.round(logicalIndex);
+              const totalCandles = store.mainData ? store.mainData.length : 0;
+
+              if (totalCandles > 0 && roundedLogical >= totalCandles - 1) {
+                // 미래 영역: 마지막 캔들 시간 + (남은 캔들 개수 * 초 단위)
+                const lastCandle = store.mainData[totalCandles - 1];
+                const secondsPerBar = tfSec[store.currentTF] || 60;
+                const futureBars = roundedLogical - (totalCandles - 1);
+                targetTime = lastCandle.time + futureBars * secondsPerBar;
+              } else if (
+                typeof sourceChart.timeScale().coordinateToTime === "function"
+              ) {
+                // 과거/현재 영역 폴백
+                targetTime = sourceChart
+                  .timeScale()
+                  .coordinateToTime(param.point.x);
+              }
+            }
           }
 
           targetCharts.forEach((targetObj) => {
@@ -393,9 +428,13 @@ export function initChart() {
               }
 
               // 🚀 1. 먼저 원격 십자선 이동 API를 호출하여 라이브러리 내부 상태 및 하단 타임스탬프 라벨 위치를 확정 짓는다!
-              if (tChart !== sourceChart && targetTime !== undefined && targetTime !== null && tSeries) {
+              if (
+                tChart !== sourceChart &&
+                targetTime !== undefined &&
+                targetTime !== null
+              ) {
                 try {
-                  tChart.setCrosshairPosition(NaN, targetTime, tSeries);
+                  tChart.setCrosshairPosition(NaN, targetTime);
                 } catch (e) {}
               }
 
@@ -426,22 +465,35 @@ export function initChart() {
             }
           }
           store.isCrosshairActive = true;
-          const pTime = getUnixSeconds(param.time);
+          // 🚀 [미래 타임스탬프 완벽 연동] param.time이 undefined일 때, 위에서 역산한 targetTime(미래 시간)을 십자선 시간으로 사용!
+          const activeTime = param.time !== undefined ? param.time : targetTime;
+          const pTime = getUnixSeconds(activeTime);
+
           let d = null;
           if (sourceChart === store.chart) {
             d = param.seriesData.get(store.candleSeries);
             // 🚀 [완벽 폴백 보강] 라이브러리 내부 캔들 구조체(d)에는 volume 필드가 없으므로, 원본 메인 장부(store.mainData)에서 찾아 volume을 주입합니다!
-            const mainCandle = store.mainData?.find((item) => item.time === pTime);
+            const mainCandle = store.mainData?.find(
+              (item) => item.time === pTime,
+            );
             if (d && mainCandle && mainCandle.volume !== undefined) {
               d.volume = mainCandle.volume;
+            } else if (!d && mainCandle) {
+              // 🚀 [미래 캔들 폴백] param.seriesData에 없어도(허공) mainData에 있으면 강제 표시!
+              d = { ...mainCandle };
             }
           } else {
             d = store.mainData?.find((item) => item.time === pTime) || null;
           }
-          const v = store.volumeData?.find((item) => item.time === pTime) || null;
-          const k = store.kimchiData?.find((item) => item.time === pTime) || null;
+          const v =
+            store.volumeData?.find((item) => item.time === pTime) || null;
+          const k =
+            store.kimchiData?.find((item) => item.time === pTime) || null;
           if (d && typeof window.updateLegend === "function") {
             window.updateLegend(d, v, k);
+          } else if (typeof window.updateStatus === "function") {
+            // 허공일 때는 현재 활성 가격(updateStatus)으로 복구!
+            window.updateStatus();
           }
         } else {
           // 🚀 [핵심 방어책] isHover === false 일 때, 현재 activeChart가 내 차트(sourceChart)인 경우에만 초기화 실행!!!
@@ -500,19 +552,27 @@ export function initChart() {
     // 🚀 [초고속 캐시 방어벽] 너비가 이전과 동일하면 applyOptions 호출을 원천 스킵하여 60fps 렌더링 성능 100% 보장!
     if (maxRight > 0 && maxRight !== currentMaxRight) {
       currentMaxRight = maxRight;
-      charts.forEach((c) => c.priceScale("right").applyOptions({ minimumWidth: maxRight }));
+      charts.forEach((c) =>
+        c.priceScale("right").applyOptions({ minimumWidth: maxRight }),
+      );
     }
     if (maxLeft > 0 && maxLeft !== currentMaxLeft) {
       currentMaxLeft = maxLeft;
-      charts.forEach((c) => c.priceScale("left").applyOptions({ minimumWidth: maxLeft }));
+      charts.forEach((c) =>
+        c.priceScale("left").applyOptions({ minimumWidth: maxLeft }),
+      );
     }
   };
 
   const allCharts = [store.chart, store.chartVol].filter(Boolean);
   allCharts.forEach((c) => {
     // 🚀 창 크기 변경뿐만 아니라, 줌인/줌아웃, 좌우 스크롤(VisibleLogicalRangeChange) 및 마우스 이동 시에도 실시간 자동 싱크!
-    c.timeScale().subscribeSizeChange(() => setTimeout(window.syncPriceScaleWidths, 50));
-    c.timeScale().subscribeVisibleLogicalRangeChange(window.syncPriceScaleWidths);
+    c.timeScale().subscribeSizeChange(() =>
+      setTimeout(window.syncPriceScaleWidths, 50),
+    );
+    c.timeScale().subscribeVisibleLogicalRangeChange(
+      window.syncPriceScaleWidths,
+    );
     c.subscribeCrosshairMove(window.syncPriceScaleWidths);
   });
 
@@ -534,6 +594,81 @@ export function initChart() {
   };
 
   window.resetPriceScaleWidthSync();
+
+  // 🚀 차트 마우스 우클릭 시 전체 차트(메인+볼륨)를 병합한 고화질 캡처 이미지를 클립보드 복사 가능하도록 img 오버레이 생성
+  const wrapper = document.getElementById("chart-wrapper");
+  if (wrapper) {
+    if (window._chartRightClickListener) {
+      wrapper.removeEventListener("mousedown", window._chartRightClickListener);
+    }
+    
+    window._chartRightClickListener = (e) => {
+      if (e.button !== 2) return; // 마우스 우클릭만 처리
+      if (store.isMeasuring || store.measureStart) return; // 🚀 측정 중에는 이미지 오버레이 방지 (측정 취소 로직에 양보)
+      if (!store.chart) return;
+
+      const mainCanvas = store.chart.takeScreenshot();
+      const paneVol = document.getElementById("pane-vol");
+      const isVolVisible = paneVol && !paneVol.classList.contains("hidden");
+      const volCanvas = isVolVisible && store.chartVol ? store.chartVol.takeScreenshot() : null;
+
+      if (!mainCanvas) return;
+
+      const combinedCanvas = document.createElement("canvas");
+      const ctx = combinedCanvas.getContext("2d");
+
+      const width = mainCanvas.width;
+      let height = mainCanvas.height;
+      if (volCanvas) {
+        height += volCanvas.height;
+      }
+
+      combinedCanvas.width = width;
+      combinedCanvas.height = height;
+
+      // 배경색 채우기
+      const bgColor = getComputedStyle(wrapper).backgroundColor || "#131722";
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, width, height);
+
+      // 드로잉
+      ctx.drawImage(mainCanvas, 0, 0);
+      if (volCanvas) {
+        ctx.drawImage(volCanvas, 0, mainCanvas.height);
+      }
+
+      // 심볼 워터마크 추가
+      ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+      ctx.font = "bold 16px sans-serif";
+      const symbolText = (store.currentSelectedSymbol || "Sellnance").toUpperCase();
+      ctx.fillText(symbolText, 20, 30);
+
+      let overlayImg = document.getElementById("chart-screenshot-overlay");
+      if (!overlayImg) {
+        overlayImg = document.createElement("img");
+        overlayImg.id = "chart-screenshot-overlay";
+        overlayImg.style.cssText = "position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0.01; z-index: 999999; pointer-events: auto;";
+        wrapper.appendChild(overlayImg);
+      }
+
+      overlayImg.src = combinedCanvas.toDataURL("image/png");
+      overlayImg.style.pointerEvents = "auto";
+
+      const clearOverlay = () => {
+        overlayImg.style.pointerEvents = "none";
+        overlayImg.removeAttribute("src");
+        document.removeEventListener("mousemove", clearOverlay);
+        document.removeEventListener("mousedown", clearOverlay);
+      };
+
+      setTimeout(() => {
+        document.addEventListener("mousemove", clearOverlay);
+        document.addEventListener("mousedown", clearOverlay);
+      }, 300);
+    };
+
+    wrapper.addEventListener("mousedown", window._chartRightClickListener);
+  }
 
   // 🚀 차트 스케일 리셋(더블클릭) 시 이전 넓이의 저주를 풀고 즉시 0으로 리셋 후 재계산 연동!
   [elMain, elVol].forEach((el) => {
@@ -559,6 +694,10 @@ export function updateChartTheme() {
   const gridColor = style.getPropertyValue("--border").trim() || "#2a2a22";
   const upColor = style.getPropertyValue("--up").trim() || "#26a69a";
   const downColor = style.getPropertyValue("--down").trim() || "#ef5350";
+
+  // Update caches
+  store.upColorCache = upColor;
+  store.downColorCache = downColor;
 
   // 1. 차트 배경 및 그리드 색상 업데이트
   const commonTheme = {

@@ -173,8 +173,12 @@ body.theme-upbit:not(.resizing-active) #right-panel {
   }
 }
 
-/* 🚀 [디자인 개선] 테이블 행 2층 구조를 위한 최적화 */
+#table-body {
+  counter-reset: row-num-counter;
+}
+
 #table-body tr {
+  counter-increment: row-num-counter;
   content-visibility: auto;
   contain-intrinsic-size: 52px;
   height: 52px !important;
@@ -186,6 +190,10 @@ body.theme-upbit:not(.resizing-active) #right-panel {
   transform: translateZ(0);
   contain: layout paint;
   position: relative;
+}
+
+#table-body tr .row-counter::before {
+  content: counter(row-num-counter);
 }
 
 #table-body td {

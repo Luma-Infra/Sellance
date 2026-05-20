@@ -28,19 +28,32 @@ function renderRealtimeRow(tId, data) {
   // 🚨 [최종 수문장] PEPE vs 1000PEPE 등 배수 기호가 다르면 다른 코인임 (오염 차단)
   if (getMultiplier(dataSym) !== getMultiplier(row.Ticker)) return;
 
-  // 1. [데이터 전수 업데이트] 500등 코인도 1등이 될 수 있게 메모리 장부부터 즉시 갱신
-  // 화면 노출 여부와 상관없이 모든 실시간 값을 장부(row)에 기입합니다.
+  // 🚀 [원인 완벽 규명 및 해결: 김치 코인 14만 프로 상승 버그 방어 & newPrice 선언 부활]
+  // 실시간 소켓에서 전달받은 가격(data.c 또는 data.p)을 파싱하여 newPrice 변수를 최우선으로 확정합니다!
   const newPrice = parseFloat(data.c || data.p);
   if (isNaN(newPrice)) return;
 
-  row.Price_Raw = newPrice;
+  // 기존에는 업비트 원화 소켓 시세(예: 1억 원)가 들어와도 무작정 row.Price_Raw = newPrice 에 1억 원을 집어넣고,
+  // 백엔드가 준 달러 시가(openPrice, 예: 7만 달러)로 나누어 ((1억 - 7만) / 7만) * 100 -> 140,000% 라는 기괴한 수치를 뱉었습니다.
+  // 이제 원화 마켓 코인 여부를 완벽히 식별하여 원화/달러 장부를 분리 격리하고, 등락률 계산 시 통화 단위를 100% 일치시킵니다!
+  const isKrwCoin = row.Ticker.endsWith("KRW") || data.isUpbitRealtime || tId.startsWith("KRW-");
+  const rate = store.marketDataMap?.krw_usd_rate || 1400;
+
+  if (isKrwCoin) {
+    row.Price_KRW = newPrice;
+    row.Price_Raw = newPrice / rate; // 달러 환산 가격으로 안전하게 격리 기입
+  } else {
+    row.Price_Raw = newPrice;
+  }
+
   if (data.P !== undefined) {
     row.Change_24h_Raw = parseFloat(data.P);
   }
+
   if (row.utc0_open_Raw) {
-    const openPrice = parseFloat(row.utc0_open_Raw);
+    const openPrice = parseFloat(row.utc0_open_Raw); // 백엔드가 준 달러 시가
     if (openPrice > 0) {
-      row.Change_Today_Raw = ((newPrice - openPrice) / openPrice) * 100;
+      row.Change_Today_Raw = ((row.Price_Raw - openPrice) / openPrice) * 100; // 달러 - 달러 / 달러 -> 정상 수치 100% 보장!
     }
   }
 
@@ -70,12 +83,9 @@ function renderRealtimeRow(tId, data) {
     priceCell.setAttribute("data-raw-price", newPrice);
     const formattedPrice = window.formatSmartPrice(newPrice, p);
     
-    // KRW 변환 가격 (있을 경우만)
-    const krwDisplay = row.Price_KRW 
-      ? `<span class="text-[12px] text-theme-text opacity-70 ml-1"> ( ${Number(row.Price_KRW).toLocaleString()} 원 )</span>` 
-      : "";
-    
-    priceCell.innerHTML = `${formattedPrice} ${krwDisplay}`;
+    // 🚀 [요구사항 2 반영: 테이블 가격 단일 표시 원칙]
+    // 기존에 붙여주던 괄호 안의 보조 원화/달러 표시를 전면 제거하고 오직 단일 가격(formattedPrice)만 깔끔하게 출력합니다.
+    priceCell.innerHTML = `${formattedPrice}`;
     
     if (typeof window.applyPriceFlash === "function") {
       window.applyPriceFlash(priceCell, newPrice, oldPrice);

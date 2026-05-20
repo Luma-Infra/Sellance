@@ -155,6 +155,16 @@ function setupButtonEvents() {
       if (store.previewSeries) store.previewSeries.setData([]);
     };
   }
+
+  // 🚀 flip-toggle (경주마 애니메이션) UI 바인딩
+  const flipToggle = document.getElementById("flip-toggle");
+  if (flipToggle) {
+    store.useFlip = flipToggle.checked;
+    flipToggle.addEventListener("change", (e) => {
+      store.useFlip = e.target.checked;
+      console.log("Flip animation status changed:", store.useFlip);
+    });
+  }
 }
 
 // ⚙️ 시간 변환 통합 헬퍼 (전역으로 이동!)

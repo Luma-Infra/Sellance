@@ -26,12 +26,18 @@ function resetChartScale() {
   }
 
   store.chart.timeScale().fitContent();
-  store.chart.priceScale("right").applyOptions({ minimumWidth: 0, autoScale: true });
-  
+  store.chart
+    .priceScale("right")
+    .applyOptions({ minimumWidth: 0, autoScale: true });
+
   if (store.chartVol) {
     store.chartVol.timeScale().fitContent();
-    store.chartVol.priceScale("right").applyOptions({ minimumWidth: 0, autoScale: true });
-    store.chartVol.priceScale("left").applyOptions({ minimumWidth: 0, autoScale: true });
+    store.chartVol
+      .priceScale("right")
+      .applyOptions({ minimumWidth: 0, autoScale: true });
+    store.chartVol
+      .priceScale("left")
+      .applyOptions({ minimumWidth: 0, autoScale: true });
   }
 }
 
@@ -58,12 +64,18 @@ export function formatCrosshairPrice(price, p, isLeftScale = false) {
     return formatSmartPrice(price, p);
   }
 
-  if (store.crosshairLeftPrice !== null && store.crosshairLeftPrice !== undefined && store.mainData && store.mainData.length > 0) {
+  if (
+    store.crosshairLeftPrice !== null &&
+    store.crosshairLeftPrice !== undefined &&
+    store.mainData &&
+    store.mainData.length > 0
+  ) {
     const minMove = p > 0 ? 1 / Math.pow(10, p) : 1;
     // 좌측 스케일 십자선 가격(crosshairLeftPrice)과 일치하는지 확인
     if (Math.abs(price - store.crosshairLeftPrice) < minMove * 0.51) {
       // 실제 계산은 우측 캔들의 정확한 십자선 가격(store.crosshairPrice)을 기준으로 수행!
-      const targetPrice = store.crosshairPrice !== null ? store.crosshairPrice : price;
+      const targetPrice =
+        store.crosshairPrice !== null ? store.crosshairPrice : price;
       const currentPrice = store.mainData[store.mainData.length - 1].close;
       if (currentPrice && currentPrice > 0) {
         const diff = targetPrice - currentPrice;
@@ -120,15 +132,26 @@ function updateLegend(d, v, k) {
     return formatSmartPrice(val, precision);
   };
 
-  // 🚀 볼륨 전광판 포맷팅 및 색상 적용
   // 🚀 볼륨 전광판 포맷팅 및 색상 적용 (배열 인덱스 오차가 발생해도 캔들 자체의 실시간 d.volume을 다이렉트로 참조하여 전광판 멈춤 완벽 방어!)
   let volHtml = "";
   if (store.paneConfig.volume) {
     let volValue = "-";
     let volColor = "text-theme-text";
-    const rawVol = (v && v.value !== undefined) ? v.value : (d && d.volume !== undefined ? d.volume : null);
+    // 🚀 [원인 완벽 규명 및 해결: OHLC 전광판 거래량 역산 방어 코드]
+    // 기존에는 보조지표용 히스토그램 배열인 v.value를 최우선으로 참조하느라,
+    // 실시간 소켓 체결로 누적된 최신 거래량(d.volume, 예: 8k) 대신 과거 배열에 남아있던 구닥다리 거래량(예: 7.5k)이 찍히면서
+    // 5k -> 8k -> 7.5k 처럼 거래량이 거꾸로 줄어드는 기괴한 역산 현상이 발생했습니다.
+    // 이제 공식 캔들 체결 구조체인 d.volume을 단일 진실 공급원(Single Source of Truth)으로 삼아 최우선 반영합니다!
+    const rawVol =
+      d && d.volume !== undefined
+        ? d.volume
+        : v && v.value !== undefined
+          ? v.value
+          : null;
     if (rawVol !== null) {
-      volValue = window.formatVolumeDollar ? window.formatVolumeDollar(rawVol) : rawVol.toLocaleString();
+      volValue = window.formatVolumeDollar
+        ? window.formatVolumeDollar(rawVol)
+        : rawVol.toLocaleString();
       volColor = cls; // 캔들의 양봉/음봉 색상을 그대로 따라감
     }
     volHtml = `<span class="opacity-60 text-[11px] mr-1 border-l border-white/10 pl-3">Vol</span><span class="${volColor} font-bold mr-3">${volValue}</span>`;
@@ -167,7 +190,8 @@ function updateStatus(d, p) {
   if (!last) return;
 
   // 🚀 [수정] 정밀도(p)가 있으면 사용하고, 없으면 단일 진실 공급원인 store.getPrecision에서 가져옴!
-  const precision = p !== undefined ? p : store.getPrecision(store.currentAsset);
+  const precision =
+    p !== undefined ? p : store.getPrecision(store.currentAsset);
 
   // 가격 업데이트
   const priceEl = document.getElementById("head-price");
@@ -383,16 +407,21 @@ export function updateRealtimeCountdown(serverMs) {
 
   const lastCandle = store.mainData[store.mainData.length - 1];
   const isDown = lastCandle.close < lastCandle.open;
-  const style = getComputedStyle(document.body);
-  const varName = isDown ? "--down" : "--up";
-  const rawColor =
-    style.getPropertyValue(varName).trim() || (isDown ? "#ef5350" : "#26a69a");
+  
+  if (!store.upColorCache || !store.downColorCache) {
+    const style = getComputedStyle(document.body);
+    store.upColorCache = style.getPropertyValue("--up").trim() || "#26a69a";
+    store.downColorCache = style.getPropertyValue("--down").trim() || "#ef5350";
+  }
+  const rawColor = isDown ? store.downColorCache : store.upColorCache;
 
   const lineOptions = {
     price: lastCandle.close,
     color: rawColor, // 🚀 투명색 대신 현재 양봉/음봉 색상 사용 (이게 없어서 안 보였음)
     lineWidth: 1,
-    lineStyle: window.LightweightCharts ? window.LightweightCharts.LineStyle.Dashed : 2, // 🚀 점선(Dashed)으로 차별화
+    lineStyle: window.LightweightCharts
+      ? window.LightweightCharts.LineStyle.Dashed
+      : 2, // 🚀 점선(Dashed)으로 차별화
     axisLabelVisible: true,
     title: store.showCountdown ? `${displayTime}` : "",
     axisLabelColor: rawColor,
@@ -413,7 +442,7 @@ setInterval(() => {
   if (store.lastServerMs > 0) {
     updateRealtimeCountdown(store.lastServerMs);
   }
-}, 50);
+}, 250);
 
 // 🎯 브라우저 탭 제목 실시간 스위칭 통합 매니저 (소켓 중복 생성 ZERO, 메인 차트 소켓 100% 재활용)
 let lastTabTitleUpdateMs = 0;
@@ -450,4 +479,3 @@ export function updateTabTitleManager(price, symbol, isUpbit) {
   }
 }
 window.updateTabTitleManager = updateTabTitleManager;
-

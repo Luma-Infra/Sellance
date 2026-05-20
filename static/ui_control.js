@@ -519,7 +519,7 @@ export function selectSymbol(s, forceMarket = null) {
           const targetSym = rowInfo ? rowInfo.Ticker : s;
           const targetRow = document.querySelector(`#table-body tr[data-sym="${targetSym}"]`);
           if (targetRow) {
-            targetRow.scrollIntoView({ block: "center", behavior: "smooth" });
+            // targetRow.scrollIntoView({ block: "center", behavior: "smooth" });
             if (typeof applySelectedHighlight === "function") applySelectedHighlight();
           }
         }, 50);

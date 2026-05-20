@@ -5,7 +5,7 @@
         "SOL": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png",
         "SUI": "https://s2.coinmarketcap.com/static/img/coins/64x64/20947.png"
     },
-    "DEFAULT_KRW_USD_RATE": 1487.0,
+    "DEFAULT_KRW_USD_RATE": 1488.0,
     "__MEMO__1": "BTC ETH 파생형 너무 많아서 고정 + 중국어 포함 모든 언어 티커 대응",
     "__MEMO__2": "----------------------------------------------------------",
     "EXCLUSION_LIST": [
@@ -1041,6 +1041,12 @@
             "ETH",
             "Cobak Token",
             "CBK"
+        ],
+        "CBRS": [
+            "39931",
+            null,
+            "Cerebras Systems (Derivatives)",
+            "CBRS"
         ],
         "CC": [
             "37263",
